@@ -181,9 +181,9 @@
 				border: 0.125rem solid var(--accent);
 				box-shadow: 0 0 0 0.1875rem var(--accent-dim);
 				cursor: grab;
-				right: .5;
-				top: -.5rem;
-				transition: box-shadow .5s;
+				right: 0.5;
+				top: -0.5rem;
+				transition: box-shadow 0.5s;
 			}
 
 			/* Hide the default noUiSlider pip lines */
@@ -351,22 +351,12 @@
 				pointer-events: none;
 			}
 
-			.legend__icon-toggle svg {
-				overflow: visible;
-				transition: opacity 0.15s;
-			}
-
-			/* Hollow the shape fill when toggled off */
-			.legend__icon-toggle.is-off .shape-fill {
-				fill: transparent;
-			}
-
 			.legend__item-label {
 				font-size: 0.95rem;
 				font-weight: 400;
 				color: var(--text-secondary);
 				cursor: pointer;
-				transition: color 0.2s, opacity 0.2s;
+				transition: color 0.5s, opacity 0.5s;
 				letter-spacing: 0.03em;
 			}
 
@@ -375,6 +365,25 @@
 			}
 			.legend__item.is-off .legend__item-label {
 				opacity: 0.4;
+			}
+
+			/* SVG shape colour driven by --shape-color on the row.
+			   Filled shapes use fill + stroke; ring shapes use stroke only.
+			   When the row is toggled off, both collapse to --text-muted. */
+			.legend__item .shape-fill {
+				fill: var(--shape-color);
+				stroke: var(--shape-color);
+				transition: fill 0.3s, stroke 0.3s;
+			}
+			.legend__item .shape-fill--ring {
+				fill: transparent;
+			}
+			.legend__item.is-off .shape-fill {
+				fill: var(--text-muted);
+				stroke: var(--text-muted);
+			}
+			.legend__item.is-off .shape-fill--ring {
+				fill: transparent;
 			}
 
 			/* ─────────────────────────────────────────
@@ -930,7 +939,7 @@
 							id: `legend-creole-${key}`,
 							label,
 							shapeSvg,
-							initialColor: "silver",
+							initialColor: "white",
 							onChange: isOn => {
 								filterState.showCreoleRole[key] = isOn
 								applyFilters()
@@ -1037,30 +1046,30 @@
 
 			/* ── Legend shape factories — return an SVG string ── */
 
-			function rectShapeSvg(color) {
+			function rectShapeSvg() {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
 			               <rect class="shape-fill" x="1.5" y="1.5" width="11" height="11"
-			                     fill="${color}" stroke="${color}" stroke-width="1.5" rx="1"/>
+			                     stroke-width="1.5" rx="1"/>
 			             </svg>`
 			}
 
-			function triShapeSvg(color) {
+			function triShapeSvg() {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
 			               <polygon class="shape-fill" points="7,1 13,13 1,13"
-			                        fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+			                        stroke-width="1.5" stroke-linejoin="round"/>
 			             </svg>`
 			}
 
-			function circShapeSvg(color) {
+			function circShapeSvg() {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
 			               <circle class="shape-fill" cx="7" cy="7" r="5"
-			                       fill="${color}" stroke="${color}" stroke-width="1.5"/>
+			                       stroke-width="1.5"/>
 			             </svg>`
 			}
-			function ringShapeSvg(color) {
+			function ringShapeSvg() {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-			               <circle class="shape-fill" cx="7" cy="7" r="5"
-			                       fill="transparent" stroke="${color}" stroke-width="1.5"/>
+			               <circle class="shape-fill shape-fill--ring" cx="7" cy="7" r="5"
+			                       stroke-width="1.5"/>
 			             </svg>`
 			}
 
@@ -1091,34 +1100,22 @@
 			function createLegendToggleRow({id, label, shapeSvg, initialColor, onChange}) {
 				const row = document.createElement("div")
 				row.className = "legend__item"
+				row.style.setProperty("--shape-color", initialColor)
 
 				const checkboxId = `cb-${id}`
 
 				row.innerHTML = `
 			       <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
 			         <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
-			         ${shapeSvg(initialColor)}
+			         ${shapeSvg()}
 			       </label>
 			       <label class="legend__item-label" for="${checkboxId}">${label}</label>`
 
 				const checkbox = row.querySelector("input")
 				const iconToggle = row.querySelector(".legend__icon-toggle")
-				const shapeFill = row.querySelector(".shape-fill")
 
 				function syncToggleState() {
 					const isOn = checkbox.checked
-					const isRing = shapeFill.getAttribute("fill") === "transparent" // detect ring or filled shape
-					const mutedColor = getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim()
-
-					if (isRing) {
-						// ring-only shapes
-						shapeFill.style.stroke = isOn ? initialColor : mutedColor
-					} else {
-						// filled shapes
-						shapeFill.style.fill = isOn ? initialColor : mutedColor
-						shapeFill.style.stroke = isOn ? initialColor : mutedColor
-					}
-
 					row.classList.toggle("is-off", !isOn)
 					iconToggle.classList.toggle("is-off", !isOn)
 					onChange(isOn)
@@ -1163,9 +1160,3 @@
 		</script>
 	</body>
 </html>
-
-<!-- 
-
-    
-
- -->

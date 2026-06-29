@@ -22,7 +22,7 @@
 				--bg-base: #0d1117;
 				--bg-surface: #161b22;
 				--bg-elevated: #1c2128;
-				--bg-overlay: rgba(13, 17, 23, 0.851);
+				--bg-overlay: #0d1117d9;
 
 				/* Borders */
 				--border-subtle: rgba(255, 255, 255, 0.07);
@@ -35,9 +35,9 @@
 				--text-muted: #484f58;
 
 				/* Brand accent */
-				--accent: #7c6fcd;
+				--accent: rgb(124, 111, 205);
 				--accent-dim: rgba(124, 111, 205, 0.18);
-				--accent-glow: rgba(124, 111, 205, 0.35);
+				--accent-glow: rgba(124, 111, 205, 0.349);
 
 				/* Document-category colours */
 				--color-cat-bible: #e66101;
@@ -68,10 +68,11 @@
                 Page layout  (header → map → slider)
             ───────────────────────────────────────── */
 			body {
+				height: 100vh;
+				height: 100dvh;
 				font-family: Saira, sans-serif;
 				background: linear-gradient(140deg, var(--bg-base), var(--accent));
 				color: var(--text-primary);
-				height: 100vh;
 				display: flex;
 				flex-direction: column;
 				overflow: hidden;
@@ -180,9 +181,9 @@
 				border: 0.125rem solid var(--accent);
 				box-shadow: 0 0 0 0.1875rem var(--accent-dim);
 				cursor: grab;
-				right: -0.5rem;
-				top: -0.45rem;
-				transition: box-shadow 0.15s;
+				right: .5;
+				top: -.5rem;
+				transition: box-shadow .5s;
 			}
 
 			/* Hide the default noUiSlider pip lines */
@@ -193,8 +194,10 @@
 
 			#time-slider .noUi-handle:hover {
 				box-shadow: 0 0 0 0.1875rem var(--accent-glow);
+				background: var(--text-secondary);
 			}
 			#time-slider .noUi-handle.noUi-active {
+				box-shadow: 0 0 0 0.1875rem var(--accent-glow);
 				background: var(--text-muted);
 				cursor: grabbing;
 			}
@@ -614,9 +617,9 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 		<script>
 			/* ═══════════════════════════════════════════════════════════════
-                1. DATA
-                Replace or fetch this from an API / file in production.
-            ═══════════════════════════════════════════════════════════════ */
+			    1. DATA
+			    Replace or fetch this from an API / file in production.
+			═══════════════════════════════════════════════════════════════ */
 
 			/** @typedef {{ time: number, category: string, creole: string|null, creoleType: string|null, urlIMG: string, urlText: string, resume: string }} FeatureProps */
 
@@ -636,10 +639,10 @@
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-                2. COLOUR PALETTE
-                Read from CSS custom properties so the single source of truth
-                stays in the stylesheet above.
-            ═══════════════════════════════════════════════════════════════ */
+			    2. COLOUR PALETTE
+			    Read from CSS custom properties so the single source of truth
+			    stays in the stylesheet above.
+			═══════════════════════════════════════════════════════════════ */
 
 			/**
 			 * Read a CSS custom property from :root at runtime.
@@ -668,8 +671,8 @@
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-                3. MAP INITIALISATION
-            ═══════════════════════════════════════════════════════════════ */
+			    3. MAP INITIALISATION
+			═══════════════════════════════════════════════════════════════ */
 
 			const map = L.map("map", {
 				center: [15.5, -61.2],
@@ -689,8 +692,8 @@
 			L.DomEvent.disableClickPropagation(toolbar)
 
 			/* ═══════════════════════════════════════════════════════════════
-                4. MARKER RENDERING
-            ═══════════════════════════════════════════════════════════════ */
+			    4. MARKER RENDERING
+			═══════════════════════════════════════════════════════════════ */
 
 			/**
 			 * Return an inline-SVG string for a map marker.
@@ -709,32 +712,30 @@
 			 * @returns {string}  Raw SVG markup
 			 */
 			function buildMarkerSvg(creoleRole, fillColor, ringColor) {
-				const STROKE_WIDTH = 3
+				const strokeWidth = 3
 				const glow = `filter:drop-shadow(0 0 0.3rem ${ringColor})`
 
 				if (creoleRole === "about") {
 					return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" style="overflow:visible; ${glow}">
-                    <polygon points="15,3 28,27 2,27" fill="${fillColor}" stroke="${ringColor}" stroke-width="${STROKE_WIDTH}" stroke-linejoin="round"/>
-                  </svg>`
+			                 <polygon points="15,3 28,27 2,27" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
+			               </svg>`
 				}
 
 				if (creoleRole === "using") {
 					return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
-                    <rect x="0" y="0" width="24" height="24" fill="${fillColor}" stroke="${ringColor}" stroke-width="${STROKE_WIDTH}" rx="1"/>
-                  </svg>`
+			                 <rect x="0" y="0" width="24" height="24" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}" rx="1"/>
+			               </svg>`
 				}
 
 				// Default: unknown / null creole relationship → circle
 				return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
-                  <circle cx="12" cy="12" r="12" fill="${fillColor}" stroke="${ringColor}" stroke-width="${STROKE_WIDTH}"/>
-                </svg>`
+			               <circle cx="12" cy="12" r="12" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}"/>
+			             </svg>`
 			}
 
 			/**
 			 * Build the HTML content for a feature's popup.
 			 * Split into left (image + pills) and right (abstract + link) panels.
-			 *
-			 * All untrusted data values are HTML-escaped before interpolation.
 			 *
 			 * @param {FeatureProps} props
 			 * @returns {string}  HTML string
@@ -742,70 +743,65 @@
 			function buildPopupHtml(props) {
 				const {time, category, creole, creoleType, urlIMG, urlText, resume} = props
 
-				// Escape all values that come from external data
-				const safeCategory = escapeHtml(category)
-				const safeResume = escapeHtml(resume)
-				// URLs: escape for attribute context; also validated by the browser's own URL parser
-				const safeUrlIMG = escapeHtml(urlIMG)
-				const safeUrlText = escapeHtml(urlText)
-
 				/* Image block (left panel, top) */
-				const imageBlockHtml = safeUrlIMG
-					? `<img src="${safeUrlIMG}" alt="Document thumbnail: ${safeCategory}" />`
+				const imageBlockHtml = urlIMG
+					? `<img src="${urlIMG}" alt="Document thumbnail: ${category}" />`
 					: `<div class="popup__image-empty">
-               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                 <rect width="18" height="18" x="3" y="3" rx="2"/>
-                 <circle cx="9" cy="9" r="2"/>
-                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-               </svg>
-             </div>`
+			            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+			              <rect width="18" height="18" x="3" y="3" rx="2"/>
+			              <circle cx="9" cy="9" r="2"/>
+			              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+			            </svg>
+			          </div>`
 
 				/* Metadata pills (left panel, bottom) */
-				const categoryPill = `<span class="pill pill--category">${safeCategory}</span>`
+				const categoryPill = `<span class="pill pill--category">${category}</span>`
 
-				const creoleTypeColor = creoleType ? CREOLE_TYPE_COLORS[creoleType] : null
-				const creoleTypePill = creoleTypeColor
-					? `<span class="pill pill--creole-type"
-                        style="background:${creoleTypeColor}22; color:${creoleTypeColor}; border-color:${creoleTypeColor}44">
-                        ${capitalize(escapeHtml(creoleType))}
-                      </span>`
+				const creoleTypePill = creoleType
+					? (() => {
+							const color = CREOLE_TYPE_COLORS[creoleType]
+							return `<span class="pill pill--creole-type"
+			                     style="background:${color}22; color:${color}; border-color:${color}44">
+			                     ${capitalize(creoleType)}
+			                   </span>`
+					  })()
 					: ""
 
 				const creoleRoleLabel = creole === "using" ? "Written in creole" : creole === "about" ? "About creoles" : ""
 				const creoleRolePill = creoleRoleLabel ? `<span class="pill pill--creole-role">${creoleRoleLabel}</span>` : ""
 
 				/* Source text link (right panel, bottom) */
-				const sourceLinkHtml = safeUrlText
+				const sourceLinkHtml = urlText
 					? `<div class="popup__divider"></div>
-             <a href="${safeUrlText}" target="_blank" rel="noopener noreferrer" class="popup__source-link">
-               Read source text
-               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                 <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
-               </svg>
-             </a>`
+			          <a href="${urlText}" target="_blank" rel="noopener noreferrer" class="popup__source-link">
+			            Read source text
+			            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+			              <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+			            </svg>
+			          </a>`
 					: ""
 
 				return `
-          <div class="popup__panels">
-            <!-- Left: thumbnail + pills -->
-            <div class="popup__left">
-              <div class="popup__image-wrap">
-                ${imageBlockHtml}
-                <span class="popup__year-badge">${time}</span>
-              </div>
-              <div class="popup__pills">
-                ${categoryPill}
-                ${creoleTypePill}
-                ${creoleRolePill}
-              </div>
-            </div>
+			       <div class="popup__panels">
+			         <!-- Left: thumbnail + pills -->
+			         <div class="popup__left">
+			           <div class="popup__image-wrap">
+			             ${imageBlockHtml}
+			             <span class="popup__year-badge">${time}</span>
+			           </div>
+			           <div class="popup__pills">
+			             ${categoryPill}
+			             ${creoleTypePill}
+			             ${creoleRolePill}
+			           </div>
+			         </div>
 
-            <!-- Right: abstract + source link -->
-            <div class="popup__right">
-              <p class="popup__abstract">${safeResume}</p>
-              ${sourceLinkHtml}
-            </div>
-          </div>`
+			         <!-- Right: abstract + source link -->
+			         <div class="popup__right">
+			           <p class="popup__abstract">${resume ?? ""}</p>
+			           ${sourceLinkHtml}
+			         </div>
+			       </div>`
 			}
 
 			/**
@@ -837,10 +833,10 @@
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-                5. FILTER STATE & LOGIC
-                A central state object drives all visibility; one function reads
-                it and updates the map, keeping the UI handlers thin.
-            ═══════════════════════════════════════════════════════════════ */
+			    5. FILTER STATE & LOGIC
+			    A central state object drives all visibility; one function reads
+			    it and updates the map, keeping the UI handlers thin.
+			═══════════════════════════════════════════════════════════════ */
 
 			const allYears = ARCHIVE_GEOJSON.features.map(f => f.properties.time)
 
@@ -849,10 +845,8 @@
 			 * then call `applyFilters()`.
 			 */
 			const filterState = {
-				// Math.min/max with spread can overflow the call stack on large arrays;
-				// reduce is safe regardless of dataset size.
-				minYear: allYears.reduce((a, b) => Math.min(a, b), Infinity),
-				maxYear: allYears.reduce((a, b) => Math.max(a, b), -Infinity),
+				minYear: Math.min(...allYears),
+				maxYear: Math.max(...allYears),
 				showCreoleRole: {
 					using: true,
 					about: true,
@@ -872,9 +866,6 @@
 			/**
 			 * Show or hide every marker based on the current filterState.
 			 * Called whenever any filter control changes.
-			 *
-			 * Tracks each marker's current visibility to skip redundant
-			 * addTo / removeLayer calls, which are expensive DOM operations.
 			 */
 			function applyFilters() {
 				allMarkers.forEach(marker => {
@@ -883,7 +874,7 @@
 					// Map the nullable creole value to one of the three role-filter keys
 					const roleKey = creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
 
-					const shouldBeVisible =
+					const isVisible =
 						time >= filterState.minYear &&
 						time <= filterState.maxYear &&
 						filterState.activeCategories.has(category) &&
@@ -891,21 +882,15 @@
 						// Features without a creole type are not filtered out by type
 						(!creoleType || filterState.activeCreoleTypes.has(creoleType))
 
-					const isCurrentlyOnMap = map.hasLayer(marker)
-
-					if (shouldBeVisible && !isCurrentlyOnMap) {
-						marker.addTo(map)
-					} else if (!shouldBeVisible && isCurrentlyOnMap) {
-						map.removeLayer(marker)
-					}
+					isVisible ? marker.addTo(map) : map.removeLayer(marker)
 				})
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-                6. LEGEND
-                Built programmatically to stay in sync with the data palette.
-                Collapse state lives on a CSS class; JS only toggles it.
-            ═══════════════════════════════════════════════════════════════ */
+			    6. LEGEND
+			    Built programmatically to stay in sync with the data palette.
+			    Collapse state lives on a CSS class; JS only toggles it.
+			═══════════════════════════════════════════════════════════════ */
 
 			/**
 			 * Inject the legend panel into the map container.
@@ -915,13 +900,15 @@
 			function buildLegend() {
 				const legend = document.createElement("div")
 				legend.className = "map-legend is-collapsed"
-				legend.setAttribute("role", "region")
 				legend.setAttribute("aria-label", "Map legend")
 				document.getElementById("map").appendChild(legend)
 
-				// Legend starts collapsed; pass that state so aria attrs are correct from the start
-				const header = createLegendHeader(legend, /* initialCollapsed */ true)
+				const header = createLegendHeader(legend)
 				legend.appendChild(header)
+
+				const collapseBtn = header.querySelector(".legend__collapse-btn")
+				collapseBtn.setAttribute("aria-expanded", "false")
+				collapseBtn.setAttribute("aria-label", "Expand legend")
 
 				/* ── Collapsible body: all filter groups ── */
 				const body = document.createElement("div")
@@ -962,7 +949,7 @@
 						createLegendToggleRow({
 							id: `legend-ctype-${typeKey}`,
 							label: capitalize(typeKey),
-							shapeSvg: circShapeSvg,
+							shapeSvg: ringShapeSvg,
 							initialColor: color,
 							onChange: isOn => {
 								isOn ? filterState.activeCreoleTypes.add(typeKey) : filterState.activeCreoleTypes.delete(typeKey)
@@ -1006,11 +993,10 @@
 			 * Collapse state is expressed as `.is-collapsed` on the root legend
 			 * element — all animation lives in CSS, JS only flips the class.
 			 *
-			 * @param {HTMLElement} legendEl       The root `.map-legend` element.
-			 * @param {boolean}     [initialCollapsed=false]
+			 * @param {HTMLElement} legendEl  The root `.map-legend` element.
 			 * @returns {HTMLElement}
 			 */
-			function createLegendHeader(legendEl, initialCollapsed = false) {
+			function createLegendHeader(legendEl) {
 				const header = document.createElement("div")
 				header.className = "legend__header"
 
@@ -1020,15 +1006,15 @@
 
 				const collapseBtn = document.createElement("button")
 				collapseBtn.className = "legend__collapse-btn"
-				collapseBtn.setAttribute("aria-label", initialCollapsed ? "Expand legend" : "Collapse legend")
-				collapseBtn.setAttribute("aria-expanded", String(!initialCollapsed))
+				collapseBtn.setAttribute("aria-label", "Collapse legend")
+				collapseBtn.setAttribute("aria-expanded", "true")
 				collapseBtn.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-               stroke="currentColor" stroke-width="1.8"
-               stroke-linecap="round" stroke-linejoin="round"
-               aria-hidden="true">
-            <polyline points="2,9 7,4 12,9"/>
-          </svg>`
+			       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+			            stroke="currentColor" stroke-width="1.8"
+			            stroke-linecap="round" stroke-linejoin="round"
+			            aria-hidden="true">
+			         <polyline points="2,9 7,4 12,9"/>
+			       </svg>`
 
 				collapseBtn.addEventListener("click", () => {
 					const isNowCollapsed = legendEl.classList.toggle("is-collapsed")
@@ -1053,23 +1039,29 @@
 
 			function rectShapeSvg(color) {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                  <rect class="shape-fill" x="1.5" y="1.5" width="11" height="11"
-                        fill="${color}" stroke="${color}" stroke-width="1.5" rx="1"/>
-                </svg>`
+			               <rect class="shape-fill" x="1.5" y="1.5" width="11" height="11"
+			                     fill="${color}" stroke="${color}" stroke-width="1.5" rx="1"/>
+			             </svg>`
 			}
 
 			function triShapeSvg(color) {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                  <polygon class="shape-fill" points="7,1 13,13 1,13"
-                           fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
-                </svg>`
+			               <polygon class="shape-fill" points="7,1 13,13 1,13"
+			                        fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+			             </svg>`
 			}
 
 			function circShapeSvg(color) {
 				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                  <circle class="shape-fill" cx="7" cy="7" r="5"
-                          fill="${color}" stroke="${color}" stroke-width="1.5"/>
-                </svg>`
+			               <circle class="shape-fill" cx="7" cy="7" r="5"
+			                       fill="${color}" stroke="${color}" stroke-width="1.5"/>
+			             </svg>`
+			}
+			function ringShapeSvg(color) {
+				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+			               <circle class="shape-fill" cx="7" cy="7" r="5"
+			                       fill="transparent" stroke="${color}" stroke-width="1.5"/>
+			             </svg>`
 			}
 
 			/* ── Legend DOM helpers ── */
@@ -1103,11 +1095,11 @@
 				const checkboxId = `cb-${id}`
 
 				row.innerHTML = `
-          <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
-            <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
-            ${shapeSvg(initialColor)}
-          </label>
-          <label class="legend__item-label" for="${checkboxId}">${label}</label>`
+			       <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
+			         <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
+			         ${shapeSvg(initialColor)}
+			       </label>
+			       <label class="legend__item-label" for="${checkboxId}">${label}</label>`
 
 				const checkbox = row.querySelector("input")
 				const iconToggle = row.querySelector(".legend__icon-toggle")
@@ -1115,7 +1107,18 @@
 
 				function syncToggleState() {
 					const isOn = checkbox.checked
-					shapeFill.style.fill = isOn ? "" : "transparent" // hollow when off
+					const isRing = shapeFill.getAttribute("fill") === "transparent" // detect ring or filled shape
+					const mutedColor = getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim()
+
+					if (isRing) {
+						// ring-only shapes
+						shapeFill.style.stroke = isOn ? initialColor : mutedColor
+					} else {
+						// filled shapes
+						shapeFill.style.fill = isOn ? initialColor : mutedColor
+						shapeFill.style.stroke = isOn ? initialColor : mutedColor
+					}
+
 					row.classList.toggle("is-off", !isOn)
 					iconToggle.classList.toggle("is-off", !isOn)
 					onChange(isOn)
@@ -1128,8 +1131,8 @@
 			buildLegend()
 
 			/* ═══════════════════════════════════════════════════════════════
-                7. TIME-RANGE SLIDER
-            ═══════════════════════════════════════════════════════════════ */
+			    7. TIME-RANGE SLIDER
+			═══════════════════════════════════════════════════════════════ */
 
 			const sliderEl = document.getElementById("time-slider")
 			const rangeValueEl = document.getElementById("range-value")
@@ -1150,25 +1153,19 @@
 			})
 
 			/* ═══════════════════════════════════════════════════════════════
-                8. UTILITIES
-            ═══════════════════════════════════════════════════════════════ */
+			    8. UTILITIES
+			═══════════════════════════════════════════════════════════════ */
 
 			/** Capitalise the first letter of a string. */
 			function capitalize(str) {
 				return str.charAt(0).toUpperCase() + str.slice(1)
 			}
-
-			/**
-			 * Escape a string for safe interpolation into HTML.
-			 * Prevents XSS when data originates from an external source.
-			 *
-			 * @param {string} str
-			 * @returns {string}
-			 */
-			function escapeHtml(str) {
-				if (!str) return ""
-				return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
-			}
 		</script>
 	</body>
 </html>
+
+<!-- 
+
+    
+
+ -->

@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="https://leibniz-ifl.de/favicon/favicon.ico" type="image/vnd.microsoft.icon" />
+		<title>Caribbean Archives — Map</title>
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" />
+		<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap" rel="stylesheet" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+
+		<style>
+			/* ─────────────────────────────────────────
+         Design tokens
+         All colours, borders, and accents are
+         centralised here — update in one place.
+      ───────────────────────────────────────── */
+			:root {
+				/* Surfaces */
+				--bg-base: #0d1117;
+				--bg-surface: #161b22;
+				--bg-elevated: #1c2128;
+				--bg-overlay: rgba(13, 17, 23, 0.851);
+
+				/* Borders */
+				--border-subtle: rgba(255, 255, 255, 0.07);
+				--border-default: rgba(255, 255, 255, 0.12);
+				--border-strong: rgba(255, 255, 255, 0.22);
+
+				/* Text */
+				--text-primary: #e6edf3;
+				--text-secondary: #8b949e;
+				--text-muted: #484f58;
+
+				/* Brand accent */
+				--accent: #7c6fcd;
+				--accent-dim: rgba(124, 111, 205, 0.18);
+				--accent-glow: rgba(124, 111, 205, 0.35);
+
+				/* Document-category colours */
+				--color-cat-bible: #e66101;
+				--color-cat-letter: #fdb863;
+				--color-cat-poem: #b2abd2;
+				--color-cat-report: #5e3c99;
+
+				/* Creole-type ring colours */
+				--color-creole-french: #c51b7d;
+				--color-creole-english: #e9a3c9;
+				--color-creole-dutch: #e6f5d0;
+				--color-creole-spanish: #a1d76a;
+				--color-creole-portugese: #4d9221;
+			}
+
+			/* ─────────────────────────────────────────
+         Reset
+      ───────────────────────────────────────── */
+			*,
+			*::before,
+			*::after {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			/* ─────────────────────────────────────────
+         Page layout  (header → map → slider)
+      ───────────────────────────────────────── */
+			body {
+				font-family: Saira, sans-serif;
+				background: linear-gradient(140deg, var(--bg-base), var(--accent));
+				color: var(--text-primary);
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			/* ── Header ── */
+			.site-header {
+				margin: 0.75rem;
+				height: 3.25rem;
+				display: flex;
+				align-items: center;
+				gap: 1.25rem;
+				flex-shrink: 0;
+			}
+
+			.site-header__dot {
+				margin-left: 0.5rem;
+				width: 1rem;
+				height: 1rem;
+				border-radius: 50%;
+				background: var(--accent);
+				box-shadow: 0 0 0.375rem var(--accent-glow);
+				flex-shrink: 0;
+			}
+
+			.site-header__title {
+				font-family: "Roboto Flex", sans-serif;
+				font-variation-settings: "slnt" -10, "GRAD" -200, "XOPQ" 96, "XTRA" 465, "YOPQ" 79, "YTAS" 854, "YTDE" -305, "YTFI" 788, "YTLC" 570, "YTUC" 760;
+				font-size: 2rem;
+				font-weight: 600;
+				color: var(--text-primary);
+			}
+
+			.site-header__divider {
+				width: 0.0625rem;
+				height: 3rem;
+				background: var(--border-default);
+			}
+
+			.site-header__sub {
+				font-size: 0.7rem;
+				color: var(--text-muted);
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				font-weight: 500;
+			}
+
+			/* ── Map container ── */
+			#map {
+				flex: 1;
+				width: 100%;
+				position: relative;
+			}
+
+			/* ── Time slider footer ── */
+			.slider-footer {
+				background: var(--bg-elevated);
+				border-top: 0.0625rem solid var(--border-subtle);
+				padding: 1rem 2rem 1.1rem;
+				flex-shrink: 0;
+			}
+
+			.slider-footer__label {
+				font-size: 0.7rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--text-secondary);
+				margin-bottom: 0.65rem;
+				display: flex;
+				align-items: center;
+				gap: 0.6rem;
+			}
+
+			.slider-footer__range-value {
+				font-size: 1rem;
+				letter-spacing: 0.02em;
+				color: var(--text-primary);
+				font-weight: 400;
+			}
+
+			/* ─────────────────────────────────────────
+         noUiSlider theme overrides
+      ───────────────────────────────────────── */
+			#time-slider .noUi-target {
+				background: var(--bg-elevated);
+				border: 0.0625rem solid var(--border-default);
+				box-shadow: none;
+				height: 0.1875rem;
+				border-radius: 99rem;
+			}
+
+			#time-slider .noUi-base {
+				background: transparent;
+			}
+
+			#time-slider .noUi-connect {
+				background: var(--accent);
+				border-radius: 99rem;
+			}
+
+			#time-slider .noUi-handle {
+				width: 2rem;
+				height: 2rem;
+				border-radius: 50%;
+				background: var(--text-primary);
+				border: 0.125rem solid var(--accent);
+				box-shadow: 0 0 0 0.1875rem var(--accent-dim);
+				cursor: grab;
+				right: -0.5rem;
+				top: -0.45rem;
+				transition: box-shadow 0.15s;
+			}
+
+			/* Hide the default noUiSlider pip lines */
+			#time-slider .noUi-handle::before,
+			#time-slider .noUi-handle::after {
+				display: none;
+			}
+
+			#time-slider .noUi-handle:hover {
+				box-shadow: 0 0 0 0.1875rem var(--accent-glow);
+			}
+			#time-slider .noUi-handle.noUi-active {
+				background: var(--text-muted);
+				cursor: grabbing;
+			}
+
+			/* ─────────────────────────────────────────
+         Selection toolbar placeholder
+      ───────────────────────────────────────── */
+			#map-select-toolbar {
+				position: absolute;
+				z-index: 1000;
+				top: 0.25rem;
+				left: 3rem;
+			}
+
+			#map-select-toolbar img {
+				width: 492px;
+				max-width: 80vw;
+				cursor: pointer;
+			}
+
+			/* ─────────────────────────────────────────
+         Map legend panel
+         No padding on the root — header and body
+         each manage their own spacing.
+      ───────────────────────────────────────── */
+			.map-legend {
+				position: absolute;
+				bottom: 1rem;
+				left: 1rem;
+				z-index: 1000;
+				background: var(--bg-overlay);
+				border: 0.0625rem solid var(--border-default);
+				padding: 0.5rem 0.4rem;
+				border-radius: 0.5rem;
+				min-width: 2rem;
+				backdrop-filter: blur(0.75rem);
+			}
+
+			/* ── Legend header (title + collapse button) ── */
+			.legend__header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0.5rem 0.75rem 0.4rem;
+				gap: 0.5rem;
+			}
+
+			.legend__title {
+				font-size: 0.7rem;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				font-weight: 500;
+			}
+
+			.legend__collapse-btn {
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: var(--text-muted);
+				padding: 0.1rem 0.2rem;
+				border-radius: 0.25rem;
+				display: flex;
+				align-items: center;
+				transition: color 0.15s;
+			}
+
+			.legend__collapse-btn:hover {
+				color: var(--text-primary);
+			}
+
+			.legend__collapse-btn svg {
+				transition: transform 0.25s ease;
+                transform: rotate(180deg);
+			}
+
+			/* Flip the chevron when the body is collapsed */
+			.map-legend.is-collapsed .legend__collapse-btn svg {
+				transform: rotate(0deg);
+			}
+
+			/* ── Legend collapsible body ── */
+			.legend__body {
+				padding: 0 1rem 0.875rem;
+				overflow: hidden;
+				transition: max-height 0.28s ease, opacity 0.22s ease;
+				opacity: 1;
+				/* max-height is set by JS once the content height is known */
+			}
+
+			.map-legend.is-collapsed .legend__body {
+				max-height: 0 !important;
+				opacity: 0;
+				pointer-events: none;
+			}
+
+			/* ── Legend group title ── */
+			.legend__group-title {
+				font-size: 0.8rem;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				font-weight: 500;
+				margin-bottom: 0.65rem;
+			}
+
+			.legend__divider {
+				height: 0.0625rem;
+				background: var(--border-default);
+				margin: 0.75rem 0;
+			}
+
+			/* Legend row = toggle icon + label */
+			.legend__item {
+				display: flex;
+				align-items: center;
+				gap: 0.55rem;
+				margin-bottom: 0.5rem;
+				cursor: pointer;
+				user-select: none;
+			}
+
+			.legend__item:last-child {
+				margin-bottom: 0;
+			}
+
+			/* Wraps a visually-hidden checkbox and an SVG shape */
+			.legend__icon-toggle {
+				position: relative;
+				flex-shrink: 0;
+				width: 1.25rem;
+				height: 1.25rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+			}
+
+			/* Hidden but keyboard-accessible */
+			.legend__icon-toggle input[type="checkbox"] {
+				position: absolute;
+				opacity: 0;
+				width: 0;
+				height: 0;
+				pointer-events: none;
+			}
+
+			.legend__icon-toggle svg {
+				overflow: visible;
+				transition: opacity 0.15s;
+			}
+
+			/* Hollow the shape fill when toggled off */
+			.legend__icon-toggle.is-off .shape-fill {
+				fill: transparent;
+			}
+
+			.legend__item-label {
+				font-size: 0.95rem;
+				font-weight: 400;
+				color: var(--text-secondary);
+				cursor: pointer;
+				transition: color 0.2s, opacity 0.2s;
+				letter-spacing: 0.03em;
+			}
+
+			.legend__item:hover .legend__item-label {
+				color: var(--text-primary);
+			}
+			.legend__item.is-off .legend__item-label {
+				opacity: 0.4;
+			}
+
+			/* ─────────────────────────────────────────
+         Popup
+      ───────────────────────────────────────── */
+			.leaflet-popup-content-wrapper {
+				background: var(--bg-elevated);
+				border: 0.0625rem solid var(--border-default);
+				border-radius: 0.75rem;
+				color: var(--text-primary);
+				box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.6), 0 0 0 0.0625rem var(--border-subtle);
+				font-family: Saira, sans-serif;
+				backdrop-filter: blur(0.5rem);
+				padding: 0;
+				overflow: hidden;
+			}
+
+			.leaflet-popup-tip {
+				background: var(--bg-elevated);
+			}
+			.leaflet-popup-close-button {
+				color: var(--text-secondary) !important;
+				z-index: 10;
+				top: 0.4rem !important;
+				right: 0.5rem !important;
+			}
+			.leaflet-popup-content {
+				margin: 0;
+				width: 512px !important;
+			}
+
+			/* Two-panel layout inside the popup */
+			.popup__panels {
+				display: flex;
+				flex-direction: row;
+				height: 512px;
+			}
+
+			/* Left panel: thumbnail + metadata pills */
+			.popup__left {
+				width: 256px;
+				flex-shrink: 0;
+				display: flex;
+				flex-direction: column;
+				border-right: 0.0625rem solid var(--border-subtle);
+			}
+
+			.popup__image-wrap {
+				position: relative;
+				width: 100%;
+				height: 86%;
+				overflow: hidden;
+				background: var(--bg-surface);
+				flex-shrink: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.popup__image-wrap img {
+				width: 100%;
+				height: 86%;
+				object-fit: cover;
+				display: block;
+			}
+
+			/* Shown when a feature has no image URL */
+			.popup__image-empty {
+				width: 100%;
+				height: 86%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: var(--text-muted);
+			}
+
+			.popup__image-empty svg {
+				opacity: 0.35;
+			}
+
+			.popup__year-badge {
+				position: absolute;
+				bottom: 0.5rem;
+				left: 0.5rem;
+				background: rgba(13, 17, 23, 0.72);
+				border: 0.0625rem solid var(--border-default);
+				color: var(--text-primary);
+				font-size: 1rem;
+				font-weight: 500;
+				padding: 0.15rem 0.55rem;
+				border-radius: 99rem;
+				letter-spacing: 0.06em;
+				backdrop-filter: blur(0.25rem);
+			}
+
+			.popup__pills {
+				padding: 0.6rem 0.65rem;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.3rem;
+				background: var(--bg-elevated);
+			}
+
+			/* Right panel: abstract text + source link */
+			.popup__right {
+				width: 256px;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				padding: 0.75rem 0.9rem 0.8rem;
+				gap: 0.5rem;
+				overflow: hidden;
+			}
+
+			.popup__abstract {
+				font-size: 0.78rem;
+				color: var(--text-secondary);
+				line-height: 1.6;
+				flex: 1;
+				overflow: hidden;
+				display: -webkit-box;
+				-webkit-line-clamp: 7;
+				-webkit-box-orient: vertical;
+				text-overflow: ellipsis;
+			}
+
+			.popup__divider {
+				height: 0.0625rem;
+				background: var(--border-subtle);
+				margin: 0.1rem 0;
+			}
+
+			.popup__source-link {
+				display: flex;
+				align-items: center;
+				gap: 0.3rem;
+				font-size: 0.7rem;
+				letter-spacing: 0.06em;
+				color: var(--accent);
+				text-decoration: none;
+				transition: color 0.15s;
+			}
+
+			.popup__source-link:hover {
+				color: var(--text-primary);
+			}
+			.popup__source-link svg {
+				opacity: 0.7;
+				flex-shrink: 0;
+			}
+
+			/* ─────────────────────────────────────────
+         Pills  (category / creole type / creole role)
+      ───────────────────────────────────────── */
+			.pill {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.25rem;
+				font-size: 0.6rem;
+				font-weight: 500;
+				padding: 0.15rem 0.55rem;
+				border-radius: 99rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				border: 0.0625rem solid transparent;
+				width: fit-content;
+			}
+
+			.pill--category {
+				background: var(--accent-dim);
+				color: var(--accent);
+				border-color: rgba(124, 111, 205, 0.28);
+			}
+
+			.pill--creole-role {
+				background: rgba(255, 255, 255, 0.05);
+				color: var(--text-secondary);
+				border-color: var(--border-subtle);
+			}
+
+			/* Creole-type pills use inline colour derived from JS data */
+			.pill--creole-type {
+				border-color: transparent;
+			}
+
+			/* ─────────────────────────────────────────
+         Leaflet chrome overrides
+      ───────────────────────────────────────── */
+			.leaflet-control-attribution {
+				background: var(--bg-overlay) !important;
+				color: var(--text-muted) !important;
+				border-radius: 0.25rem 0 0 0 !important;
+				font-size: 0.6rem !important;
+			}
+
+			.leaflet-control-attribution a {
+				color: var(--text-secondary) !important;
+			}
+
+			.leaflet-control-zoom a {
+				background: var(--bg-elevated) !important;
+				color: var(--text-secondary) !important;
+				border-color: var(--border-default) !important;
+			}
+
+			.leaflet-control-zoom a:hover {
+				background: var(--bg-surface) !important;
+				color: var(--text-primary) !important;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- ── Header ── -->
+		<header class="site-header">
+			<div class="site-header__dot" aria-hidden="true"></div>
+			<h1 class="site-header__title">Caribbean Archives</h1>
+			<div class="site-header__divider" aria-hidden="true"></div>
+			<span class="site-header__sub">Illustrative data only</span>
+		</header>
+
+		<!-- ── Map ── -->
+		<div id="map">
+			<!-- Placeholder for selection toolbar -->
+			<div id="map-select-toolbar">
+				<img src="U:\_kvk\creoles\sketches\SELECT_BAR.png" alt="Selection toolbar" />
+			</div>
+			<!-- Legend is injected here by JS (needs CSS-var colours to be resolved first) -->
+		</div>
+
+		<!-- ── Time-range slider ── -->
+		<footer class="slider-footer">
+			<div class="slider-footer__label">
+				<span>Time range</span>
+				<span class="slider-footer__range-value" id="range-value" aria-live="polite"></span>
+			</div>
+			<div id="time-slider"></div>
+		</footer>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+		<script>
+			/* ═══════════════════════════════════════════════════════════════
+         1. DATA
+         Replace or fetch this from an API / file in production.
+      ═══════════════════════════════════════════════════════════════ */
+
+			/** @typedef {{ time: number, category: string, creole: string|null, creoleType: string|null, urlIMG: string, urlText: string, resume: string }} FeatureProps */
+
+			const ARCHIVE_GEOJSON = {
+				type: "FeatureCollection",
+				features: [
+					{type: "Feature", properties: {time: 1750, category: "poem", creole: "using", creoleType: "french", urlIMG: "U:\\_kvk\\creoles\\ui\\book1.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.409993, 15.523156]}},
+					{type: "Feature", properties: {time: 1816, category: "report", creole: "about", creoleType: "english", urlIMG: "U:\\_kvk\\creoles\\ui\\book1.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.316598, 15.37628]}},
+					{type: "Feature", properties: {time: 1691, category: "letter", creole: "using", creoleType: "dutch", urlIMG: "U:\\_kvk\\creoles\\ui\\book1.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: ""}, geometry: {type: "Point", coordinates: [-61.346091, 15.544468]}},
+					{type: "Feature", properties: {time: 1763, category: "letter", creole: "about", creoleType: null, urlIMG: "U:\\_kvk\\creoles\\ui\\book1.jpg", urlText: "", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}},
+					{type: "Feature", properties: {time: 1847, category: "letter", creole: "about", creoleType: "spanish", urlIMG: "", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.387352, 16.315212]}},
+					{type: "Feature", properties: {time: 1717, category: "poem", creole: null, creoleType: null, urlIMG: "U:\\_kvk\\creoles\\ui\\book2.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.611308, 16.117324]}},
+					{type: "Feature", properties: {time: 1648, category: "bible", creole: "about", creoleType: "portugese", urlIMG: "U:\\_kvk\\creoles\\ui\\book2.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}},
+					{type: "Feature", properties: {time: 1689, category: "poem", creole: null, creoleType: "french", urlIMG: "U:\\_kvk\\creoles\\ui\\book2.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-60.964977, 14.693279]}},
+					{type: "Feature", properties: {time: 1777, category: "letter", creole: "using", creoleType: null, urlIMG: "U:\\_kvk\\creoles\\ui\\book2.jpg", urlText: "U:\\_kvk\\creoles\\ui\\lorem-ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-60.885014, 14.484105]}}
+				]
+			}
+
+			/* ═══════════════════════════════════════════════════════════════
+         2. COLOUR PALETTE
+         Read from CSS custom properties so the single source of truth
+         stays in the stylesheet above.
+      ═══════════════════════════════════════════════════════════════ */
+
+			/**
+			 * Read a CSS custom property from :root at runtime.
+			 * @param {string} name  e.g. "--accent"
+			 * @returns {string}
+			 */
+			function getCssVar(name) {
+				return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+			}
+
+			/** Colour keyed by document category. */
+			const CATEGORY_COLORS = {
+				bible: getCssVar("--color-cat-bible"),
+				letter: getCssVar("--color-cat-letter"),
+				poem: getCssVar("--color-cat-poem"),
+				report: getCssVar("--color-cat-report")
+			}
+
+			/** Ring colour keyed by creole-language family. */
+			const CREOLE_TYPE_COLORS = {
+				french: getCssVar("--color-creole-french"),
+				english: getCssVar("--color-creole-english"),
+				dutch: getCssVar("--color-creole-dutch"),
+				spanish: getCssVar("--color-creole-spanish"),
+				portugese: getCssVar("--color-creole-portugese")
+			}
+
+			/* ═══════════════════════════════════════════════════════════════
+         3. MAP INITIALISATION
+      ═══════════════════════════════════════════════════════════════ */
+
+			const map = L.map("map", {
+				center: [15.5, -61.2],
+				zoom: 8,
+				zoomControl: true
+			})
+
+			L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+				attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+				subdomains: "abcd",
+				maxZoom: 19
+			}).addTo(map)
+
+			/* ═══════════════════════════════════════════════════════════════
+         4. MARKER RENDERING
+      ═══════════════════════════════════════════════════════════════ */
+
+			/**
+			 * Return an inline-SVG string for a map marker.
+			 *
+			 * Shape encodes the creole relationship:
+			 *   "about"  → triangle
+			 *   "using"  → square
+			 *   null     → circle  (relationship unknown)
+			 *
+			 * Fill colour  = document category.
+			 * Stroke colour = creole-language family (falls back to fill when unknown).
+			 *
+			 * @param {"about"|"using"|null} creoleRole
+			 * @param {string} fillColor
+			 * @param {string} ringColor
+			 * @returns {string}  Raw SVG markup
+			 */
+			function buildMarkerSvg(creoleRole, fillColor, ringColor) {
+				const strokeWidth = 3
+				const glow = `filter:drop-shadow(0 0 0.3rem ${ringColor})`
+
+				if (creoleRole === "about") {
+					return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" style="overflow:visible; ${glow}">
+                    <polygon points="15,3 28,27 2,27" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
+                  </svg>`
+				}
+
+				if (creoleRole === "using") {
+					return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
+                    <rect x="0" y="0" width="24" height="24" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}" rx="1"/>
+                  </svg>`
+				}
+
+				// Default: unknown / null creole relationship → circle
+				return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
+                  <circle cx="12" cy="12" r="12" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}"/>
+                </svg>`
+			}
+
+			/**
+			 * Build the HTML content for a feature's popup.
+			 * Split into left (image + pills) and right (abstract + link) panels.
+			 *
+			 * @param {FeatureProps} props
+			 * @returns {string}  HTML string
+			 */
+			function buildPopupHtml(props) {
+				const {time, category, creole, creoleType, urlIMG, urlText, resume} = props
+
+				/* Image block (left panel, top) */
+				const imageBlockHtml = urlIMG
+					? `<img src="${urlIMG}" alt="Document thumbnail: ${category}" />`
+					: `<div class="popup__image-empty">
+               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                 <rect width="18" height="18" x="3" y="3" rx="2"/>
+                 <circle cx="9" cy="9" r="2"/>
+                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+               </svg>
+             </div>`
+
+				/* Metadata pills (left panel, bottom) */
+				const categoryPill = `<span class="pill pill--category">${category}</span>`
+
+				const creoleTypePill = creoleType
+					? (() => {
+							const color = CREOLE_TYPE_COLORS[creoleType]
+							return `<span class="pill pill--creole-type"
+                        style="background:${color}22; color:${color}; border-color:${color}44">
+                        ${capitalize(creoleType)}
+                      </span>`
+					  })()
+					: ""
+
+				const creoleRoleLabel = creole === "using" ? "Written in creole" : creole === "about" ? "About creoles" : ""
+				const creoleRolePill = creoleRoleLabel ? `<span class="pill pill--creole-role">${creoleRoleLabel}</span>` : ""
+
+				/* Source text link (right panel, bottom) */
+				const sourceLinkHtml = urlText
+					? `<div class="popup__divider"></div>
+             <a href="${urlText}" target="_blank" rel="noopener noreferrer" class="popup__source-link">
+               Read source text
+               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                 <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+               </svg>
+             </a>`
+					: ""
+
+				return `
+          <div class="popup__panels">
+            <!-- Left: thumbnail + pills -->
+            <div class="popup__left">
+              <div class="popup__image-wrap">
+                ${imageBlockHtml}
+                <span class="popup__year-badge">${time}</span>
+              </div>
+              <div class="popup__pills">
+                ${categoryPill}
+                ${creoleTypePill}
+                ${creoleRolePill}
+              </div>
+            </div>
+
+            <!-- Right: abstract + source link -->
+            <div class="popup__right">
+              <p class="popup__abstract">${resume ?? ""}</p>
+              ${sourceLinkHtml}
+            </div>
+          </div>`
+			}
+
+			/**
+			 * Create a Leaflet marker with a bound popup for a single GeoJSON feature.
+			 *
+			 * @param {object} feature  GeoJSON Feature
+			 * @returns {L.Marker}
+			 */
+			function createFeatureMarker(feature) {
+				const {category, creole, creoleType} = feature.properties
+				const [lng, lat] = feature.geometry.coordinates
+
+				const fillColor = CATEGORY_COLORS[category] ?? "#8b949e"
+				const ringColor = creoleType ? CREOLE_TYPE_COLORS[creoleType] : fillColor
+
+				const icon = L.divIcon({
+					className: "", // clear Leaflet's default white box
+					html: buildMarkerSvg(creole, fillColor, ringColor),
+					iconSize: [20, 20],
+					iconAnchor: [10, 10]
+				})
+
+				const marker = L.marker([lat, lng], {icon})
+				marker.bindPopup(buildPopupHtml(feature.properties), {maxWidth: 512})
+
+				// Attach the source feature for later filtering
+				marker.feature = feature
+				return marker
+			}
+
+			/* ═══════════════════════════════════════════════════════════════
+         5. FILTER STATE & LOGIC
+         A central state object drives all visibility; one function reads
+         it and updates the map, keeping the UI handlers thin.
+      ═══════════════════════════════════════════════════════════════ */
+
+			const allYears = ARCHIVE_GEOJSON.features.map(f => f.properties.time)
+
+			/**
+			 * Mutable filter state. All UI controls read & write this object,
+			 * then call `applyFilters()`.
+			 */
+			const filterState = {
+				minYear: Math.min(...allYears),
+				maxYear: Math.max(...allYears),
+				showCreoleRole: {
+					using: true,
+					about: true,
+					unknown: true // covers features with a null creole value
+				},
+				activeCategories: new Set(Object.keys(CATEGORY_COLORS)),
+				activeCreoleTypes: new Set(Object.keys(CREOLE_TYPE_COLORS))
+			}
+
+			// Build markers once, then show/hide via applyFilters().
+			const allMarkers = ARCHIVE_GEOJSON.features.map(feature => {
+				const marker = createFeatureMarker(feature)
+				marker.addTo(map)
+				return marker
+			})
+
+			/**
+			 * Show or hide every marker based on the current filterState.
+			 * Called whenever any filter control changes.
+			 */
+			function applyFilters() {
+				allMarkers.forEach(marker => {
+					const {time, category, creole, creoleType} = marker.feature.properties
+
+					// Map the nullable creole value to one of the three role-filter keys
+					const roleKey = creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
+
+					const isVisible =
+						time >= filterState.minYear &&
+						time <= filterState.maxYear &&
+						filterState.activeCategories.has(category) &&
+						filterState.showCreoleRole[roleKey] &&
+						// Features without a creole type are not filtered out by type
+						(!creoleType || filterState.activeCreoleTypes.has(creoleType))
+
+					isVisible ? marker.addTo(map) : map.removeLayer(marker)
+				})
+			}
+
+			/* ═══════════════════════════════════════════════════════════════
+         6. LEGEND
+         Built programmatically to stay in sync with the data palette.
+         Collapse state lives on a CSS class; JS only toggles it.
+      ═══════════════════════════════════════════════════════════════ */
+
+			/**
+			 * Inject the legend panel into the map container.
+			 * Building it in JS lets CATEGORY_COLORS / CREOLE_TYPE_COLORS
+			 * serve as the single source of truth for both markers and legend.
+			 */
+			function buildLegend() {
+				const legend = document.createElement("div")
+				legend.className = "map-legend is-collapsed"
+				legend.setAttribute("aria-label", "Map legend")
+				document.getElementById("map").appendChild(legend)
+
+				const header = createLegendHeader(legend)
+				legend.appendChild(header)
+
+				const collapseBtn = header.querySelector(".legend__collapse-btn")
+				collapseBtn.setAttribute("aria-expanded", "false")
+				collapseBtn.setAttribute("aria-label", "Expand legend")
+
+				/* ── Collapsible body: all filter groups ── */
+				const body = document.createElement("div")
+				body.className = "legend__body"
+				legend.appendChild(body)
+
+				/* Creole role group — shape encodes the relationship */
+				body.appendChild(createLegendGroupTitle("Creole"))
+
+				const creoleRoleEntries = [
+					{key: "using", label: "Using creoles", shapeSvg: rectShapeSvg},
+					{key: "about", label: "About creoles", shapeSvg: triShapeSvg},
+					{key: "unknown", label: "Unknown", shapeSvg: circShapeSvg}
+				]
+
+				creoleRoleEntries.forEach(({key, label, shapeSvg}) => {
+					body.appendChild(
+						createLegendToggleRow({
+							id: `legend-creole-${key}`,
+							label,
+							shapeSvg,
+							initialColor: "silver",
+							onChange: isOn => {
+								filterState.showCreoleRole[key] = isOn
+								applyFilters()
+							}
+						})
+					)
+				})
+
+				body.appendChild(createLegendDivider())
+
+				/* Creole type group — colour encodes the language family */
+				body.appendChild(createLegendGroupTitle("Creole type"))
+
+				Object.entries(CREOLE_TYPE_COLORS).forEach(([typeKey, color]) => {
+					body.appendChild(
+						createLegendToggleRow({
+							id: `legend-ctype-${typeKey}`,
+							label: capitalize(typeKey),
+							shapeSvg: circShapeSvg,
+							initialColor: color,
+							onChange: isOn => {
+								isOn ? filterState.activeCreoleTypes.add(typeKey) : filterState.activeCreoleTypes.delete(typeKey)
+								applyFilters()
+							}
+						})
+					)
+				})
+
+				body.appendChild(createLegendDivider())
+
+				/* Document category group */
+				body.appendChild(createLegendGroupTitle("Document type"))
+
+				Object.entries(CATEGORY_COLORS).forEach(([catKey, color]) => {
+					body.appendChild(
+						createLegendToggleRow({
+							id: `legend-cat-${catKey}`,
+							label: capitalize(catKey),
+							shapeSvg: circShapeSvg,
+							initialColor: color,
+							onChange: isOn => {
+								isOn ? filterState.activeCategories.add(catKey) : filterState.activeCategories.delete(catKey)
+								applyFilters()
+							}
+						})
+					)
+				})
+
+				// Measure the fully-rendered body so the CSS transition has a
+				// concrete max-height to animate from.
+				requestAnimationFrame(() => {
+					body.style.maxHeight = `${body.scrollHeight}px`
+				})
+			}
+
+			/**
+			 * Build the legend header: a "Legend" label and a collapse toggle.
+			 * Collapse state is expressed as `.is-collapsed` on the root legend
+			 * element — all animation lives in CSS, JS only flips the class.
+			 *
+			 * @param {HTMLElement} legendEl  The root `.map-legend` element.
+			 * @returns {HTMLElement}
+			 */
+			function createLegendHeader(legendEl) {
+				const header = document.createElement("div")
+				header.className = "legend__header"
+
+				const title = document.createElement("span")
+				title.className = "legend__title"
+				title.textContent = "Filters"
+
+				const collapseBtn = document.createElement("button")
+				collapseBtn.className = "legend__collapse-btn"
+				collapseBtn.setAttribute("aria-label", "Collapse legend")
+				collapseBtn.setAttribute("aria-expanded", "true")
+				collapseBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <polyline points="2,9 7,4 12,9"/>
+          </svg>`
+
+				collapseBtn.addEventListener("click", () => {
+					const isNowCollapsed = legendEl.classList.toggle("is-collapsed")
+
+					// Keep ARIA attributes in sync with the visual state
+					collapseBtn.setAttribute("aria-expanded", String(!isNowCollapsed))
+					collapseBtn.setAttribute("aria-label", isNowCollapsed ? "Expand legend" : "Collapse legend")
+
+					// Re-measure on expand in case content changed since first render
+					if (!isNowCollapsed) {
+						const body = legendEl.querySelector(".legend__body")
+						body.style.maxHeight = `${body.scrollHeight}px`
+					}
+				})
+
+				header.appendChild(title)
+				header.appendChild(collapseBtn)
+				return header
+			}
+
+			/* ── Legend shape factories — return an SVG string ── */
+
+			function rectShapeSvg(color) {
+				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <rect class="shape-fill" x="1.5" y="1.5" width="11" height="11"
+                        fill="${color}" stroke="${color}" stroke-width="1.5" rx="1"/>
+                </svg>`
+			}
+
+			function triShapeSvg(color) {
+				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <polygon class="shape-fill" points="7,1 13,13 1,13"
+                           fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>`
+			}
+
+			function circShapeSvg(color) {
+				return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <circle class="shape-fill" cx="7" cy="7" r="5"
+                          fill="${color}" stroke="${color}" stroke-width="1.5"/>
+                </svg>`
+			}
+
+			/* ── Legend DOM helpers ── */
+
+			function createLegendGroupTitle(text) {
+				const el = document.createElement("div")
+				el.className = "legend__group-title"
+				el.textContent = text
+				return el
+			}
+
+			function createLegendDivider() {
+				const el = document.createElement("div")
+				el.className = "legend__divider"
+				el.setAttribute("role", "separator")
+				return el
+			}
+
+			/**
+			 * Create a toggleable legend row: hidden checkbox + SVG shape + label.
+			 * Clicking anywhere on the row toggles the checkbox, which fires
+			 * syncToggleState and then the caller-supplied onChange handler.
+			 *
+			 * @param {{ id: string, label: string, shapeSvg: function, initialColor: string, onChange: function }} options
+			 * @returns {HTMLElement}
+			 */
+			function createLegendToggleRow({id, label, shapeSvg, initialColor, onChange}) {
+				const row = document.createElement("div")
+				row.className = "legend__item"
+
+				const checkboxId = `cb-${id}`
+
+				row.innerHTML = `
+          <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
+            <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
+            ${shapeSvg(initialColor)}
+          </label>
+          <label class="legend__item-label" for="${checkboxId}">${label}</label>`
+
+				const checkbox = row.querySelector("input")
+				const iconToggle = row.querySelector(".legend__icon-toggle")
+				const shapeFill = row.querySelector(".shape-fill")
+
+				function syncToggleState() {
+					const isOn = checkbox.checked
+					shapeFill.style.fill = isOn ? "" : "transparent" // hollow when off
+					row.classList.toggle("is-off", !isOn)
+					iconToggle.classList.toggle("is-off", !isOn)
+					onChange(isOn)
+				}
+
+				checkbox.addEventListener("change", syncToggleState)
+				return row
+			}
+
+			buildLegend()
+
+			/* ═══════════════════════════════════════════════════════════════
+         7. TIME-RANGE SLIDER
+      ═══════════════════════════════════════════════════════════════ */
+
+			const sliderEl = document.getElementById("time-slider")
+			const rangeValueEl = document.getElementById("range-value")
+
+			noUiSlider.create(sliderEl, {
+				start: [filterState.minYear, filterState.maxYear],
+				connect: true,
+				step: 1,
+				range: {min: filterState.minYear, max: filterState.maxYear}
+			})
+
+			sliderEl.noUiSlider.on("update", values => {
+				const [min, max] = values.map(Math.round)
+				filterState.minYear = min
+				filterState.maxYear = max
+				rangeValueEl.textContent = `${min} – ${max}`
+				applyFilters()
+			})
+
+			/* ═══════════════════════════════════════════════════════════════
+         8. UTILITIES
+      ═══════════════════════════════════════════════════════════════ */
+
+			/** Capitalise the first letter of a string. */
+			function capitalize(str) {
+				return str.charAt(0).toUpperCase() + str.slice(1)
+			}
+		</script>
+	</body>
+</html>
+
+<!-- 
+
+    - Make Legend and toolbar non clicktrough
+    - Make Legend be collapsed by default
+      - Legend Collapsed = Title
+      - Legend Visible = No title
+    - Fix gap below legend when collapsed
+
+-->
+
+<!-- 
+
+    You are a senior software engineer with 15 years of experience. Your goal is to re-write this prototype to a production-quality, maintainable, and readable code.
+        1. Write clean, idiomatic code using CSS, HTML and JS.
+        2. Follow established design patterns where relevant.
+        4. Follow up-to-date best practices and naming conventions.
+        3. Add concise comments for non-obvious parts.
+        4. Use descriptive variable and function names.
+        5. Make the code easy to extend and test.
+        6. Clean-up, reorganise and refactor as needed.
+    Here is the code/function/task:
+
+ -->

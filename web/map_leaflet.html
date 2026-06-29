@@ -13,10 +13,10 @@
 
 		<style>
 			/* ─────────────────────────────────────────
-         Design tokens
-         All colours, borders, and accents are
-         centralised here — update in one place.
-      ───────────────────────────────────────── */
+                Design tokens
+                All colours, borders, and accents are
+                centralised here — update in one place.
+            ───────────────────────────────────────── */
 			:root {
 				/* Surfaces */
 				--bg-base: #0d1117;
@@ -54,8 +54,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Reset
-      ───────────────────────────────────────── */
+                Reset
+            ───────────────────────────────────────── */
 			*,
 			*::before,
 			*::after {
@@ -65,8 +65,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Page layout  (header → map → slider)
-      ───────────────────────────────────────── */
+                Page layout  (header → map → slider)
+            ───────────────────────────────────────── */
 			body {
 				font-family: Saira, sans-serif;
 				background: linear-gradient(140deg, var(--bg-base), var(--accent));
@@ -153,8 +153,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         noUiSlider theme overrides
-      ───────────────────────────────────────── */
+                noUiSlider theme overrides
+            ───────────────────────────────────────── */
 			#time-slider .noUi-target {
 				background: var(--bg-elevated);
 				border: 0.0625rem solid var(--border-default);
@@ -200,8 +200,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Selection toolbar placeholder
-      ───────────────────────────────────────── */
+                Selection toolbar placeholder
+            ───────────────────────────────────────── */
 			#map-select-toolbar {
 				position: absolute;
 				z-index: 1000;
@@ -216,10 +216,10 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Map legend panel
-         No padding on the root — header and body
-         each manage their own spacing.
-      ───────────────────────────────────────── */
+                Map legend panel
+                No padding on the root — header and body
+                each manage their own spacing.
+            ───────────────────────────────────────── */
 			.map-legend {
 				position: absolute;
 				bottom: 1rem;
@@ -240,6 +240,11 @@
 				justify-content: space-between;
 				padding: 0.5rem 0.75rem 0.4rem;
 				gap: 0.5rem;
+				margin-bottom: 0.78rem;
+			}
+
+			.map-legend.is-collapsed .legend__header {
+				margin-bottom: 0;
 			}
 
 			.legend__title {
@@ -259,7 +264,7 @@
 				border-radius: 0.25rem;
 				display: flex;
 				align-items: center;
-				transition: color 0.15s;
+				transition: color 0.5s;
 			}
 
 			.legend__collapse-btn:hover {
@@ -267,8 +272,8 @@
 			}
 
 			.legend__collapse-btn svg {
-				transition: transform 0.25s ease;
-                transform: rotate(180deg);
+				transition: transform 1s ease;
+				transform: rotate(180deg);
 			}
 
 			/* Flip the chevron when the body is collapsed */
@@ -280,7 +285,7 @@
 			.legend__body {
 				padding: 0 1rem 0.875rem;
 				overflow: hidden;
-				transition: max-height 0.28s ease, opacity 0.22s ease;
+				transition: max-height 0.8s ease, opacity 0.22s ease;
 				opacity: 1;
 				/* max-height is set by JS once the content height is known */
 			}
@@ -289,6 +294,7 @@
 				max-height: 0 !important;
 				opacity: 0;
 				pointer-events: none;
+				padding-bottom: 0;
 			}
 
 			/* ── Legend group title ── */
@@ -369,8 +375,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Popup
-      ───────────────────────────────────────── */
+                Popup
+            ───────────────────────────────────────── */
 			.leaflet-popup-content-wrapper {
 				background: var(--bg-elevated);
 				border: 0.0625rem solid var(--border-default);
@@ -518,8 +524,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Pills  (category / creole type / creole role)
-      ───────────────────────────────────────── */
+                Pills  (category / creole type / creole role)
+            ───────────────────────────────────────── */
 			.pill {
 				display: inline-flex;
 				align-items: center;
@@ -552,8 +558,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-         Leaflet chrome overrides
-      ───────────────────────────────────────── */
+                Leaflet chrome overrides
+            ───────────────────────────────────────── */
 			.leaflet-control-attribution {
 				background: var(--bg-overlay) !important;
 				color: var(--text-muted) !important;
@@ -608,9 +614,9 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 		<script>
 			/* ═══════════════════════════════════════════════════════════════
-         1. DATA
-         Replace or fetch this from an API / file in production.
-      ═══════════════════════════════════════════════════════════════ */
+                1. DATA
+                Replace or fetch this from an API / file in production.
+            ═══════════════════════════════════════════════════════════════ */
 
 			/** @typedef {{ time: number, category: string, creole: string|null, creoleType: string|null, urlIMG: string, urlText: string, resume: string }} FeatureProps */
 
@@ -630,10 +636,10 @@
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-         2. COLOUR PALETTE
-         Read from CSS custom properties so the single source of truth
-         stays in the stylesheet above.
-      ═══════════════════════════════════════════════════════════════ */
+                2. COLOUR PALETTE
+                Read from CSS custom properties so the single source of truth
+                stays in the stylesheet above.
+            ═══════════════════════════════════════════════════════════════ */
 
 			/**
 			 * Read a CSS custom property from :root at runtime.
@@ -662,8 +668,8 @@
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-         3. MAP INITIALISATION
-      ═══════════════════════════════════════════════════════════════ */
+                3. MAP INITIALISATION
+            ═══════════════════════════════════════════════════════════════ */
 
 			const map = L.map("map", {
 				center: [15.5, -61.2],
@@ -677,9 +683,14 @@
 				maxZoom: 19
 			}).addTo(map)
 
+			const toolbar = document.getElementById("map-select-toolbar")
+
+			L.DomEvent.disableScrollPropagation(toolbar)
+			L.DomEvent.disableClickPropagation(toolbar)
+
 			/* ═══════════════════════════════════════════════════════════════
-         4. MARKER RENDERING
-      ═══════════════════════════════════════════════════════════════ */
+                4. MARKER RENDERING
+            ═══════════════════════════════════════════════════════════════ */
 
 			/**
 			 * Return an inline-SVG string for a map marker.
@@ -698,24 +709,24 @@
 			 * @returns {string}  Raw SVG markup
 			 */
 			function buildMarkerSvg(creoleRole, fillColor, ringColor) {
-				const strokeWidth = 3
+				const STROKE_WIDTH = 3
 				const glow = `filter:drop-shadow(0 0 0.3rem ${ringColor})`
 
 				if (creoleRole === "about") {
 					return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" style="overflow:visible; ${glow}">
-                    <polygon points="15,3 28,27 2,27" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
+                    <polygon points="15,3 28,27 2,27" fill="${fillColor}" stroke="${ringColor}" stroke-width="${STROKE_WIDTH}" stroke-linejoin="round"/>
                   </svg>`
 				}
 
 				if (creoleRole === "using") {
 					return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
-                    <rect x="0" y="0" width="24" height="24" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}" rx="1"/>
+                    <rect x="0" y="0" width="24" height="24" fill="${fillColor}" stroke="${ringColor}" stroke-width="${STROKE_WIDTH}" rx="1"/>
                   </svg>`
 				}
 
 				// Default: unknown / null creole relationship → circle
 				return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
-                  <circle cx="12" cy="12" r="12" fill="${fillColor}" stroke="${ringColor}" stroke-width="${strokeWidth}"/>
+                  <circle cx="12" cy="12" r="12" fill="${fillColor}" stroke="${ringColor}" stroke-width="${STROKE_WIDTH}"/>
                 </svg>`
 			}
 
@@ -723,15 +734,24 @@
 			 * Build the HTML content for a feature's popup.
 			 * Split into left (image + pills) and right (abstract + link) panels.
 			 *
+			 * All untrusted data values are HTML-escaped before interpolation.
+			 *
 			 * @param {FeatureProps} props
 			 * @returns {string}  HTML string
 			 */
 			function buildPopupHtml(props) {
 				const {time, category, creole, creoleType, urlIMG, urlText, resume} = props
 
+				// Escape all values that come from external data
+				const safeCategory = escapeHtml(category)
+				const safeResume = escapeHtml(resume)
+				// URLs: escape for attribute context; also validated by the browser's own URL parser
+				const safeUrlIMG = escapeHtml(urlIMG)
+				const safeUrlText = escapeHtml(urlText)
+
 				/* Image block (left panel, top) */
-				const imageBlockHtml = urlIMG
-					? `<img src="${urlIMG}" alt="Document thumbnail: ${category}" />`
+				const imageBlockHtml = safeUrlIMG
+					? `<img src="${safeUrlIMG}" alt="Document thumbnail: ${safeCategory}" />`
 					: `<div class="popup__image-empty">
                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                  <rect width="18" height="18" x="3" y="3" rx="2"/>
@@ -741,25 +761,23 @@
              </div>`
 
 				/* Metadata pills (left panel, bottom) */
-				const categoryPill = `<span class="pill pill--category">${category}</span>`
+				const categoryPill = `<span class="pill pill--category">${safeCategory}</span>`
 
-				const creoleTypePill = creoleType
-					? (() => {
-							const color = CREOLE_TYPE_COLORS[creoleType]
-							return `<span class="pill pill--creole-type"
-                        style="background:${color}22; color:${color}; border-color:${color}44">
-                        ${capitalize(creoleType)}
+				const creoleTypeColor = creoleType ? CREOLE_TYPE_COLORS[creoleType] : null
+				const creoleTypePill = creoleTypeColor
+					? `<span class="pill pill--creole-type"
+                        style="background:${creoleTypeColor}22; color:${creoleTypeColor}; border-color:${creoleTypeColor}44">
+                        ${capitalize(escapeHtml(creoleType))}
                       </span>`
-					  })()
 					: ""
 
 				const creoleRoleLabel = creole === "using" ? "Written in creole" : creole === "about" ? "About creoles" : ""
 				const creoleRolePill = creoleRoleLabel ? `<span class="pill pill--creole-role">${creoleRoleLabel}</span>` : ""
 
 				/* Source text link (right panel, bottom) */
-				const sourceLinkHtml = urlText
+				const sourceLinkHtml = safeUrlText
 					? `<div class="popup__divider"></div>
-             <a href="${urlText}" target="_blank" rel="noopener noreferrer" class="popup__source-link">
+             <a href="${safeUrlText}" target="_blank" rel="noopener noreferrer" class="popup__source-link">
                Read source text
                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                  <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
@@ -784,7 +802,7 @@
 
             <!-- Right: abstract + source link -->
             <div class="popup__right">
-              <p class="popup__abstract">${resume ?? ""}</p>
+              <p class="popup__abstract">${safeResume}</p>
               ${sourceLinkHtml}
             </div>
           </div>`
@@ -819,10 +837,10 @@
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-         5. FILTER STATE & LOGIC
-         A central state object drives all visibility; one function reads
-         it and updates the map, keeping the UI handlers thin.
-      ═══════════════════════════════════════════════════════════════ */
+                5. FILTER STATE & LOGIC
+                A central state object drives all visibility; one function reads
+                it and updates the map, keeping the UI handlers thin.
+            ═══════════════════════════════════════════════════════════════ */
 
 			const allYears = ARCHIVE_GEOJSON.features.map(f => f.properties.time)
 
@@ -831,8 +849,10 @@
 			 * then call `applyFilters()`.
 			 */
 			const filterState = {
-				minYear: Math.min(...allYears),
-				maxYear: Math.max(...allYears),
+				// Math.min/max with spread can overflow the call stack on large arrays;
+				// reduce is safe regardless of dataset size.
+				minYear: allYears.reduce((a, b) => Math.min(a, b), Infinity),
+				maxYear: allYears.reduce((a, b) => Math.max(a, b), -Infinity),
 				showCreoleRole: {
 					using: true,
 					about: true,
@@ -852,6 +872,9 @@
 			/**
 			 * Show or hide every marker based on the current filterState.
 			 * Called whenever any filter control changes.
+			 *
+			 * Tracks each marker's current visibility to skip redundant
+			 * addTo / removeLayer calls, which are expensive DOM operations.
 			 */
 			function applyFilters() {
 				allMarkers.forEach(marker => {
@@ -860,7 +883,7 @@
 					// Map the nullable creole value to one of the three role-filter keys
 					const roleKey = creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
 
-					const isVisible =
+					const shouldBeVisible =
 						time >= filterState.minYear &&
 						time <= filterState.maxYear &&
 						filterState.activeCategories.has(category) &&
@@ -868,15 +891,21 @@
 						// Features without a creole type are not filtered out by type
 						(!creoleType || filterState.activeCreoleTypes.has(creoleType))
 
-					isVisible ? marker.addTo(map) : map.removeLayer(marker)
+					const isCurrentlyOnMap = map.hasLayer(marker)
+
+					if (shouldBeVisible && !isCurrentlyOnMap) {
+						marker.addTo(map)
+					} else if (!shouldBeVisible && isCurrentlyOnMap) {
+						map.removeLayer(marker)
+					}
 				})
 			}
 
 			/* ═══════════════════════════════════════════════════════════════
-         6. LEGEND
-         Built programmatically to stay in sync with the data palette.
-         Collapse state lives on a CSS class; JS only toggles it.
-      ═══════════════════════════════════════════════════════════════ */
+                6. LEGEND
+                Built programmatically to stay in sync with the data palette.
+                Collapse state lives on a CSS class; JS only toggles it.
+            ═══════════════════════════════════════════════════════════════ */
 
 			/**
 			 * Inject the legend panel into the map container.
@@ -886,15 +915,13 @@
 			function buildLegend() {
 				const legend = document.createElement("div")
 				legend.className = "map-legend is-collapsed"
+				legend.setAttribute("role", "region")
 				legend.setAttribute("aria-label", "Map legend")
 				document.getElementById("map").appendChild(legend)
 
-				const header = createLegendHeader(legend)
+				// Legend starts collapsed; pass that state so aria attrs are correct from the start
+				const header = createLegendHeader(legend, /* initialCollapsed */ true)
 				legend.appendChild(header)
-
-				const collapseBtn = header.querySelector(".legend__collapse-btn")
-				collapseBtn.setAttribute("aria-expanded", "false")
-				collapseBtn.setAttribute("aria-label", "Expand legend")
 
 				/* ── Collapsible body: all filter groups ── */
 				const body = document.createElement("div")
@@ -970,6 +997,8 @@
 				requestAnimationFrame(() => {
 					body.style.maxHeight = `${body.scrollHeight}px`
 				})
+				L.DomEvent.disableScrollPropagation(legend)
+				L.DomEvent.disableClickPropagation(legend)
 			}
 
 			/**
@@ -977,10 +1006,11 @@
 			 * Collapse state is expressed as `.is-collapsed` on the root legend
 			 * element — all animation lives in CSS, JS only flips the class.
 			 *
-			 * @param {HTMLElement} legendEl  The root `.map-legend` element.
+			 * @param {HTMLElement} legendEl       The root `.map-legend` element.
+			 * @param {boolean}     [initialCollapsed=false]
 			 * @returns {HTMLElement}
 			 */
-			function createLegendHeader(legendEl) {
+			function createLegendHeader(legendEl, initialCollapsed = false) {
 				const header = document.createElement("div")
 				header.className = "legend__header"
 
@@ -990,8 +1020,8 @@
 
 				const collapseBtn = document.createElement("button")
 				collapseBtn.className = "legend__collapse-btn"
-				collapseBtn.setAttribute("aria-label", "Collapse legend")
-				collapseBtn.setAttribute("aria-expanded", "true")
+				collapseBtn.setAttribute("aria-label", initialCollapsed ? "Expand legend" : "Collapse legend")
+				collapseBtn.setAttribute("aria-expanded", String(!initialCollapsed))
 				collapseBtn.innerHTML = `
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                stroke="currentColor" stroke-width="1.8"
@@ -1098,8 +1128,8 @@
 			buildLegend()
 
 			/* ═══════════════════════════════════════════════════════════════
-         7. TIME-RANGE SLIDER
-      ═══════════════════════════════════════════════════════════════ */
+                7. TIME-RANGE SLIDER
+            ═══════════════════════════════════════════════════════════════ */
 
 			const sliderEl = document.getElementById("time-slider")
 			const rangeValueEl = document.getElementById("range-value")
@@ -1120,37 +1150,25 @@
 			})
 
 			/* ═══════════════════════════════════════════════════════════════
-         8. UTILITIES
-      ═══════════════════════════════════════════════════════════════ */
+                8. UTILITIES
+            ═══════════════════════════════════════════════════════════════ */
 
 			/** Capitalise the first letter of a string. */
 			function capitalize(str) {
 				return str.charAt(0).toUpperCase() + str.slice(1)
 			}
+
+			/**
+			 * Escape a string for safe interpolation into HTML.
+			 * Prevents XSS when data originates from an external source.
+			 *
+			 * @param {string} str
+			 * @returns {string}
+			 */
+			function escapeHtml(str) {
+				if (!str) return ""
+				return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
+			}
 		</script>
 	</body>
 </html>
-
-<!-- 
-
-    - Make Legend and toolbar non clicktrough
-    - Make Legend be collapsed by default
-      - Legend Collapsed = Title
-      - Legend Visible = No title
-    - Fix gap below legend when collapsed
-
--->
-
-<!-- 
-
-    You are a senior software engineer with 15 years of experience. Your goal is to re-write this prototype to a production-quality, maintainable, and readable code.
-        1. Write clean, idiomatic code using CSS, HTML and JS.
-        2. Follow established design patterns where relevant.
-        4. Follow up-to-date best practices and naming conventions.
-        3. Add concise comments for non-obvious parts.
-        4. Use descriptive variable and function names.
-        5. Make the code easy to extend and test.
-        6. Clean-up, reorganise and refactor as needed.
-    Here is the code/function/task:
-
- -->

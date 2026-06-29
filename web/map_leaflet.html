@@ -38,7 +38,8 @@
 				--color-creole-portugese: #4d9221;
 
 				/* Map-specific sizes */
-				--popup-panel-size: 256px; /* each half of the 512px popup */
+				--popup-width: clamp(20dvw, 40dvw, 60dvw);
+				--popup-height: clamp(20dvh, 40dvh, 60dvh);
 				--slider-handle-size: 2rem;
 				--toolbar-max-width: 80vw;
 				--legend-min-width: 2rem;
@@ -436,59 +437,47 @@
 
 			.leaflet-popup-content {
 				margin: 0;
-				width: 512px !important;
+				width: var(--popup-width) !important;
+			}
+
+			.popup__left,
+			.popup__right {
+                display: flex;
+                flex: 1;
+				flex-direction: column;
 			}
 
 			/* Two-panel layout inside the popup */
 			.popup__panels {
 				display: flex;
-				flex-direction: row;
-				height: 512px;
+				height: var(--popup-height);
 			}
 
 			.popup__left {
-				width: var(--popup-panel-size);
-				flex-shrink: 0;
-				display: flex;
-				flex-direction: column;
 				border-right: 0.0625rem solid var(--color-border-subtle);
 			}
 
 			.popup__image-wrap {
-				position: relative;
-				width: 100%;
-				height: 86%;
-				overflow: hidden;
-				background: var(--color-surface);
-				flex-shrink: 0;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-
-			.popup__image-wrap img {
-				width: 100%;
-				height: 86%;
-				object-fit: cover;
-				display: block;
+				flex: 1;
+				min-height: 0;
 			}
 
 			.popup__image-empty {
-				width: 100%;
-				height: 86%;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				color: var(--color-text-muted);
 			}
 
-			.popup__image-empty svg {
-				opacity: var(--opacity-dim);
+			.popup__image-wrap img,
+			.popup__image-empty {
+				width: 100%;
+				height: 100%;
+				object-fit: contain;
 			}
 
 			.popup__year-badge {
 				position: absolute;
-				bottom: var(--space-3);
+				bottom: var(--space-10);
 				left: var(--space-3);
 				background: rgba(13, 17, 23, 0.72);
 				border: 0.0625rem solid var(--color-border);
@@ -510,25 +499,18 @@
 			}
 
 			.popup__right {
-				width: var(--popup-panel-size);
-				flex: 1;
-				display: flex;
-				flex-direction: column;
 				padding: var(--space-5) 0.9rem 0.8rem;
 				gap: var(--space-3);
 				overflow: hidden;
 			}
 
 			.popup__abstract {
+				height: auto;
+				overflow: auto;
 				font-size: 0.78rem;
 				color: var(--color-text-secondary);
 				line-height: var(--line-height-normal);
 				flex: 1;
-				overflow: hidden;
-				display: -webkit-box;
-				-webkit-line-clamp: 7;
-				-webkit-box-orient: vertical;
-				text-overflow: ellipsis;
 			}
 
 			.popup__divider {
@@ -546,6 +528,7 @@
 				color: var(--color-accent);
 				text-decoration: none;
 				transition: color var(--duration-fast);
+				margin-top: auto;
 			}
 
 			.popup__source-link:hover {
@@ -672,7 +655,7 @@
 					{type: "Feature", properties: {time: 1763, category: "letter", creole: "about", creoleType: null, urlIMG: "../assets/img/book1.jpg", urlText: "", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}},
 					{type: "Feature", properties: {time: 1847, category: "letter", creole: "about", creoleType: "spanish", urlIMG: "", urlText: "./lorem_ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.387352, 16.315212]}},
 					{type: "Feature", properties: {time: 1717, category: "poem", creole: null, creoleType: null, urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.611308, 16.117324]}},
-					{type: "Feature", properties: {time: 1648, category: "bible", creole: "about", creoleType: "portugese", urlIMG: "./assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}},
+					{type: "Feature", properties: {time: 1648, category: "bible", creole: "about", creoleType: "portugese", urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}},
 					{type: "Feature", properties: {time: 1689, category: "poem", creole: null, creoleType: "french", urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-60.964977, 14.693279]}},
 					{type: "Feature", properties: {time: 1777, category: "letter", creole: "using", creoleType: null, urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."}, geometry: {type: "Point", coordinates: [-60.885014, 14.484105]}}
 				]

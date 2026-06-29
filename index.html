@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Links</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+		<style>
+			*,
+			*::before,
+			*::after {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			:root {
+				--bg: #0e0e10;
+				--surface: #18181c;
+				--border: #2a2a30;
+				--text: #e8e8ec;
+				--muted: #6b6b78;
+				--accent: #c8ff57;
+				--font-mono: "Space Mono", monospace;
+				--font-sans: "DM Sans", sans-serif;
+			}
+
+			html {
+				scroll-behavior: smooth;
+			}
+
+			body {
+				background: var(--bg);
+				color: var(--text);
+				font-family: var(--font-sans);
+				font-weight: 300;
+				display: flex;
+			}
+
+			/* NAV */
+			nav {
+				width: 10vw;
+				flex-shrink: 0;
+				position: sticky;
+				top: 0;
+				height: 100vh;
+				overflow-y: auto;
+				padding: 1.2rem 0 2rem 2rem;
+				border-right: 1px solid var(--border);
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+
+			nav .nav-label {
+				font-family: var(--font-mono);
+				font-size: 1.2rem;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				color: var(--muted);
+			}
+
+			nav .nav-label:not(:first-of-type) {
+				padding-top: 2rem;
+			}
+
+			nav a {
+				font-family: var(--font-mono);
+				font-size: 1rem;
+				color: var(--muted);
+				text-decoration: none;
+				padding: 0.4rem 0;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				transition: color 0.15s;
+			}
+
+			nav a:hover {
+				color: var(--text);
+			}
+
+			nav a.active {
+				color: var(--accent);
+			}
+
+			nav a .dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: var(--border);
+				flex-shrink: 0;
+			}
+
+			nav a.active .dot {
+				background: var(--accent);
+			}
+
+			/* MAIN */
+			main {
+				flex: 1;
+				margin-top: 5vh;
+				margin-bottom: 80vh;
+				padding-left: 20vw;
+				padding-right: 20vw;
+				max-width: 60vw;
+			}
+
+			header {
+				margin-bottom: 80px;
+			}
+
+			header .eyebrow {
+				font-family: var(--font-mono);
+				font-size: 10px;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+				color: var(--accent);
+				margin-bottom: 16px;
+			}
+
+			header h1 {
+				font-family: var(--font-mono);
+				font-size: clamp(28px, 4vw, 48px);
+				font-weight: 700;
+				line-height: 1.1;
+				color: var(--text);
+			}
+
+			header p {
+				margin-top: 16px;
+				color: var(--muted);
+				font-size: 14px;
+				max-width: 480px;
+				line-height: 1.7;
+			}
+
+			/* SECTION */
+			section {
+				margin-bottom: 80px;
+			}
+
+			section h2 {
+				font-family: var(--font-mono);
+				font-size: 10px;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+				color: var(--muted);
+				margin-bottom: 24px;
+				padding-bottom: 12px;
+				border-bottom: 1px solid var(--border);
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			section h2 .h2-swatch {
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				flex-shrink: 0;
+			}
+
+			section h2 .h2-count {
+				margin-left: auto;
+				font-size: 9px;
+				color: #3a3a42;
+			}
+
+			/* LINK GRID */
+			.link-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+				gap: 8px;
+			}
+
+			.link-card {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				overflow: hidden;
+				transition: transform 0.15s, border-color 0.15s;
+				text-decoration: none;
+				display: flex;
+				flex-direction: column;
+				padding: 1.25rem 1.5rem;
+				gap: 6px;
+			}
+
+			.link-card:hover {
+				transform: translateY(-2px);
+				border-color: #3a3a42;
+			}
+
+			.link-card .link-title {
+				font-family: var(--font-mono);
+				font-size: 13px;
+				font-weight: 700;
+				color: var(--text);
+				transition: color 0.15s;
+			}
+
+			.link-card:hover .link-title {
+				color: var(--accent);
+			}
+
+			.link-card .link-desc {
+				font-size: 12px;
+				color: var(--muted);
+				line-height: 1.6;
+			}
+
+			.link-card .link-url {
+				margin-top: 8px;
+				font-family: var(--font-mono);
+				font-size: 9px;
+				letter-spacing: 0.05em;
+				color: #3a3a42;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				transition: color 0.15s;
+			}
+
+			.link-card:hover .link-url {
+				color: var(--muted);
+			}
+
+			/* SCROLLBAR */
+			::-webkit-scrollbar {
+				width: 4px;
+			}
+
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+
+			::-webkit-scrollbar-thumb {
+				background: var(--border);
+				border-radius: 2px;
+			}
+
+			@media (max-width: 768px) {
+				nav {
+					display: none;
+				}
+
+				main {
+					padding: 40px 24px 80px;
+					max-width: 100vw;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<nav id="sidebar">
+			<div class="nav-label">Jumps to</div>
+			<a href="#prototypes"><span class="dot"></span>Prototypes</a>
+			<a href="#resources"><span class="dot"></span>Resources</a>
+			<a href="#reading"><span class="dot"></span>Reading</a>
+		</nav>
+
+		<main>
+			<header>
+				<div class="eyebrow">Index</div>
+				<h1>Index</h1>
+				<p>A curated collection of pages, Prototypes, and references. Click any card to open the link.</p>
+			</header>
+
+			<!-- =============================================
+			     SECTION: Prototypes
+			     To add a link: copy one <a class="link-card"> block,
+			     paste it inside .link-grid, and fill in href, title, desc, url.
+			     ============================================= -->
+			<section id="prototypes">
+				<h2>
+					<span class="h2-swatch" style="background: var(--accent)"></span>
+					Prototypes
+					<span class="h2-count">1 link</span>
+				</h2>
+				<div class="link-grid">
+					<!-- LINK CARD — duplicate this block to add more links -->
+					<a class="link-card" href="./web/map_leaflet.html" title="Leaflet_Map">
+						<div class="link-title">Leaflet Map</div>
+						<div class="link-desc">A Data Visualisation tool prototyped using Leaflet and hosted on GitHub.</div>
+						<div class="link-url">cdxx.github.io</div>
+					</a>
+					<!-- /LINK CARD -->
+				</div>
+			</section>
+
+			<!-- =============================================
+			     SECTION: Resources
+			     ============================================= -->
+			<section id="resources">
+				<h2>
+					<span class="h2-swatch" style="background: #57aaff"></span>
+					Resources
+					<span class="h2-count">1 link</span>
+				</h2>
+				<div class="link-grid">
+					<!-- LINK CARD — duplicate this block to add more links -->
+					<a class="link-card" href="./web/css_cheatsheet.html" title="CSS_Cheatsheet">
+						<div class="link-title">CSS Cheatsheet</div>
+						<div class="link-desc">A CSS Cheatsheet with named fonts and colors, hosted on GitHub.</div>
+						<div class="link-url">cdxx.github.io</div>
+					</a>
+				</div>
+			</section>
+
+			<!-- =============================================
+			     SECTION: Reading
+			     ============================================= -->
+			<section id="reading">
+				<h2>
+					<span class="h2-swatch" style="background: #ff7c57"></span>
+					Reading
+					<span class="h2-count">0 links</span>
+				</h2>
+				<div class="link-grid">
+					<!-- Add link cards here -->
+				</div>
+			</section>
+		</main>
+
+		<script>
+			// Active nav highlight on scroll
+			const sections = document.querySelectorAll("section[id]")
+			const navLinks = document.querySelectorAll("nav a")
+
+			const observer = new IntersectionObserver(
+				entries => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							navLinks.forEach(a => a.classList.remove("active"))
+							const active = document.querySelector(`nav a[href="#${entry.target.id}"]`)
+							if (active) active.classList.add("active")
+						}
+					})
+				},
+				{rootMargin: "-20% 0px -70% 0px"}
+			)
+
+			sections.forEach(s => observer.observe(s))
+		</script>
+	</body>
+</html>

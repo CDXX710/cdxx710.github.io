@@ -219,6 +219,42 @@
 			}
 
 			/* ─────────────────────────────────────────
+			   WINDOW VISUALIZER
+			───────────────────────────────────────── */
+
+			.visualizer,
+			.visualizer iframe {
+				position: absolute;
+				z-index: var(--z-modal);
+				width: 97%;
+				height: 96%;
+				top: 2%;
+				left: 1.5%;
+				border: 0;
+			}
+
+			.visualizer {
+				visibility: hidden;
+			}
+
+			.visualizer.show,
+			.visualizer iframe.show {
+				visibility: visible;
+				animation: fadeIn 0.5s;
+			}
+
+			.visualizer-close {
+                position: relative;
+                display: flex;
+				align-content: flex-start;
+				justify-content: flex-end;
+				flex-wrap: wrap;
+				color: var(--color-text-muted);
+                font-size: 2rem;
+				z-index: var(--z-tooltip);
+			}
+
+			/* ─────────────────────────────────────────
 			   SELECTION TOOLBAR
 			───────────────────────────────────────── */
 
@@ -442,8 +478,8 @@
 
 			.popup__left,
 			.popup__right {
-                display: flex;
-                flex: 1;
+				display: flex;
+				flex: 1;
 				flex-direction: column;
 			}
 
@@ -458,6 +494,8 @@
 			}
 
 			.popup__image-wrap {
+				position: relative;
+				display: inline-block;
 				flex: 1;
 				min-height: 0;
 			}
@@ -466,6 +504,10 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
+			}
+
+			.popup__image-wrap img {
+				display: block;
 			}
 
 			.popup__image-wrap img,
@@ -477,8 +519,8 @@
 
 			.popup__year-badge {
 				position: absolute;
-				bottom: var(--space-10);
-				left: var(--space-3);
+				bottom: 1dvh;
+				left: 1dvw;
 				background: rgba(13, 17, 23, 0.72);
 				border: 0.0625rem solid var(--color-border);
 				color: var(--color-text);
@@ -529,6 +571,7 @@
 				text-decoration: none;
 				transition: color var(--duration-fast);
 				margin-top: auto;
+				cursor: pointer;
 			}
 
 			.popup__source-link:hover {
@@ -620,6 +663,11 @@
 
 		<!-- ── Map ── -->
 		<div id="map">
+			<!-- Visualizer Window -->
+			<div class="visualizer" id="fullText" onclick="toggleWindowPopup()">
+				<div class="visualizer-close" role="button">X</div>
+				<iframe src="./lorem_ipsum.html"></iframe>
+			</div>
 			<!-- Placeholder for selection toolbar -->
 			<div id="map-select-toolbar">
 				<img src="../assets/img/select-toolbar.png" alt="Selection toolbar" />
@@ -795,8 +843,7 @@
 
 				/* Source text link (right panel, bottom) */
 				const sourceLinkHtml = urlText
-					? `<div class="popup__divider"></div>
-					  <a href="${urlText}" target="_blank" rel="noopener noreferrer" class="popup__source-link">
+					? `<a class="popup__source-link" target="_blank" rel="noopener noreferrer" onclick="toggleWindowPopup()">
 					    Read source text
 					    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 					      <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
@@ -804,27 +851,33 @@
 					  </a>`
 					: ""
 
-				return `
-				       <div class="popup__panels">
-				         <!-- Left: thumbnail + pills -->
-				         <div class="popup__left">
-				           <div class="popup__image-wrap">
-				             ${imageBlockHtml}
-				             <span class="popup__year-badge">${time}</span>
-				           </div>
-				           <div class="popup__pills">
-				             ${categoryPill}
-				             ${creoleTypePill}
-				             ${creoleRolePill}
-				           </div>
-				         </div>
-
-				         <!-- Right: abstract + source link -->
-				         <div class="popup__right">
-				           <p class="popup__abstract">${resume ?? ""}</p>
-				           ${sourceLinkHtml}
-				         </div>
-				       </div>`
+				return `<div class="popup__panels">
+				            <!-- Left: thumbnail + pills -->
+				            <div class="popup__left">
+				                <div class="popup__image-wrap">
+				                   ${imageBlockHtml}
+				                   <span class="popup__year-badge">${time}</span>
+				                </div>
+				                <div class="popup__pills">
+				                    ${categoryPill}
+				                    ${creoleTypePill}
+				                    ${creoleRolePill}
+				                </div>
+				            </div>
+				            <!-- Right: abstract + source link -->
+				            <div class="popup__right">
+				                <p class="popup__abstract">${resume ?? ""}</p>
+			                    ${sourceLinkHtml}
+				            </div>
+				        </div>`
+			}
+			/**
+			 * Build the HTML content for a window popup.
+			 * Toggled when viewing full size image or text
+			 */
+			function toggleWindowPopup() {
+				const popup = document.getElementById("fullText")
+				popup.classList.toggle("show")
 			}
 
 			/**

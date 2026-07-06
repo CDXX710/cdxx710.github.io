@@ -202,8 +202,8 @@
 			#map-select-toolbar {
 				position: absolute;
 				z-index: var(--z-map-overlay);
-				bottom: var(--space-5);
-				left: var(--space-5);
+				bottom: var(--space-8);
+				left: var(--space-6);
 				max-width: var(--toolbar-max-width);
 			}
 
@@ -226,7 +226,7 @@
 
 			.map-legend {
 				position: absolute;
-				bottom: var(--space-6);
+				bottom: var(--space-8);
 				right: var(--space-6);
 				z-index: var(--z-map-overlay);
 				min-width: var(--legend-min-width);
@@ -242,7 +242,8 @@
 			   swallow the click before it ever reaches the map container and
 			   silently break drag-to-select whenever it starts on/near a point. */
 			.leaflet-container.is-drawing-select .leaflet-marker-pane,
-			.leaflet-container.is-drawing-select .leaflet-popup-pane {
+			.leaflet-container.is-drawing-select .leaflet-popup-pane, 
+            .leaflet-container.is-drawing-select .leaflet-marker-icon {
 				pointer-events: none;
 			}
 

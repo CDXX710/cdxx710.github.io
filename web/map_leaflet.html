@@ -29,14 +29,15 @@
 			     4. Panel primitive (shared "glass" treatment)
 			     5. Selection toolbar
 			     6. Selection results panel
-			     7. Map legend
-			     8. Leaflet popup
-			     9. Pills
-			    10. Leaflet chrome overrides
-			    11. Document viewer overlay
-			    12. Custom select
-			    13. Time slider (layout + noUiSlider theme)
-			    14. Responsive
+                 7. Searchbar
+			     8. Map legend
+			     9. Leaflet popup
+			    10. Pills
+			    11. Leaflet chrome overrides
+			    12. Document viewer overlay
+			    13. Custom select
+			    14. Time slider (layout + noUiSlider theme)
+			    15. Responsive
 			═══════════════════════════════════════════════════════════════ */
 
 			/* ─────────────────────────────────────────
@@ -201,9 +202,16 @@
 			#map-select-toolbar {
 				position: absolute;
 				z-index: var(--z-map-overlay);
-				top: var(--space-5);
-				left: var(--space-11);
+				bottom: var(--space-5);
+				left: var(--space-5);
 				max-width: var(--toolbar-max-width);
+			}
+
+			#map-searchbar {
+				position: absolute;
+				z-index: var(--z-map-overlay);
+				top: var(--space-8);
+				left: var(--space-11);
 			}
 
 			.selection-results {
@@ -219,7 +227,7 @@
 			.map-legend {
 				position: absolute;
 				bottom: var(--space-6);
-				left: var(--space-6);
+				right: var(--space-6);
 				z-index: var(--z-map-overlay);
 				min-width: var(--legend-min-width);
 			}
@@ -247,22 +255,16 @@
 			.select-toolbar,
 			.selection-results,
 			.map-legend,
+			.searchbar,
 			.leaflet-popup-content-wrapper,
 			.visualizer .lorem_main,
 			.lorem_boxed {
-				background: var(--panel-bg);
+				background: var(--color-overlay);
 				border: var(--panel-border);
 				border-radius: var(--panel-radius);
 				box-shadow: var(--panel-shadow);
 				backdrop-filter: var(--panel-blur);
 				color: var(--color-text);
-			}
-
-			/* Toolbar and legend sit on a slightly more translucent surface
-			   than content-heavy panels (popup, results, viewer). */
-			.select-toolbar,
-			.map-legend {
-				background: var(--color-overlay);
 			}
 
 			/* ─────────────────────────────────────────
@@ -523,7 +525,177 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   7. MAP LEGEND
+			   7. SEARCH BAR
+			   Sizing is driven entirely by CSS custom properties (rem/dvh/vw
+			   based, not hard-coded SVG pixel geometry) so the bar tracks the
+			   panel height and viewport width on resize. Colour comes from
+			   the shared design tokens (currentColor + var(--color-*)) so it
+			   follows the active theme instead of a baked-in hex value.
+			───────────────────────────────────────── */
+
+			#map-searchbar {
+				--searchbar-height: clamp(2.75rem, 6.8dvh, 3.5rem);
+				--searchbar-field-width: clamp(12rem, 20vw, 18rem);
+
+				color: var(--color-text-secondary);
+				height: var(--searchbar-height);
+				width: var(--searchbar-height);
+				display: flex;
+				align-items: center;
+				overflow: hidden;
+				transition: width var(--duration-normal) var(--ease-standard);
+				cursor: pointer;
+			}
+
+			#map-searchbar.is-open {
+				width: calc(var(--searchbar-height) + var(--searchbar-field-width));
+			}
+
+			.searchbar__trigger {
+				flex-shrink: 0;
+				width: var(--searchbar-height);
+				height: var(--searchbar-height);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: inherit;
+				transition: color var(--duration-fast);
+			}
+
+			.searchbar:hover {
+				background-color: var(--color-surface);
+			}
+
+			.searchbar__trigger:hover,
+			.searchbar__trigger:focus-visible {
+				color: var(--color-accent);
+			}
+
+			.searchbar__icon {
+				width: 42%;
+				height: 42%;
+				overflow: visible;
+			}
+
+			.searchbar__icon-lens,
+			.searchbar__icon-handle {
+				transform-box: fill-box;
+				transform-origin: center;
+				transition: transform var(--duration-normal) var(--ease-standard), opacity var(--duration-fast) ease;
+			}
+
+			#map-searchbar.is-open .searchbar__icon-handle {
+				transform: rotate(45deg) scale(2.5);
+				animation: search-caret-blink 1s steps(1, end) infinite;
+				animation-delay: var(--duration-normal);
+				translate: calc(-1 * var(--space-2)) calc(-1 * var(--space-2));
+			}
+
+			/* Lens: on open it just settles slightly larger; on focus it
+			   grows and fades out exactly as the focus ring (below) grows
+			   and fades in, so the circle visually "becomes" the box border. */
+			#map-searchbar.is-open .searchbar__icon-lens {
+				transform: scale(1.05);
+			}
+
+			#map-searchbar.is-open:focus-within .searchbar__icon-lens {
+				opacity: 0;
+				transform: scale(3);
+			}
+
+			.searchbar__focus-ring {
+				position: absolute;
+				inset: 0;
+				border-radius: inherit;
+				border: 0.125rem solid var(--color-accent);
+				opacity: 0;
+				transform: scale(0.9);
+				pointer-events: none;
+				transition: opacity var(--duration-normal) var(--ease-standard), transform var(--duration-normal) var(--ease-standard);
+			}
+
+			#map-searchbar.is-open:focus-within .searchbar__focus-ring {
+				opacity: 1;
+				transform: scale(1);
+			}
+
+			#field-box {
+				display: flex;
+				align-items: center;
+				flex: 1;
+				min-width: 0;
+				height: 100%;
+				padding-right: var(--space-4);
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity var(--duration-fast) ease;
+			}
+
+			#map-searchbar.is-open #field-box {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			#field {
+				flex: 1;
+				min-width: 0;
+				height: 100%;
+				border: none;
+				background: transparent;
+				font-family: var(--font-mono);
+				font-size: var(--font-size-sm);
+				color: var(--color-text);
+				outline: none;
+				padding: 0;
+			}
+
+			#field::placeholder {
+				color: var(--color-text-secondary);
+			}
+
+			.searchbar__clear {
+				flex-shrink: 0;
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				font-size: var(--font-size-xs);
+				line-height: 1;
+				padding: 0.2rem;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity var(--duration-fast), color var(--duration-fast);
+			}
+
+			.searchbar__clear.is-visible {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.searchbar__clear:hover {
+				color: var(--color-accent);
+			}
+
+			/* Handle: rotates in place from the diagonal "magnifier grip" angle
+			   (45deg) to vertical, becoming a text caret once the field is
+			   open. It keeps blinking like a real cursor once the morph
+			   settles — the blink is delayed so it doesn't flicker mid-rotation. */
+			@keyframes search-caret-blink {
+				0%,
+				45% {
+					opacity: 1;
+				}
+				50%,
+				100% {
+					opacity: 0;
+				}
+			}
+
+			/* ─────────────────────────────────────────
+			   8. MAP LEGEND
 			───────────────────────────────────────── */
 
 			.map-legend {
@@ -678,7 +850,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   8. LEAFLET POPUP
+			   9. LEAFLET POPUP
 			───────────────────────────────────────── */
 
 			.leaflet-popup-content-wrapper {
@@ -810,7 +982,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   9. PILLS (category / creole type / creole role)
+			   10. PILLS (category / creole type / creole role)
 			───────────────────────────────────────── */
 
 			.pill {
@@ -845,7 +1017,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   10. LEAFLET CHROME OVERRIDES
+			   11. LEAFLET CHROME OVERRIDES
 			───────────────────────────────────────── */
 
 			.leaflet-control {
@@ -903,7 +1075,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   11. DOCUMENT VIEWER OVERLAY
+			   12. DOCUMENT VIEWER OVERLAY
 			───────────────────────────────────────── */
 
 			.visualizer {
@@ -1006,7 +1178,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   12. CUSTOM SELECT
+			   13. CUSTOM SELECT
 			───────────────────────────────────────── */
 
 			[role="button"]:hover,
@@ -1102,7 +1274,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   13. TIME SLIDER
+			   14. TIME SLIDER
 			───────────────────────────────────────── */
 
 			#time-slider .noUi-target {
@@ -1161,7 +1333,7 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   14. RESPONSIVE
+			   15. RESPONSIVE
 			   Mobile keeps the same information architecture as desktop —
 			   header, map, floating overlays, slider footer — but overlays
 			   stop competing for the same narrow width. Below the tablet
@@ -1197,6 +1369,10 @@
 				.select-toolbar__btn {
 					width: 2.4rem;
 					height: 2.25rem;
+				}
+
+				#map-searchbar {
+					--searchbar-field-width: min(50vw, 14rem);
 				}
 
 				.map-legend {
@@ -1310,6 +1486,20 @@
 				<button type="button" class="visualizer-close" aria-label="Close document viewer"><span aria-hidden="true">✕</span></button>
 			</div>
 
+			<!-- Searchbar -->
+			<div class="searchbar" id="map-searchbar">
+				<div class="searchbar__focus-ring" aria-hidden="true"></div>
+				<button type="button" id="trigger" class="searchbar__trigger" aria-label="Toggle search" aria-expanded="false">
+					<svg class="searchbar__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<circle class="searchbar__icon-lens" cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" />
+						<line class="searchbar__icon-handle" x1="20" y1="20" x2="15.2" y2="15.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+					</svg>
+				</button>
+				<div id="field-box">
+					<input type="text" id="field" name="field-box" placeholder="Search..." autocomplete="off" />
+					<button type="button" id="searchClearBtn" class="searchbar__clear" aria-label="Clear search" tabindex="-1">✕</button>
+				</div>
+			</div>
 			<!-- Selection toolbar: shape row + (on arm) boolean-mode row -->
 			<div id="map-select-toolbar">
 				<div class="select-toolbar" id="selectToolbar">
@@ -1390,7 +1580,6 @@
 								</svg>
 							</button>
 							<ul class="custom-select__menu" role="listbox" aria-label="Sort selection by">
-								custom-select
 								<li class="custom-select__option is-selected" data-value="name" role="option" aria-selected="true">Name</li>
 								<li class="custom-select__option" data-value="date" role="option" aria-selected="false">Date</li>
 								<li class="custom-select__option" data-value="creoleType" role="option" aria-selected="false">Creole type</li>
@@ -2618,6 +2807,151 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
+				   Searchbar — searchbar animations and logic.
+				═══════════════════════════════════════════════════════════ */
+
+				function searchbar() {
+					const bar = document.getElementById("map-searchbar")
+					const trigger = document.getElementById("trigger")
+					const fieldBox = document.getElementById("field-box")
+					const input = document.getElementById("field")
+					const clearBtn = document.getElementById("searchClearBtn")
+
+					// Match every other floating panel (legend, toolbar, results,
+					// visualizer): the map must not see clicks/scroll/drag that
+					// originate inside this control.
+					L.DomEvent.disableClickPropagation(bar)
+					L.DomEvent.disableScrollPropagation(bar)
+
+					let open = false,
+						animating = false,
+						pendingOpen = null
+
+					function setOpen(next) {
+						if (next === open) {
+							pendingOpen = null
+							return
+						}
+						if (animating) {
+							// Don't drop the request: a rapid map grab can blur the
+							// input mid-open-animation, and CSS (:focus-within) reacts
+							// instantly while this queue used to just discard the
+							// close — leaving the bar/handle stuck open forever with
+							// no way to recover. Replay the latest request once the
+							// in-flight animation finishes instead.
+							pendingOpen = next
+							return
+						}
+
+						animating = true
+						open = next
+
+						bar.classList.toggle("is-open", open)
+						trigger.setAttribute("aria-expanded", String(open))
+
+						if (open) {
+							setTimeout(() => input.focus())
+						} else {
+							input.blur()
+							input.value = ""
+							clearBtn.classList.remove("is-visible")
+							clearTimeout(searchTimer)
+							runSearch("")
+						}
+
+						setTimeout(() => {
+							animating = false
+							if (pendingOpen !== null && pendingOpen !== open) {
+								const queued = pendingOpen
+								pendingOpen = null
+								setOpen(queued)
+							} else {
+								pendingOpen = null
+							}
+						}, 200)
+					}
+
+					trigger.addEventListener("click", () => setOpen(!open))
+
+					// Clicking the bar's own background (its border/frame, or the
+					// empty space in field-box) doesn't reliably blur the input on
+					// its own since neither is a focusable element — handle it
+					// explicitly so closing is deterministic either way.
+					bar.addEventListener("mousedown", e => {
+						if (e.target === bar || e.target === fieldBox) setOpen(false)
+					})
+
+					// Wire the searchbar's text input up to SelectionState, so a
+					// query drives the same selection pipeline as the toolbar's
+					// draw tools — which is what the selection-results panel
+					// already listens to via "selection:changed".
+					const SEARCH_DEBOUNCE_MS = 200
+					let searchTimer = null
+
+					function matchesQuery(feature, query) {
+						const {name, time, category, creole, creoleType} = feature.properties
+						const haystack = [name, time, category, creole, creoleType].filter(Boolean).join(" ").toLowerCase()
+
+						const escaped = query.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+						const regex = new RegExp(`\\b${escaped}`, "i")
+
+						return regex.test(haystack)
+					}
+
+					function runSearch(rawQuery) {
+						const query = rawQuery.trim().toLowerCase()
+
+						if (!query) {
+							SelectionState.clear()
+							return
+						}
+
+						const matchingIndices = ArchiveData.features.map((feature, index) => (matchesQuery(feature, query) ? index : -1)).filter(index => index !== -1)
+
+						// A search always replaces the current selection outright,
+						// regardless of whatever boolean mode (add/subtract/intersect)
+						// the selection toolbar currently has armed.
+						const previousMode = SelectionState.getMode()
+						SelectionState.setMode("new")
+						SelectionState.applyHits(matchingIndices)
+						SelectionState.setMode(previousMode)
+					}
+
+					input.addEventListener("input", () => {
+						clearBtn.classList.toggle("is-visible", input.value.length > 0)
+
+						clearTimeout(searchTimer)
+						searchTimer = setTimeout(() => runSearch(input.value), SEARCH_DEBOUNCE_MS)
+					})
+
+					clearBtn.addEventListener("click", () => {
+						input.value = ""
+						clearBtn.classList.remove("is-visible")
+						input.focus()
+
+						clearTimeout(searchTimer)
+						runSearch("")
+					})
+
+					input.addEventListener("blur", () => {
+						// Deferred one tick: if focus is moving to something else
+						// inside the bar (the clear button), stay open. Otherwise
+						// close in the same instant the CSS :focus-within ring
+						// drops, instead of waiting for a full click (mouseup) —
+						// grabbing the map only fires mousedown/blur, not a click,
+						// until release, which used to desync the two animations.
+						setTimeout(() => {
+							if (open && !bar.contains(document.activeElement)) setOpen(false)
+						}, 0)
+					})
+
+					document.addEventListener("keydown", e => {
+						if (e.key === "Escape" && open) setOpen(false)
+					})
+				}
+				searchbar()
+
+				/* ═══════════════════════════════════════════════════════════
 				   APP — bootstraps modules in dependency order.
 				═══════════════════════════════════════════════════════════ */
 
@@ -2630,9 +2964,15 @@
 					SelectionResults.init()
 					CustomSelect.init(document.querySelector(".custom-select"), {onSelect: () => SelectionResults.refresh()})
 				}
-
 				bootstrap()
 			})()
 		</script>
 	</body>
 </html>
+
+<!--
+
+    - MOBILE LAYOUT
+    - REFACTOR IN MULTIPLE FILES
+    
+-->

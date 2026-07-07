@@ -8,79 +8,8 @@
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
 		<link rel="stylesheet" href="./css/shared.css" />
-		<style>
-            header{
-                margin-bottom: var(--space-11);
-            }
-
-			body {
-				display: flex;
-			}
-
-			/* ─────────────────────────────────────────
-                1. LINK CARD
-            ───────────────────────────────────────── */
-			.link-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-				gap: var(--grid-gap);
-			}
-
-			.link-card {
-				/* extends .card */
-				background: var(--color-surface);
-				border: 1px solid var(--color-border);
-				border-radius: var(--radius-md);
-				overflow: hidden;
-				transition: transform var(--duration-fast), border-color var(--duration-fast);
-				text-decoration: none;
-				display: flex;
-				flex-direction: column;
-				padding: 1.25rem var(--space-8);
-				gap: var(--space-2);
-			}
-
-			.link-card:hover {
-				transform: translateY(-2px);
-				border-color: var(--color-border-strong);
-			}
-
-			.link-title {
-				font-family: var(--font-mono);
-				font-size: var(--font-size-card-title);
-				font-weight: var(--font-weight-bold);
-				color: var(--color-text);
-				transition: color var(--duration-fast);
-			}
-
-			.link-card:hover .link-title {
-				color: var(--color-accent);
-			}
-
-			.link-desc {
-				font-size: var(--font-size-sm);
-				color: var(--color-text-secondary);
-				line-height: var(--line-height-normal);
-			}
-
-			.link-url {
-				margin-top: var(--space-3);
-				font-family: var(--font-mono);
-				font-size: var(--font-size-2xs);
-				letter-spacing: 0.05em;
-				color: var(--color-border-strong);
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				transition: color var(--duration-fast);
-			}
-
-			.link-card:hover .link-url {
-				color: var(--color-text-secondary);
-			}
-		</style>
+		<link rel="stylesheet" href="./css/index.css" />
 	</head>
-
 	<body>
 		<nav id="sidebar">
 			<div class="nav-label">Jumps to</div>
@@ -88,14 +17,12 @@
 			<a href="#resources"><span class="dot"></span>Resources</a>
 			<a href="#reading"><span class="dot"></span>Reading</a>
 		</nav>
-
 		<main>
 			<header>
 				<div class="eyebrow">Index</div>
 				<h1>Index</h1>
 				<p>A curated collection references. Click any card to open the link.</p>
 			</header>
-
 			<!-- =============================================
 			     SECTION: Prototypes
 			     ============================================= -->
@@ -107,7 +34,7 @@
 				</h2>
 				<div class="link-grid">
 					<!-- LINK CARD — duplicate this block to add more links -->
-					<a class="link-card" href="./web/map_leaflet.html" title="Leaflet_Map">
+					<a class="link-card" href="./web/carribean_archives.html" title="Carribean Archives">
 						<div class="link-title">Carribean Archives</div>
 						<div class="link-desc">A Data Visualisation tool prototyped using Leaflet and hosted on GitHub.</div>
 						<div class="link-url">cdxx.github.io</div>
@@ -115,7 +42,6 @@
 					<!-- /LINK CARD -->
 				</div>
 			</section>
-
 			<!-- =============================================
 			     SECTION: Resources
 			     ============================================= -->
@@ -127,14 +53,13 @@
 				</h2>
 				<div class="link-grid">
 					<!-- LINK CARD — duplicate this block to add more links -->
-					<a class="link-card" href="./web/css_cheatsheet.html" title="CSS_Cheatsheet">
+					<a class="link-card" href="./web/cheatsheet.html" title="CSS Cheatsheet">
 						<div class="link-title">CSS Cheatsheet</div>
 						<div class="link-desc">A CSS Cheatsheet with named fonts and colors, hosted on GitHub.</div>
 						<div class="link-url">cdxx.github.io</div>
 					</a>
 				</div>
 			</section>
-
 			<!-- =============================================
 			     SECTION: Reading
 			     ============================================= -->
@@ -149,12 +74,10 @@
 				</div>
 			</section>
 		</main>
-
 		<script>
 			// Active nav highlight on scroll
 			const sections = document.querySelectorAll("section[id]")
 			const navLinks = document.querySelectorAll("nav a")
-
 			const observer = new IntersectionObserver(
 				entries => {
 					entries.forEach(entry => {
@@ -167,7 +90,6 @@
 				},
 				{rootMargin: "-20% 0px -70% 0px"}
 			)
-
 			sections.forEach(s => observer.observe(s))
 		</script>
 	</body>

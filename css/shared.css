@@ -79,6 +79,19 @@
 	--space-10: 3rem; /* 48px */
 	--space-11: 5rem; /* 80px */
 
+	/* ── Negative Spacing scale ── */
+	--nspace-1: -0.25rem; /*  4px */
+	--nspace-2: -0.375rem; /*  6px */
+	--nspace-3: -0.5rem; /*  8px */
+	--nspace-4: -0.625rem; /* 10px */
+	--nspace-5: -0.75rem; /* 12px */
+	--nspace-6: -1rem; /* 16px */
+	--nspace-7: -1.25rem; /* 20px */
+	--nspace-8: -1.5rem; /* 24px */
+	--nspace-9: -2rem; /* 32px */
+	--nspace-10: -3rem; /* 48px */
+	--nspace-11: -5rem; /* 80px */
+
 	/* ── Border radius ── */
 	--radius-sm: 0.25rem; /*  4px */
 	--radius-md: 0.375rem; /*  6px */
@@ -110,7 +123,8 @@
 	--ease-in-out: ease-in-out;
 
 	/* ── Layout: side-nav ── */
-	--nav-width: 16vw;
+	--nav-width: clamp(10rem, 12rem, 14rem);
+	--nav-height: 100svh;
 	--nav-padding-y: 1.2rem;
 	--nav-padding-x: 2rem;
 	--nav-gap: var(--space-2);
@@ -120,6 +134,7 @@
 	--main-padding-x: 20vw;
 	--main-margin-top: 5vh;
 	--main-margin-bottom: 80vh;
+	--main-max-width: 60vw;
 
 	/* ── Layout: header (map page) ── */
 	--header-height: 3.25rem;
@@ -161,7 +176,7 @@ html {
 ───────────────────────────────────────── */
 
 body {
-	background: var(--color-bg);
+	background: var(--color-elevated);
 	color: var(--color-text);
 	font-family: var(--font-sans);
 	font-weight: var(--font-weight-light);
@@ -192,7 +207,7 @@ nav {
 	flex-shrink: 0;
 	position: sticky;
 	top: 0;
-	height: 100vh;
+	height: 100svh;
 	overflow-y: auto;
 	padding: var(--nav-padding-y) 0 var(--space-9) var(--nav-padding-x);
 	border-right: 1px solid var(--color-border);
@@ -202,6 +217,7 @@ nav {
 }
 
 .nav-label {
+	width: 90%;
 	font-family: var(--font-mono);
 	font-size: 1.2rem; /* intentional: nav label is larger than body label */
 	letter-spacing: var(--letter-spacing-wider);
@@ -214,6 +230,7 @@ nav {
 }
 
 nav a {
+	width: 90%;
 	font-family: var(--font-mono);
 	font-size: var(--font-size-nav);
 	color: var(--color-text-secondary);
@@ -257,16 +274,13 @@ main {
 	margin-bottom: var(--main-margin-bottom);
 	padding-left: var(--main-padding-x);
 	padding-right: var(--main-padding-x);
+	max-width: 100%;
 }
 
 /* ─────────────────────────────────────────
    6. PAGE HEADER (scroll-page variant)
    The eyebrow + h1 + description block.
 ───────────────────────────────────────── */
-
-header {
-	margin-bottom: var(--space-4);
-}
 
 header .eyebrow {
 	font-family: var(--font-mono);
@@ -346,157 +360,6 @@ section h2 {
 .card:hover {
 	transform: translateY(-2px);
 	border-color: var(--color-border-strong);
-}
-
-/* ─────────────────────────────────────────
-   9. CARD GRIDS
-───────────────────────────────────────── */
-
-.link-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-	gap: var(--grid-gap);
-}
-
-.color-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-	gap: var(--grid-gap);
-}
-
-.font-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
-	gap: var(--grid-gap);
-}
-
-/* ─────────────────────────────────────────
-   10. LINK CARD  (index.html)
-───────────────────────────────────────── */
-
-.link-card {
-	/* extends .card */
-	background: var(--color-surface);
-	border: 1px solid var(--color-border);
-	border-radius: var(--radius-md);
-	overflow: hidden;
-	transition: transform var(--duration-fast), border-color var(--duration-fast);
-	text-decoration: none;
-	display: flex;
-	flex-direction: column;
-	padding: 1.25rem var(--space-8);
-	gap: var(--space-2);
-}
-
-.link-card:hover {
-	transform: translateY(-2px);
-	border-color: var(--color-border-strong);
-}
-
-.link-title {
-	font-family: var(--font-mono);
-	font-size: var(--font-size-card-title);
-	font-weight: var(--font-weight-bold);
-	color: var(--color-text);
-	transition: color var(--duration-fast);
-}
-
-.link-card:hover .link-title {
-	color: var(--color-accent);
-}
-
-.link-desc {
-	font-size: var(--font-size-sm);
-	color: var(--color-text-secondary);
-	line-height: var(--line-height-normal);
-}
-
-.link-url {
-	margin-top: var(--space-3);
-	font-family: var(--font-mono);
-	font-size: var(--font-size-2xs);
-	letter-spacing: 0.05em;
-	color: var(--color-border-strong);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	transition: color var(--duration-fast);
-}
-
-.link-card:hover .link-url {
-	color: var(--color-text-secondary);
-}
-
-/* ─────────────────────────────────────────
-   11. COLOR CARD  (css_cheatsheet.html)
-───────────────────────────────────────── */
-
-.color-card {
-	background: var(--color-surface);
-	border: 1px solid var(--color-border);
-	border-radius: var(--radius-md);
-	overflow: hidden;
-	transition: transform var(--duration-fast), border-color var(--duration-fast);
-	cursor: pointer;
-}
-
-.color-card:hover {
-	transform: translateY(-2px);
-	border-color: var(--color-border-strong);
-}
-
-.color-card .swatch {
-	width: 12vw;
-	height: 8rem;
-}
-
-.color-card .label {
-	padding: var(--space-3) var(--space-4);
-	font-family: var(--font-mono);
-	font-size: var(--font-size-label);
-	color: var(--color-text-secondary);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	transition: color var(--duration-fast);
-}
-
-.color-card:hover .label {
-	color: var(--color-text);
-}
-
-/* ─────────────────────────────────────────
-   12. FONT CARD  (css_cheatsheet.html)
-───────────────────────────────────────── */
-
-.font-card {
-	background: var(--color-surface);
-	border: 1px solid var(--color-border);
-	border-radius: var(--radius-md);
-	overflow: hidden;
-	transition: transform var(--duration-fast), border-color var(--duration-fast);
-	cursor: pointer;
-	padding: var(--space-9);
-}
-
-.font-card:hover {
-	transform: translateY(-2px);
-	border-color: var(--color-border-strong);
-}
-
-.font-card .label {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	color: var(--color-text-secondary);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	transition: color var(--duration-fast);
-}
-
-.font-card:hover .label {
-	color: var(--color-text);
 }
 
 /* ─────────────────────────────────────────

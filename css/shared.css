@@ -265,7 +265,7 @@ main {
 ───────────────────────────────────────── */
 
 header {
-	margin-bottom: var(--space-11);
+	margin-bottom: var(--space-4);
 }
 
 header .eyebrow {

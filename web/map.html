@@ -703,14 +703,15 @@
 				                                </div>
 			                                	<div class="popup__right">
 			                                		<div style="height:100%; display:flex; flex-direction:column; justify-content:center">${
-														resume ??
-														`                                    
-                                                        <div style="font-size:var(--font-size-xl); color:var(--color-text)">
-                                                            We're sorry,
-                                                        </div>
-                                                        <div style="text-align:right; color:var(--color-text-secondary)">
-                                                            No resumés are available at the moment..
-                                                        </div>
+														resume
+															? `❝ ${resume} ❞`
+															: `
+                                                            <div style="font-size:var(--font-size-xl); color:var(--color-text)">
+                                                                We're sorry,
+                                                            </div>
+                                                            <div style="text-align:right; color:var(--color-text-secondary)">
+                                                                No resumés are available at the moment..
+                                                            </div>
                                                         `
 													}</div>
 			                                		${sourceLink(urlText)}

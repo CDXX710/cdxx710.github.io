@@ -9,9 +9,74 @@
 		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
 		<link rel="stylesheet" href="./css/shared.css" />
 		<style>
-			/* ── index.html: page-level layout ── */
+            header{
+                margin-bottom: var(--space-11);
+            }
+
 			body {
 				display: flex;
+			}
+
+			/* ─────────────────────────────────────────
+                1. LINK CARD
+            ───────────────────────────────────────── */
+			.link-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+				gap: var(--grid-gap);
+			}
+
+			.link-card {
+				/* extends .card */
+				background: var(--color-surface);
+				border: 1px solid var(--color-border);
+				border-radius: var(--radius-md);
+				overflow: hidden;
+				transition: transform var(--duration-fast), border-color var(--duration-fast);
+				text-decoration: none;
+				display: flex;
+				flex-direction: column;
+				padding: 1.25rem var(--space-8);
+				gap: var(--space-2);
+			}
+
+			.link-card:hover {
+				transform: translateY(-2px);
+				border-color: var(--color-border-strong);
+			}
+
+			.link-title {
+				font-family: var(--font-mono);
+				font-size: var(--font-size-card-title);
+				font-weight: var(--font-weight-bold);
+				color: var(--color-text);
+				transition: color var(--duration-fast);
+			}
+
+			.link-card:hover .link-title {
+				color: var(--color-accent);
+			}
+
+			.link-desc {
+				font-size: var(--font-size-sm);
+				color: var(--color-text-secondary);
+				line-height: var(--line-height-normal);
+			}
+
+			.link-url {
+				margin-top: var(--space-3);
+				font-family: var(--font-mono);
+				font-size: var(--font-size-2xs);
+				letter-spacing: 0.05em;
+				color: var(--color-border-strong);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				transition: color var(--duration-fast);
+			}
+
+			.link-card:hover .link-url {
+				color: var(--color-text-secondary);
 			}
 		</style>
 	</head>
@@ -28,13 +93,11 @@
 			<header>
 				<div class="eyebrow">Index</div>
 				<h1>Index</h1>
-				<p>A curated collection of pages, Prototypes, and references. Click any card to open the link.</p>
+				<p>A curated collection references. Click any card to open the link.</p>
 			</header>
 
 			<!-- =============================================
 			     SECTION: Prototypes
-			     To add a link: copy one <a class="link-card"> block,
-			     paste it inside .link-grid, and fill in href, title, desc, url.
 			     ============================================= -->
 			<section id="prototypes">
 				<h2>
@@ -45,7 +108,7 @@
 				<div class="link-grid">
 					<!-- LINK CARD — duplicate this block to add more links -->
 					<a class="link-card" href="./web/map_leaflet.html" title="Leaflet_Map">
-						<div class="link-title">Leaflet Map</div>
+						<div class="link-title">Carribean Archives</div>
 						<div class="link-desc">A Data Visualisation tool prototyped using Leaflet and hosted on GitHub.</div>
 						<div class="link-url">cdxx.github.io</div>
 					</a>

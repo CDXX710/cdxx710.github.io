@@ -17,34 +17,41 @@
 
 		<style>
 			/* ═══════════════════════════════════════════════════════════════
-			   map_leaflet.html — page-specific styles only.
-			   All tokens, reset, base, and fonts come from shared.css.
-			   This file covers the full-viewport map layout and
-			   components that are exclusive to this page.
-
-			   Sections:
-			     1. Tokens
-			     2. Page layout
-			     3. Map surface & overlay positioning
-			     4. Panel primitive (shared "glass" treatment)
-			     5. Selection toolbar
-			     6. Selection results panel
-                 7. Searchbar
-			     8. Map legend
-			     9. Leaflet popup
-			    10. Pills
-			    11. Leaflet chrome overrides
-			    12. Document viewer overlay
-			    13. Custom select
-			    14. Time slider (layout + noUiSlider theme)
-			    15. Responsive
-			═══════════════════════════════════════════════════════════════ */
+                map_leaflet.html — page-specific styles only.
+                All tokens, reset, base, and fonts come from shared.css.
+                This file covers the full-viewport map layout and components
+                that are exclusive to this page.
+                        
+                Sections:
+                  1.  Tokens
+                  2.  Page layout
+                  3.  Map surface & overlay positioning
+                  4.  Panel primitive (shared "glass" treatment)
+                  5.  Selection toolbar
+                  6.  Selection results panel
+                  7.  Searchbar
+                  8.  Map legend
+                  9.  Leaflet popup
+                 10.  Pills
+                 11.  Leaflet chrome overrides
+                 12.  Document viewer overlay
+                 13.  Custom select
+                 14.  Time slider (layout + noUiSlider theme)
+                 15.  Responsive
+                        
+                Responsive approach: sizes that can scale continuously (popup,
+                searchbar, toolbar spacing) use clamp()/dvw/dvh in their base
+                definition instead of a breakpoint override, so the layout tracks
+                the viewport smoothly and mobile stays as close to the desktop
+                layout as the available space allows. Section 15 is reserved for
+                the few structural changes that genuinely can't be fluid (the
+                selection-results panel becoming a bottom sheet, the popup
+                stacking its two columns).
+            ═══════════════════════════════════════════════════════════════ */
 
 			/* ─────────────────────────────────────────
-			   1. TOKENS
-			   Domain-specific to this page; shared tokens (colour, radius,
-			   shadow, spacing scale) live in shared.css.
-			───────────────────────────────────────── */
+                1. TOKENS
+            ───────────────────────────────────────── */
 
 			:root {
 				--color-cat-bible: #e66101;
@@ -52,21 +59,25 @@
 				--color-cat-poem: #b2abd2;
 				--color-cat-report: #5e3c99;
 
-				--color-creole-french: #c51b7d;
-				--color-creole-english: #e9a3c9;
-				--color-creole-dutch: #e6f5d0;
-				--color-creole-spanish: #a1d76a;
-				--color-creole-portugese: #4d9221;
+				--color-writ-admin: #c51b7d;
+				--color-writ-clergy: #e9a3c9;
+				--color-writ-merchant: #4d9221;
+				--color-writ-poet: #a1d76a;
+				--color-writ-other: #e6f5d0;
 
-				--popup-width: clamp(20dvw, 30dvw, 40dvw);
-				--popup-height: clamp(20dvh, 40dvh, 60dvh);
+				/*  Fluid sizing: shrinks continuously with viewport instead of
+	                jumping at a breakpoint, so narrow screens keep the same
+	                proportions as desktop rather than a distinct layout. */
+				--popup-width: clamp(20rem, 32dvw, 34rem);
+				--popup-height: clamp(16rem, 42dvh, 26rem);
 				--slider-handle-size: 2rem;
-				--toolbar-max-width: 80vw;
+				--toolbar-max-width: min(80vw, calc(100dvw - var(--space-6) * 2));
 				--legend-min-width: 2rem;
+				--legend-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
 
-				/* Shared "glass panel" treatment — one definition, reused by
-				   every floating surface (popup, legend, toolbar, results,
-				   document viewer) instead of six near-identical copies. */
+				/*  Shared "glass panel" treatment — one definition, reused by
+	                every floating surface (popup, legend, toolbar, results,
+	                document viewer) instead of six near-identical copies. */
 				--panel-bg: var(--color-elevated);
 				--panel-border: 0.0625rem solid var(--color-border);
 				--panel-radius: var(--radius-lg);
@@ -75,10 +86,10 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   2. PAGE LAYOUT
-			   Full-viewport column: header → map → slider footer.
-			   Overrides the scroll-page layout from shared.css.
-			───────────────────────────────────────── */
+                2. PAGE LAYOUT
+                Full-viewport column: header → map → slider footer.
+                Overrides the scroll-page layout from shared.css.
+            ───────────────────────────────────────── */
 
 			body {
 				height: 100dvh;
@@ -89,11 +100,11 @@
 
 			.site-header {
 				margin: 0;
-				padding: 0 var(--space-8);
+				padding: 0 clamp(var(--space-5), 3vw, var(--space-8));
 				height: var(--header-height);
 				display: flex;
 				align-items: center;
-				gap: var(--space-6);
+				gap: clamp(var(--space-4), 2vw, var(--space-6));
 				flex-shrink: 0;
 				background: var(--color-surface);
 				border-bottom: 1px solid var(--color-border);
@@ -125,6 +136,7 @@
 			}
 
 			.site-header__sub {
+				margin: 0;
 				font-family: var(--font-mono);
 				font-size: var(--font-size-xs);
 				color: var(--color-text-secondary);
@@ -134,6 +146,9 @@
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
+				/* Shrinks out of the way before it ever needs a breakpoint to hide it. */
+				flex-shrink: 3;
+				min-width: 0;
 			}
 
 			.site-header__back {
@@ -148,6 +163,7 @@
 				color: var(--color-text-secondary);
 				text-decoration: none;
 				white-space: nowrap;
+				flex-shrink: 0;
 				transition: color var(--duration-fast);
 			}
 
@@ -158,7 +174,7 @@
 			.slider-footer {
 				background: var(--color-surface);
 				border-top: 1px solid var(--color-border);
-				padding: var(--space-6) var(--space-9) 1.1rem;
+				padding: var(--space-6) clamp(var(--space-5), 4vw, var(--space-9)) 1.1rem;
 				flex-shrink: 0;
 			}
 
@@ -183,11 +199,13 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   3. MAP SURFACE & OVERLAY POSITIONING
-			   #map is a positioning context; its floating children (toolbar,
-			   results panel, legend, document viewer) are all absolutely
-			   placed against it.
-			───────────────────────────────────────── */
+                3. MAP SURFACE
+                #map is the positioning context for every floating panel (the
+                toolbar, results card, legend, and searchbar). Each panel's own
+                section below owns its full position + size definition in one
+                place — this section only holds rules generic to the map surface
+                itself, not to any one panel.
+            ───────────────────────────────────────── */
 
 			#map {
 				flex: 1;
@@ -199,59 +217,25 @@
 				max-width: none !important;
 			}
 
-			#map-select-toolbar {
-				position: absolute;
-				z-index: var(--z-map-overlay);
-				bottom: var(--space-8);
-				left: var(--space-6);
-				max-width: var(--toolbar-max-width);
-			}
-
-			#map-searchbar {
-				position: absolute;
-				z-index: var(--z-map-overlay);
-				top: var(--space-8);
-				left: var(--space-11);
-			}
-
-			.selection-results {
-				position: absolute;
-				top: var(--space-6);
-				right: var(--space-6);
-				z-index: var(--z-map-overlay);
-				width: 18rem;
-				max-height: 70%;
-				transition: opacity var(--duration-normal);
-			}
-
-			.map-legend {
-				position: absolute;
-				bottom: var(--space-8);
-				right: var(--space-6);
-				z-index: var(--z-map-overlay);
-				min-width: var(--legend-min-width);
-			}
-
 			.leaflet-container.is-drawing-select {
 				cursor: crosshair !important;
 			}
 
-			/* While a selection shape is armed, markers must not intercept
-			   mousedown — Leaflet stops propagation of marker pointer events
-			   by default (bubblingMouseEvents: false), which would otherwise
-			   swallow the click before it ever reaches the map container and
-			   silently break drag-to-select whenever it starts on/near a point. */
+			/*  While a selection shape is armed, markers must not intercept
+                mousedown — Leaflet stops propagation of marker pointer events
+                by default (bubblingMouseEvents: false), which would otherwise
+                swallow the click before it ever reaches the map container and
+                silently break drag-to-select whenever it starts on/near a point. */
 			.leaflet-container.is-drawing-select .leaflet-marker-pane,
-			.leaflet-container.is-drawing-select .leaflet-popup-pane, 
-            .leaflet-container.is-drawing-select .leaflet-marker-icon {
+			.leaflet-container.is-drawing-select .leaflet-popup-pane {
 				pointer-events: none;
 			}
 
 			/* ─────────────────────────────────────────
-			   4. PANEL PRIMITIVE
-			   One "glass" treatment shared by every floating surface, instead
-			   of each panel redeclaring background/blur/border/shadow.
-			───────────────────────────────────────── */
+                4. PANEL PRIMITIVE
+                One "glass" treatment shared by every floating surface, instead
+                of each panel redeclaring background/blur/border/shadow.
+            ───────────────────────────────────────── */
 
 			.select-toolbar,
 			.selection-results,
@@ -269,8 +253,16 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   5. SELECTION TOOLBAR
-			───────────────────────────────────────── */
+                5. SELECTION TOOLBAR
+            ───────────────────────────────────────── */
+
+			#map-select-toolbar {
+				position: absolute;
+				z-index: var(--z-map-overlay);
+				bottom: var(--space-8);
+				left: var(--space-6);
+				max-width: var(--toolbar-max-width);
+			}
 
 			.select-toolbar {
 				overflow: hidden;
@@ -368,10 +360,16 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   6. SELECTION RESULTS PANEL
-			───────────────────────────────────────── */
+                6. SELECTION RESULTS PANEL
+            ───────────────────────────────────────── */
 
 			.selection-results {
+				position: absolute;
+				top: var(--space-6);
+				right: var(--space-6);
+				z-index: var(--z-map-overlay);
+				width: clamp(16rem, 24vw, 18rem);
+				max-height: 70%;
 				display: flex;
 				flex-direction: column;
 				color: var(--color-text-muted);
@@ -415,8 +413,10 @@
 				justify-content: flex-start;
 			}
 
-			.selection-results__clear,
-			.selection-results__collapse {
+			/*  .collapse-btn (shared with the legend's collapse button, see §8)
+                already supplies the icon-button reset + hover; this adds only
+                what the text "Clear" button needs on top of it. */
+			.selection-results__clear {
 				background: none;
 				border: none;
 				cursor: pointer;
@@ -430,8 +430,7 @@
 				transition: color var(--duration-fast);
 			}
 
-			.selection-results__clear:hover,
-			.selection-results__collapse:hover {
+			.selection-results__clear:hover {
 				color: var(--color-accent);
 			}
 
@@ -526,18 +525,22 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   7. SEARCH BAR
-			   Sizing is driven entirely by CSS custom properties (rem/dvh/vw
-			   based, not hard-coded SVG pixel geometry) so the bar tracks the
-			   panel height and viewport width on resize. Colour comes from
-			   the shared design tokens (currentColor + var(--color-*)) so it
-			   follows the active theme instead of a baked-in hex value.
-			───────────────────────────────────────── */
+                7. SEARCH BAR
+                Sizing is driven entirely by CSS custom properties (rem/dvh/vw
+                based, not hard-coded SVG pixel geometry) so the bar tracks the
+                panel height and viewport width on resize. Colour comes from
+                the shared design tokens (currentColor + var(--color-*)) so it
+                follows the active theme instead of a baked-in hex value.
+            ───────────────────────────────────────── */
 
 			#map-searchbar {
 				--searchbar-height: clamp(2.75rem, 6.8dvh, 3.5rem);
-				--searchbar-field-width: clamp(12rem, 20vw, 18rem);
+				--searchbar-field-width: clamp(10rem, 20vw, 18rem);
 
+				position: absolute;
+				z-index: var(--z-map-overlay);
+				top: var(--space-8);
+				left: var(--space-11);
 				color: var(--color-text-secondary);
 				height: var(--searchbar-height);
 				width: var(--searchbar-height);
@@ -595,9 +598,9 @@
 				translate: calc(-1 * var(--space-2)) calc(-1 * var(--space-2));
 			}
 
-			/* Lens: on open it just settles slightly larger; on focus it
-			   grows and fades out exactly as the focus ring (below) grows
-			   and fades in, so the circle visually "becomes" the box border. */
+			/*  Lens: on open it just settles slightly larger; on focus it
+                grows and fades out exactly as the focus ring (below) grows
+                and fades in, so the circle visually "becomes" the box border. */
 			#map-searchbar.is-open .searchbar__icon-lens {
 				transform: scale(1.05);
 			}
@@ -680,10 +683,10 @@
 				color: var(--color-accent);
 			}
 
-			/* Handle: rotates in place from the diagonal "magnifier grip" angle
-			   (45deg) to vertical, becoming a text caret once the field is
-			   open. It keeps blinking like a real cursor once the morph
-			   settles — the blink is delayed so it doesn't flicker mid-rotation. */
+			/*  Handle: rotates in place from the diagonal "magnifier grip" angle
+                (45deg) to vertical, becoming a text caret once the field is
+                open. It keeps blinking like a real cursor once the morph
+                settles — the blink is delayed so it doesn't flicker mid-rotation. */
 			@keyframes search-caret-blink {
 				0%,
 				45% {
@@ -696,10 +699,16 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   8. MAP LEGEND
-			───────────────────────────────────────── */
+                8. MAP LEGEND
+            ───────────────────────────────────────── */
 
 			.map-legend {
+				position: absolute;
+				bottom: var(--space-8);
+				right: var(--space-6);
+				z-index: var(--z-map-overlay);
+				min-width: var(--legend-min-width);
+				max-width: var(--legend-max-width);
 				padding: var(--space-3) 0.4rem;
 			}
 
@@ -724,6 +733,9 @@
 				font-weight: var(--font-weight-medium);
 			}
 
+			/*  Shared icon-button reset: the legend's collapse button and the
+                selection-results' collapse button both carry this class, so
+                the hover/focus treatment for "collapse a panel" is defined once. */
 			.collapse-btn {
 				background: none;
 				border: none;
@@ -828,9 +840,9 @@
 				opacity: var(--opacity-ghost);
 			}
 
-			/* SVG shape colour driven by --shape-color on the row.
-			   Filled shapes use fill + stroke; ring shapes use stroke only.
-			   When the row is toggled off, both collapse to --color-text-muted. */
+			/*  SVG shape colour driven by --shape-color on the row.
+                Filled shapes use fill + stroke; ring shapes use stroke only.
+                When the row is toggled off, both collapse to --color-text-muted. */
 			.legend__item .shape-fill {
 				fill: var(--shape-color);
 				stroke: var(--shape-color);
@@ -851,8 +863,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   9. LEAFLET POPUP
-			───────────────────────────────────────── */
+                9. LEAFLET POPUP
+            ───────────────────────────────────────── */
 
 			.leaflet-popup-content-wrapper {
 				padding: 0;
@@ -954,12 +966,6 @@
 				line-height: var(--line-height-normal);
 			}
 
-			.popup__divider {
-				height: 0.0625rem;
-				background: var(--color-border-subtle);
-				margin: 0.1rem 0;
-			}
-
 			.popup__source-link {
 				display: flex;
 				align-items: center;
@@ -973,18 +979,14 @@
 				transition: color var(--duration-fast);
 			}
 
-			.popup__source-link:hover {
-				color: var(--color-accent);
-			}
-
 			.popup__source-link svg {
 				opacity: var(--opacity-icon);
 				flex-shrink: 0;
 			}
 
 			/* ─────────────────────────────────────────
-			   10. PILLS (category / creole type / creole role)
-			───────────────────────────────────────── */
+                10. PILLS (category / author type / creole role)
+            ───────────────────────────────────────── */
 
 			.pill {
 				display: inline-flex;
@@ -1018,8 +1020,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   11. LEAFLET CHROME OVERRIDES
-			───────────────────────────────────────── */
+                11. LEAFLET CHROME OVERRIDES
+            ───────────────────────────────────────── */
 
 			.leaflet-control {
 				margin-left: 0 !important;
@@ -1076,8 +1078,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   12. DOCUMENT VIEWER OVERLAY
-			───────────────────────────────────────── */
+                12. DOCUMENT VIEWER OVERLAY
+            ───────────────────────────────────────── */
 
 			.visualizer {
 				position: absolute;
@@ -1087,6 +1089,9 @@
 				padding: 0;
 				border: 0;
 				visibility: hidden;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 			}
 
 			.visualizer.show {
@@ -1095,22 +1100,20 @@
 			}
 
 			.visualizer .lorem_main {
-				position: absolute;
-				top: 5%;
-				left: 20%;
-				width: 60%;
+				width: min(60dvw, 70rem);
+				max-width: calc(100dvw - var(--space-6) * 2);
 				height: 90%;
 				padding: 1rem;
-				overflow: hidden;
+				overflow: hidden auto;
 			}
 
 			.visualizer-close {
 				position: absolute;
 				top: 5.5%;
-				right: 20.5%;
+				right: max(20.5%, var(--space-6));
 				z-index: var(--z-modal);
-				width: 32px;
-				height: 32px;
+				width: 2rem;
+				height: 2rem;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -1119,8 +1122,13 @@
 				border: none;
 				background: transparent;
 				color: var(--color-text-secondary);
-				font: var(--font-size-xl) Tahoma, Verdana, sans-serif;
+				font-size: var(--font-size-xl);
 				cursor: pointer;
+				transition: color var(--duration-fast);
+			}
+
+			.visualizer-close:hover {
+				color: var(--color-accent);
 			}
 
 			.lorem_main {
@@ -1134,6 +1142,7 @@
 			.lorem_header__ {
 				width: 100%;
 				display: flex;
+				flex-wrap: wrap;
 				justify-content: center;
 				align-items: baseline;
 				gap: 2rem;
@@ -1141,11 +1150,13 @@
 			}
 
 			.lorem_header__h1 {
-				font-size: 4rem;
+				font-size: clamp(2.25rem, 6vw, 4rem);
+				margin: 0;
 			}
 
 			.lorem_header__h2 {
 				font-size: 1.7rem;
+				margin: 0;
 			}
 
 			.lorem_header__sub {
@@ -1160,12 +1171,13 @@
 
 			.lorem_header__h3 {
 				font-size: 1.4rem;
-				margin-bottom: 0.5rem;
+				margin: 0 0 0.5rem;
 			}
 
 			.lorem_header__h4 {
 				font-size: 1.1rem;
 				font-weight: normal;
+				margin: 0;
 			}
 
 			.lorem_boxed {
@@ -1179,13 +1191,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   13. CUSTOM SELECT
-			───────────────────────────────────────── */
-
-			[role="button"]:hover,
-			button:hover {
-				color: var(--color-accent) !important;
-			}
+                13. CUSTOM SELECT
+            ───────────────────────────────────────── */
 
 			.custom-select {
 				position: relative;
@@ -1214,6 +1221,7 @@
 
 			.custom-select__trigger:hover {
 				border-color: var(--color-border-strong);
+				color: var(--color-accent);
 			}
 
 			.custom-select__trigger:focus-visible {
@@ -1275,8 +1283,8 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   14. TIME SLIDER
-			───────────────────────────────────────── */
+                14. TIME SLIDER
+            ───────────────────────────────────────── */
 
 			#time-slider .noUi-target {
 				background: var(--color-elevated);
@@ -1299,7 +1307,6 @@
 				width: var(--slider-handle-size);
 				height: var(--slider-handle-size);
 				top: -0.5rem;
-				right: 0.5;
 				border-radius: var(--radius-circle);
 				background: var(--color-text);
 				border: 0.125rem solid var(--color-accent);
@@ -1334,56 +1341,22 @@
 			}
 
 			/* ─────────────────────────────────────────
-			   15. RESPONSIVE
-			   Mobile keeps the same information architecture as desktop —
-			   header, map, floating overlays, slider footer — but overlays
-			   stop competing for the same narrow width. Below the tablet
-			   breakpoint the toolbar and legend shrink to fit side by side;
-			   below the phone breakpoint the selection-results panel becomes
-			   a full-width bottom sheet instead of a floating card, and the
-			   popup grows to use the available width instead of a fixed
-			   viewport fraction.
-			───────────────────────────────────────── */
+                15. RESPONSIVE
+                Most sizing above is already fluid (clamp/dvw/dvh), so mobile
+                tracks the desktop layout continuously and these breakpoints only
+                cover the handful of changes that are structural, not scalable:
+                the popup's two-column layout can't shrink below a usable column
+                width, so it stacks; the selection-results card becomes a bottom
+                sheet once there's no room for a floating card beside the map.
+            ───────────────────────────────────────── */
 
 			@media (max-width: 48rem) {
-				:root {
-					--popup-width: min(90dvw, 26rem);
-					--popup-height: 60dvh;
-					--toolbar-max-width: calc(100dvw - var(--space-6) * 2);
-				}
-
 				.site-header {
-					padding: 0 var(--space-5);
-					gap: var(--space-4);
-				}
-
-				.site-header__sub {
-					display: none;
-				}
-
-				#map-select-toolbar {
-					left: var(--space-5);
-					right: var(--space-5);
-					max-width: none;
-				}
-
-				.select-toolbar__btn {
-					width: 2.4rem;
-					height: 2.25rem;
-				}
-
-				#map-searchbar {
-					--searchbar-field-width: min(50vw, 14rem);
-				}
-
-				.map-legend {
-					left: var(--space-4);
-					bottom: var(--space-4);
-					max-width: calc(100dvw - var(--space-4) * 2);
+					gap: var(--space-3);
 				}
 
 				.leaflet-popup-content {
-					width: var(--popup-width) !important;
+					width: min(90dvw, 26rem) !important;
 				}
 
 				.popup__panels {
@@ -1404,6 +1377,11 @@
 			}
 
 			@media (max-width: 30rem) {
+				.select-toolbar__btn {
+					width: 2.4rem;
+					height: 2.25rem;
+				}
+
 				.selection-results {
 					top: auto;
 					right: 0;
@@ -1414,14 +1392,8 @@
 					border-radius: var(--panel-radius) var(--panel-radius) 0 0;
 				}
 
-				.map-legend {
-					max-width: calc(100dvw - var(--space-4) * 2 - 12rem);
-				}
-
 				.visualizer .lorem_main {
-					top: 2.5%;
-					left: 4%;
-					width: 92%;
+					width: 92dvw;
 					height: 95%;
 				}
 
@@ -1436,10 +1408,6 @@
 					gap: 0.5rem;
 					padding: 1.25rem 1rem;
 				}
-
-				.lorem_header__h1 {
-					font-size: 2.25rem;
-				}
 			}
 		</style>
 	</head>
@@ -1449,7 +1417,7 @@
 			<div class="site-header__dot" aria-hidden="true"></div>
 			<h1 class="site-header__title">Caribbean Archives</h1>
 			<div class="site-header__divider" aria-hidden="true"></div>
-			<span class="site-header__sub">Illustrative data only</span>
+			<p class="site-header__sub">Illustrative data only</p>
 			<a class="site-header__back" href="../index.html">
 				<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<polyline points="9,2 4,7 9,12" />
@@ -1460,12 +1428,12 @@
 
 		<main id="map" aria-label="Archive map">
 			<!-- Document viewer overlay, toggled by "Read source text" links -->
-			<div class="visualizer" id="visualizer" role="dialog" aria-modal="true" aria-label="Document viewer" onclick="toggleWindowPopup()">
-				<div class="lorem_main">
-					<div class="lorem_header__">
+			<section class="visualizer" id="visualizer" role="dialog" aria-modal="true" aria-label="Document viewer" onclick="toggleWindowPopup()">
+				<article class="lorem_main">
+					<header class="lorem_header__">
 						<h2 class="lorem_header__h1">Lorem Ipsum</h2>
 						<p class="lorem_header__h2">Illustrative data only</p>
-					</div>
+					</header>
 
 					<div class="lorem_header__sub">
 						<p class="lorem_header__h3">"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."</p>
@@ -1483,12 +1451,12 @@
 
 						<p>Phasellus elementum tellus erat, ut varius risus viverra a. Sed mi diam, vehicula sit amet fringilla sit amet, lacinia eu neque. Duis scelerisque maximus nunc, et euismod augue bibendum eget. Etiam molestie cursus magna, in semper nunc gravida a. Donec sollicitudin ut ante sit amet suscipit. Suspendisse potenti. Quisque turpis turpis, maximus nec pretium non, efficitur ut justo. Vestibulum ullamcorper ante nunc, sed viverra dui finibus id. Nam gravida sed leo sit amet rutrum. Nulla facilisi. Fusce quis nibh dignissim, euismod ante id, consequat diam. In pellentesque mauris eu odio auctor feugiat. In nec lacus interdum, scelerisque mi a, facilisis nibh. Nulla facilisi. Phasellus ut dui metus. Sed hendrerit commodo interdum.</p>
 					</div>
-				</div>
+				</article>
 				<button type="button" class="visualizer-close" aria-label="Close document viewer"><span aria-hidden="true">✕</span></button>
-			</div>
+			</section>
 
 			<!-- Searchbar -->
-			<div class="searchbar" id="map-searchbar">
+			<div class="searchbar" id="map-searchbar" role="search">
 				<div class="searchbar__focus-ring" aria-hidden="true"></div>
 				<button type="button" id="trigger" class="searchbar__trigger" aria-label="Toggle search" aria-expanded="false">
 					<svg class="searchbar__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1497,12 +1465,13 @@
 					</svg>
 				</button>
 				<div id="field-box">
-					<input type="text" id="field" name="field-box" placeholder="Search..." autocomplete="off" />
+					<input type="text" id="field" name="field-box" placeholder="Search..." aria-label="Search archive" autocomplete="off" />
 					<button type="button" id="searchClearBtn" class="searchbar__clear" aria-label="Clear search" tabindex="-1">✕</button>
 				</div>
 			</div>
+
 			<!-- Selection toolbar: shape row + (on arm) boolean-mode row -->
-			<div id="map-select-toolbar">
+			<div id="map-select-toolbar" aria-label="Selection tools">
 				<div class="select-toolbar" id="selectToolbar">
 					<div class="select-toolbar__row" id="selectToolbarShapes" role="toolbar" aria-label="Selection shape">
 						<button type="button" class="select-toolbar__btn" data-shape="rectangle" title="Rectangle select" aria-label="Rectangle select">
@@ -1560,10 +1529,10 @@
 
 			<!-- Dedicated panel for selection results, separate from feature popups -->
 			<aside class="selection-results is-collapsed" id="selectionResults" aria-label="Selection results">
-				<div class="selection-results__header">
+				<header class="selection-results__header">
 					<span class="selection-results__title">
 						Selected:
-						<span id="selectionCount">0</span>
+						<span id="selectionCount" aria-live="polite">0</span>
 						<span aria-hidden="true" style="display: inline-block; width: 0.5rem"></span>
 					</span>
 					<div class="selection-results__actions">
@@ -1572,8 +1541,8 @@
 								<polyline points="12,5 7,10 2,5" />
 							</svg>
 						</button>
-						<button type="button" class="selection-results__clear" id="selectionClearBtn">Clear</button>
-						<div class="custom-select" id="selection-results-sort">
+						<button type="button" class="selection-results__clear" id="selectionClearBtn" aria-label="Clear selection">Clear</button>
+						<div class="custom-select">
 							<button type="button" class="collapse-btn custom-select__trigger" aria-haspopup="listbox" aria-expanded="false">
 								<span class="custom-select__value">Name</span>
 								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1583,13 +1552,13 @@
 							<ul class="custom-select__menu" role="listbox" aria-label="Sort selection by">
 								<li class="custom-select__option is-selected" data-value="name" role="option" aria-selected="true">Name</li>
 								<li class="custom-select__option" data-value="date" role="option" aria-selected="false">Date</li>
-								<li class="custom-select__option" data-value="creoleType" role="option" aria-selected="false">Creole type</li>
+								<li class="custom-select__option" data-value="authorType" role="option" aria-selected="false">Author type</li>
 								<li class="custom-select__option" data-value="documentType" role="option" aria-selected="false">Document type</li>
 							</ul>
-							<input type="hidden" id="selection-results__sort" name="selection-results__sort" value="index" />
+							<input type="hidden" id="selectionSortValue" name="selectionSortValue" value="index" />
 						</div>
 					</div>
-				</div>
+				</header>
 				<div class="selection-results__list" id="selectionList"></div>
 			</aside>
 			<!-- Legend is injected here by JS (needs CSS-var colours to be resolved first) -->
@@ -1606,25 +1575,71 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 		<script>
 			/* ═══════════════════════════════════════════════════════════════
-			   Caribbean Archives — Map
-			   Single-file app, organised into cohesive modules. Each module
-			   owns one concern and exposes a small public surface; cross-module
-			   communication goes through EventBus rather than shared globals.
-			═══════════════════════════════════════════════════════════════ */
+                Caribbean Archives — Map
+                Single-file app, organised into cohesive modules. Each module owns
+                one concern and exposes a small public surface; cross-module
+                communication goes through EventBus rather than shared globals.
+
+                Module map:
+                    Config          — every tunable constant, in one place
+                    Utils           — generic helpers, no app-specific knowledge
+                    EventBus        — pub/sub between state and UI modules
+                    ArchiveData     — sample dataset (swap for fetch() later)
+                    Theme           — colour palette, read once from CSS vars
+                    FilterState     — "which features are visible" (time/category/creole)
+                    SelectionAlgebra— pure new/add/subtract/intersect set combination
+                    SelectionState  — "which features are selected"
+                    MapCore         — the Leaflet map + base layer
+                    Shapes          — single source of shape geometry (marker + legend)
+                    PopupContent    — pure popup HTML from feature props
+                    Markers         — Leaflet markers, kept in sync with FilterState
+                    Geometry        — pure hit-testing math
+                    DrawOverlay      — the transient shape shown while dragging
+                    Panels          — shared "isolate from map" + collapsible-panel helpers
+                    VisualizerModal — the "read source text" document overlay
+                    Legend          — filter legend UI
+                    TimeSlider      — noUiSlider wiring
+                    SelectionToolbar— arms a draw tool, resolves shapes into hits
+                    SelectionResults— renders the selected-features panel
+                    CustomSelect    — generic dropdown, reusable for any .custom-select
+                    Searchbar       — expanding search field wired into SelectionState
+                    App             — bootstraps every module in dependency order
+            ═══════════════════════════════════════════════════════════════ */
 
 			;(() => {
 				"use strict"
 
 				/* ═══════════════════════════════════════════════════════════
-				   UTILS — generic helpers with no app-specific knowledge.
-				═══════════════════════════════════════════════════════════ */
+	                CONFIG — every magic number/string that isn't purely local
+	                to a single line lives here, so tuning behaviour never means
+	                hunting through modules.
+	            ═══════════════════════════════════════════════════════════ */
+
+				const Config = {
+					map: {
+						center: [15.5, -61.2],
+						zoom: 8,
+						tileUrl: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+						tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+						tileSubdomains: "abcd",
+						maxZoom: 19
+					},
+					popup: {maxWidth: 512},
+					search: {debounceMs: 200},
+					flyTo: {minZoom: 11},
+					searchbarAnimationMs: 200
+				}
+
+				/* ═══════════════════════════════════════════════════════════
+	                UTILS — generic helpers with no app-specific knowledge.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const Utils = (() => {
-					/**
-					 * Identity tagged-template: joins strings/values back into one
-					 * string. Exists purely so template literals read as `html\`...\``
-					 * for editor syntax highlighting; no escaping is performed, so
-					 * only ever interpolate trusted/internal values.
+					/*
+					 *   Identity tagged-template: joins strings/values back into one
+					 *   string. Exists purely so template literals read as `html\`...\``
+					 *   for editor syntax highlighting; no escaping is performed, so
+					 *   only ever interpolate trusted/internal values.
 					 */
 					function html(strings, ...values) {
 						return strings.reduce((out, str, i) => out + str + (i < values.length ? values[i] : ""), "")
@@ -1638,7 +1653,7 @@
 						return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 					}
 
-					/** Build a DOM element with attributes/props and children in one call. */
+					// Build a DOM element with attributes/props and children in one call.
 					function el(tag, attrs = {}, children = []) {
 						const node = document.createElement(tag)
 						for (const [key, value] of Object.entries(attrs)) {
@@ -1654,13 +1669,32 @@
 						return node
 					}
 
-					return {html, capitalize, readCssVar, el}
+					// Compares two nullable values, always placing null/undefined last.
+					function compareNullsLast(a, b, compareFn) {
+						const aNull = a === null || a === undefined
+						const bNull = b === null || b === undefined
+						if (aNull && bNull) return 0
+						if (aNull) return 1
+						if (bNull) return -1
+						return compareFn(a, b)
+					}
+
+					// Debounce: delays `fn` until `waitMs` have passed with no further calls.
+					function debounce(fn, waitMs) {
+						let timer = null
+						return (...args) => {
+							clearTimeout(timer)
+							timer = setTimeout(() => fn(...args), waitMs)
+						}
+					}
+
+					return {html, capitalize, readCssVar, el, compareNullsLast, debounce}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   EVENT BUS — decouples state modules from the UI modules
-				   that react to them.
-				═══════════════════════════════════════════════════════════ */
+	                EVENT BUS — decouples state modules from the UI modules
+	                that react to them.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const EventBus = (() => {
 					const listeners = new Map()
@@ -1679,140 +1713,61 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   DATA — sample archive dataset. Swap for a fetch() call
-				   without touching any other module.
-				═══════════════════════════════════════════════════════════ */
+	                DATA — sample archive dataset. Swap for a fetch() call
+	                without touching any other module.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const ArchiveData = (() => {
-					/** @typedef {{ name: string, time: number, category: string, creole: "using"|"about"|null, creoleType: string|null, urlIMG: string, urlText: string, resume: string }} FeatureProps */
+					/** @typedef {{ name: string, time: number, category: string, creole: "using"|"about"|null, authorType: string|null, urlIMG: string, urlText: string, resume: string }} FeatureProps */
+
+					const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
 
 					const geojson = {
 						type: "FeatureCollection",
 						features: [
 							{
 								type: "Feature",
-								properties: {
-									name: "A Voyage to Dominica",
-									time: 1750,
-									category: "poem",
-									creole: "using",
-									creoleType: "french",
-									urlIMG: "../assets/img/book1.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "A Voyage to Dominica", time: 1750, category: "poem", creole: "using", authorType: "clergy", urlIMG: "../assets/img/book1.jpg", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-61.409993, 15.523156]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "British Colonial Report",
-									time: 1816,
-									category: "report",
-									creole: "about",
-									creoleType: "english",
-									urlIMG: "../assets/img/book1.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "British Colonial Report", time: 1816, category: "report", creole: "about", authorType: "admin", urlIMG: "../assets/img/book1.jpg", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-61.316598, 15.37628]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "Caribbean Merchant Letter",
-									time: 1691,
-									category: "letter",
-									creole: "using",
-									creoleType: "dutch",
-									urlIMG: "../assets/img/book1.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: ""
-								},
+								properties: {name: "Caribbean Merchant Letter", time: 1691, category: "letter", creole: "using", authorType: "poet", urlIMG: "../assets/img/book1.jpg", urlText: "./lorem_ipsum.html", resume: ""},
 								geometry: {type: "Point", coordinates: [-61.346091, 15.544468]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "Dutch Plantation Letter",
-									time: 1763,
-									category: "letter",
-									creole: "about",
-									creoleType: null,
-									urlIMG: "../assets/img/book1.jpg",
-									urlText: "",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "poet Plantation Letter", time: 1763, category: "letter", creole: "about", authorType: null, urlIMG: "../assets/img/book1.jpg", urlText: "", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "Early Missionary Notes",
-									time: 1847,
-									category: "letter",
-									creole: "about",
-									creoleType: "spanish",
-									urlIMG: "",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "Early Missionary Notes", time: 1847, category: "letter", creole: "about", authorType: "merchant", urlIMG: "", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-61.387352, 16.315212]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "French Creole Verses",
-									time: 1717,
-									category: "poem",
-									creole: null,
-									creoleType: null,
-									urlIMG: "../assets/img/book2.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "clergy Creole Verses", time: 1717, category: "poem", creole: null, authorType: null, urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-61.611308, 16.117324]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "Holy Scriptures Translation",
-									time: 1648,
-									category: "bible",
-									creole: "about",
-									creoleType: "portugese",
-									urlIMG: "../assets/img/book2.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "Holy Scriptures Translation", time: 1648, category: "bible", creole: "about", authorType: "other", urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "Island Folk Ballad",
-									time: 1689,
-									category: "poem",
-									creole: null,
-									creoleType: "french",
-									urlIMG: "../assets/img/book2.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "Island Folk Ballad", time: 1689, category: "poem", creole: null, authorType: "clergy", urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-60.964977, 14.693279]}
 							},
 							{
 								type: "Feature",
-								properties: {
-									name: "Zanzibar Correspondence",
-									time: 1777,
-									category: "letter",
-									creole: "using",
-									creoleType: null,
-									urlIMG: "../assets/img/book2.jpg",
-									urlText: "./lorem_ipsum.html",
-									resume: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
-								},
+								properties: {name: "Zanzibar Correspondence", time: 1777, category: "letter", creole: "using", authorType: null, urlIMG: "../assets/img/book2.jpg", urlText: "./lorem_ipsum.html", resume: LOREM},
 								geometry: {type: "Point", coordinates: [-60.885014, 14.484105]}
 							}
 						]
@@ -1822,9 +1777,9 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   THEME — single source of truth for palette, read once from
-				   the CSS custom properties defined in the stylesheet.
-				═══════════════════════════════════════════════════════════ */
+	                THEME — single source of truth for palette, read once from
+	                the CSS custom properties defined in the stylesheet.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const Theme = (() => {
 					const categoryColors = {
@@ -1834,31 +1789,33 @@
 						report: Utils.readCssVar("--color-cat-report")
 					}
 
-					const creoleTypeColors = {
-						french: Utils.readCssVar("--color-creole-french"),
-						english: Utils.readCssVar("--color-creole-english"),
-						dutch: Utils.readCssVar("--color-creole-dutch"),
-						spanish: Utils.readCssVar("--color-creole-spanish"),
-						portugese: Utils.readCssVar("--color-creole-portugese")
+					const authorTypeColors = {
+						admin: Utils.readCssVar("--color-writ-admin"),
+						clergy: Utils.readCssVar("--color-writ-clergy"),
+						merchant: Utils.readCssVar("--color-writ-merchant"),
+						poet: Utils.readCssVar("--color-writ-poet"),
+						other: Utils.readCssVar("--color-writ-other")
 					}
+
+					const fallbackColor = "#8b949e"
 
 					function categoryColor(category) {
-						return categoryColors[category] ?? "#8b949e"
+						return categoryColors[category] ?? fallbackColor
 					}
 
-					function creoleColor(creoleType) {
-						return creoleType ? creoleTypeColors[creoleType] : null
+					function creoleColor(authorType) {
+						return authorType ? authorTypeColors[authorType] : null
 					}
 
-					return {categoryColors, creoleTypeColors, categoryColor, creoleColor}
+					return {categoryColors, authorTypeColors, categoryColor, creoleColor}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   FILTER STATE — the single owner of "which features are
-				   currently visible". UI modules read/write through these
-				   functions and react to "filters:changed"; nothing mutates
-				   the underlying object directly.
-				═══════════════════════════════════════════════════════════ */
+	                FILTER STATE — the single owner of "which features are
+	                currently visible". UI modules read/write through these
+	                functions and react to "filters:changed"; nothing mutates
+	                the underlying object directly.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const FilterState = (() => {
 					const years = ArchiveData.features.map(f => f.properties.time)
@@ -1868,7 +1825,7 @@
 						maxYear: Math.max(...years),
 						showCreoleRole: {using: true, about: true, unknown: true},
 						activeCategories: new Set(Object.keys(Theme.categoryColors)),
-						activeCreoleTypes: new Set(Object.keys(Theme.creoleTypeColors))
+						activeauthorTypes: new Set(Object.keys(Theme.authorTypeColors))
 					}
 
 					function notify() {
@@ -1891,19 +1848,19 @@
 						notify()
 					}
 
-					function setCreoleTypeActive(creoleType, isOn) {
-						isOn ? state.activeCreoleTypes.add(creoleType) : state.activeCreoleTypes.delete(creoleType)
+					function setauthorTypeActive(authorType, isOn) {
+						isOn ? state.activeauthorTypes.add(authorType) : state.activeauthorTypes.delete(authorType)
 						notify()
 					}
 
-					/** Map a feature's nullable `creole` value to a role-filter key. */
+					// Map a feature's nullable `creole` value to a role-filter key.
 					function roleKeyFor(creole) {
 						return creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
 					}
 
 					function isFeatureVisible(properties) {
-						const {time, category, creole, creoleType} = properties
-						return time >= state.minYear && time <= state.maxYear && state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!creoleType || state.activeCreoleTypes.has(creoleType))
+						const {time, category, creole, authorType} = properties
+						return time >= state.minYear && time <= state.maxYear && state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeauthorTypes.has(authorType))
 					}
 
 					return {
@@ -1916,18 +1873,43 @@
 						setYearRange,
 						setCreoleRoleActive,
 						setCategoryActive,
-						setCreoleTypeActive,
+						setauthorTypeActive,
 						isFeatureVisible
 					}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   SELECTION STATE — the single owner of "which features are
-				   currently selected" via the draw-and-select tool.
-				═══════════════════════════════════════════════════════════ */
+	                SELECTION ALGEBRA — pure combination of "hits from this draw"
+	                with "the existing selection", per boolean mode. Zero DOM/
+	                Leaflet dependency, so it can be reasoned about (and tested)
+	                in isolation from everything else.
+	            ═══════════════════════════════════════════════════════════ */
+
+				const SelectionAlgebra = (() => {
+					const combinators = {
+						new: (existing, hits) => new Set(hits),
+						add: (existing, hits) => new Set([...existing, ...hits]),
+						subtract: (existing, hits) => new Set([...existing].filter(i => !hits.has(i))),
+						intersect: (existing, hits) => new Set([...existing].filter(i => hits.has(i)))
+					}
+
+					/** @returns {Set<number>} a new selection Set; never mutates `existing`. */
+					function combine(existing, hitIndices, mode) {
+						const hits = new Set(hitIndices)
+						const combinator = combinators[mode] ?? combinators.new
+						return combinator(existing, hits)
+					}
+
+					return {combine}
+				})()
+
+				/* ═══════════════════════════════════════════════════════════
+	                SELECTION STATE — the single owner of "which features are
+	                currently selected" via the draw-and-select tool.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const SelectionState = (() => {
-					const selectedIndices = new Set()
+					let selectedIndices = new Set()
 					let mode = "new" // "new" | "add" | "subtract" | "intersect"
 
 					function setMode(nextMode) {
@@ -1938,28 +1920,14 @@
 						return mode
 					}
 
-					/** Combine a set of newly-hit indices into the selection per the active boolean mode. */
+					// Combine a set of newly-hit indices into the selection per the active boolean mode.
 					function applyHits(hitIndices) {
-						const hits = new Set(hitIndices)
-
-						if (mode === "new") {
-							selectedIndices.clear()
-							hits.forEach(i => selectedIndices.add(i))
-						} else if (mode === "add") {
-							hits.forEach(i => selectedIndices.add(i))
-						} else if (mode === "subtract") {
-							hits.forEach(i => selectedIndices.delete(i))
-						} else if (mode === "intersect") {
-							Array.from(selectedIndices).forEach(i => {
-								if (!hits.has(i)) selectedIndices.delete(i)
-							})
-						}
-
+						selectedIndices = SelectionAlgebra.combine(selectedIndices, hitIndices, mode)
 						EventBus.emit("selection:changed", selectedIndices)
 					}
 
 					function clear() {
-						selectedIndices.clear()
+						selectedIndices = new Set()
 						EventBus.emit("selection:changed", selectedIndices)
 					}
 
@@ -1979,36 +1947,43 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   MAP CORE — the Leaflet map instance and base layer.
-				═══════════════════════════════════════════════════════════ */
+	                MAP CORE — the Leaflet map instance and base layer.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const MapCore = (() => {
-					const map = L.map("map", {center: [15.5, -61.2], zoom: 8, zoomControl: true})
+					const map = L.map("map", {center: Config.map.center, zoom: Config.map.zoom, zoomControl: true})
 
-					L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-						attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-						subdomains: "abcd",
-						maxZoom: 19
+					L.tileLayer(Config.map.tileUrl, {
+						attribution: Config.map.tileAttribution,
+						subdomains: Config.map.tileSubdomains,
+						maxZoom: Config.map.maxZoom
 					}).addTo(map)
 
 					return {map, getContainer: () => map.getContainer()}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   MARKER ICONS — pure SVG builders keyed by creole role.
-				═══════════════════════════════════════════════════════════ */
+	                SHAPES — single source of shape geometry, shared by marker
+	                icons (coloured, glowing, map-scale) and legend swatches
+	                (CSS-driven, 14×14). Each shape "kind" is defined once as an
+	                SVG-fragment builder; the two renderers just choose the frame
+	                and styling strategy around it.
+	            ═══════════════════════════════════════════════════════════ */
 
-				const MarkerIcons = (() => {
-					const shapeBuilders = {
-						about: (fillColor, ringColor, glow) => Utils.html`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" style="overflow:visible; ${glow}">
-							<polygon points="15,3 28,27 2,27" fill="${fillColor}" stroke="${ringColor}" stroke-width="3" stroke-linejoin="round" />
-						</svg>`,
-						using: (fillColor, ringColor, glow) => Utils.html`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
-							<rect x="0" y="0" width="24" height="24" fill="${fillColor}" stroke="${ringColor}" stroke-width="3" rx="1" />
-						</svg>`,
-						unknown: (fillColor, ringColor, glow) => Utils.html`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="overflow:visible; ${glow}">
-							<circle cx="12" cy="12" r="12" fill="${fillColor}" stroke="${ringColor}" stroke-width="3" />
-						</svg>`
+				const Shapes = (() => {
+					// Marker-scale fragments: solid fill + coloured stroke, sized per shape.
+					const markerFragments = {
+						about: (fill, stroke) => ({size: 30, svg: Utils.html`<polygon points="15,3 28,27 2,27" fill="${fill}" stroke="${stroke}" stroke-width="3" stroke-linejoin="round" />`}),
+						using: (fill, stroke) => ({size: 24, svg: Utils.html`<rect x="0" y="0" width="24" height="24" fill="${fill}" stroke="${stroke}" stroke-width="3" rx="1" />`}),
+						unknown: (fill, stroke) => ({size: 24, svg: Utils.html`<circle cx="12" cy="12" r="12" fill="${fill}" stroke="${stroke}" stroke-width="3" />`})
+					}
+
+					// Legend-scale fragments: 14×14, colour comes from the `--shape-color` CSS var via the `.shape-fill` class.
+					const legendFragments = {
+						using: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
+						about: `<polygon class="shape-fill" points="7,1 13,13 1,13" stroke-width="1.5" stroke-linejoin="round" />`,
+						unknown: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
+						ring: `<circle class="shape-fill shape-fill--ring" cx="7" cy="7" r="5" stroke-width="1.5" />`
 					}
 
 					/**
@@ -2016,47 +1991,40 @@
 					 * @param {string} fillColor  category colour
 					 * @param {string} ringColor  creole-type colour (falls back to fillColor)
 					 */
-					function buildMarkerSvg(creoleRole, fillColor, ringColor) {
+					function markerSvg(creoleRole, fillColor, ringColor) {
+						const {size, svg} = (markerFragments[creoleRole] ?? markerFragments.unknown)(fillColor, ringColor)
 						const glow = `filter:drop-shadow(0 0 0.3rem ${ringColor})`
-						const build = shapeBuilders[creoleRole] ?? shapeBuilders.unknown
-						return build(fillColor, ringColor, glow)
+						return Utils.html`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="overflow:visible; ${glow}">${svg}</svg>`
 					}
 
-					/** Small legend-scale shape swatches, sharing one 14×14 template. */
-					function legendShapeSvg(kind) {
-						const inner = {
-							using: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
-							about: `<polygon class="shape-fill" points="7,1 13,13 1,13" stroke-width="1.5" stroke-linejoin="round" />`,
-							unknown: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
-							ring: `<circle class="shape-fill shape-fill--ring" cx="7" cy="7" r="5" stroke-width="1.5" />`
-						}[kind]
-
-						return Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${inner}</svg>`
+					// Small legend-scale shape swatch, sharing one 14×14 template.
+					function legendSvg(kind) {
+						return Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${legendFragments[kind] ?? legendFragments.unknown}</svg>`
 					}
 
-					return {buildMarkerSvg, legendShapeSvg}
+					return {markerSvg, legendSvg}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   POPUP CONTENT — pure rendering of a feature's popup HTML.
-				═══════════════════════════════════════════════════════════ */
+	                POPUP CONTENT — pure rendering of a feature's popup HTML.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const PopupContent = (() => {
 					function imageBlock(urlIMG, category) {
 						if (urlIMG) return Utils.html`<img src="${urlIMG}" alt="Document thumbnail: ${category}" />`
-						return Utils.html`<div class="popup__image-empty">
-								<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-									<rect width="18" height="18" x="3" y="3" rx="2" />
-									<circle cx="9" cy="9" r="2" />
-									<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-								</svg>
-							</div>`
+						return Utils.html`  <div class="popup__image-empty">
+					                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+					                            	<rect width="18" height="18" x="3" y="3" rx="2" />
+					                            	<circle cx="9" cy="9" r="2" />
+					                            	<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+					                            </svg>
+				                            </div>`
 					}
 
-					function creoleTypePill(creoleType) {
-						if (!creoleType) return ""
-						const color = Theme.creoleColor(creoleType)
-						return Utils.html`<span class="pill pill--creole-type" style="background:${color}22; color:${color}; border-color:${color}44"> ${Utils.capitalize(creoleType)} </span>`
+					function authorTypePill(authorType) {
+						if (!authorType) return ""
+						const color = Theme.creoleColor(authorType)
+						return Utils.html`<span class="pill pill--creole-type" style="background:${color}22; color:${color}; border-color:${color}44"> ${Utils.capitalize(authorType)} </span>`
 					}
 
 					function creoleRolePill(creole) {
@@ -2066,63 +2034,65 @@
 
 					function sourceLink(urlText) {
 						if (!urlText) return ""
-						return Utils.html`<a class="popup__source-link" target="_blank" rel="noopener noreferrer" onclick="toggleWindowPopup()">
-								Read source text
-								<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-									<path d="M7 7h10v10" />
-									<path d="M7 17 17 7" />
-								</svg>
-							</a>`
+						return Utils.html`  <a class="popup__source-link" target="_blank" rel="noopener noreferrer" onclick="toggleWindowPopup()">
+					                            Read source text
+				                            	<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				                            		<path d="M7 7h10v10" />
+				                            		<path d="M7 17 17 7" />
+				                            	</svg>
+				                            </a>`
 					}
 
 					/** @param {FeatureProps} props */
 					function build(props) {
-						const {time, category, creole, creoleType, urlIMG, urlText, resume} = props
+						const {time, category, creole, authorType, urlIMG, urlText, resume} = props
 						const categoryPill = Utils.html`<span class="pill pill--category">${category}</span>`
 
-						return Utils.html`<div class="popup__panels">
-							<div class="popup__left">
-								<div class="popup__image-wrap">
-									${imageBlock(urlIMG, category)}
-									<span class="popup__year-badge">${time}</span>
-								</div>
-								<div class="popup__pills">${categoryPill} ${creoleTypePill(creoleType)} ${creoleRolePill(creole)}</div>
-							</div>
-							<div class="popup__right">
-								<p class="popup__abstract">${resume ?? ""}</p>
-								${sourceLink(urlText)}
-							</div>
-						</div>`
+						return Utils.html`  <div class="popup__panels">
+				                                <div class="popup__left">
+				                                	<div class="popup__image-wrap">
+				                                		${imageBlock(urlIMG, category)}
+				                                		<span class="popup__year-badge">${time}</span>
+				                                	</div>
+				                                	<div class="popup__pills">${categoryPill} ${authorTypePill(authorType)} ${creoleRolePill(creole)}</div>
+				                                </div>
+			                                	<div class="popup__right">
+			                                		<p class="popup__abstract">${resume ?? ""}</p>
+			                                		${sourceLink(urlText)}
+			                                	</div>
+			                                </div>`
 					}
 
 					return {build}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   MARKERS — builds Leaflet markers from features and keeps
-				   their visibility in sync with FilterState.
-				═══════════════════════════════════════════════════════════ */
+	                MARKERS — builds Leaflet markers from features and keeps
+	                their visibility in sync with FilterState.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const Markers = (() => {
 					let markers = []
+					const indexByMarker = new Map()
 
-					function createMarker(feature) {
-						const {category, creole, creoleType} = feature.properties
+					function createMarker(feature, index) {
+						const {category, creole, authorType} = feature.properties
 						const [lng, lat] = feature.geometry.coordinates
 
 						const fillColor = Theme.categoryColor(category)
-						const ringColor = Theme.creoleColor(creoleType) ?? fillColor
+						const ringColor = Theme.creoleColor(authorType) ?? fillColor
 
 						const icon = L.divIcon({
 							className: "",
-							html: MarkerIcons.buildMarkerSvg(creole, fillColor, ringColor),
+							html: Shapes.markerSvg(creole, fillColor, ringColor),
 							iconSize: [20, 20],
 							iconAnchor: [10, 10]
 						})
 
 						const marker = L.marker([lat, lng], {icon})
-						marker.bindPopup(PopupContent.build(feature.properties), {maxWidth: 512})
+						marker.bindPopup(PopupContent.build(feature.properties), {maxWidth: Config.popup.maxWidth})
 						marker.feature = feature
+						indexByMarker.set(marker, index)
 						return marker
 					}
 
@@ -2134,8 +2104,8 @@
 					}
 
 					function init(features) {
-						markers = features.map(feature => {
-							const marker = createMarker(feature)
+						markers = features.map((feature, index) => {
+							const marker = createMarker(feature, index)
 							marker.addTo(MapCore.map)
 							return marker
 						})
@@ -2151,218 +2121,18 @@
 						return markers.filter(marker => MapCore.map.hasLayer(marker))
 					}
 
+					// O(1) lookup of a marker's index into ArchiveData.features, cached at creation time.
 					function featureIndex(marker) {
-						return ArchiveData.features.indexOf(marker.feature)
+						return indexByMarker.get(marker)
 					}
 
 					return {init, all, visible, featureIndex}
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   VISUALIZER MODAL — the "read source text" overlay.
-				   Placeholder content; isolated so it's easy to replace later.
-				═══════════════════════════════════════════════════════════ */
-
-				const VisualizerModal = (() => {
-					function init() {
-						const visualizer = document.getElementById("visualizer")
-
-						function toggle() {
-							visualizer.classList.toggle("show")
-							L.DomEvent.disableScrollPropagation(visualizer)
-							L.DomEvent.disableClickPropagation(visualizer)
-						}
-
-						// Exposed globally: referenced by inline onclick in static HTML
-						// and in dynamically-injected popup markup.
-						window.toggleWindowPopup = toggle
-					}
-
-					return {init}
-				})()
-
-				/* ═══════════════════════════════════════════════════════════
-				   LEGEND — builds the filter legend UI. Reads current state
-				   for initial checked-ness, writes changes back through
-				   FilterState; has no knowledge of marker visibility itself.
-				═══════════════════════════════════════════════════════════ */
-
-				const Legend = (() => {
-					function toggleRow({id, label, shapeKind, initialColor, onChange}) {
-						const checkboxId = `cb-${id}`
-						const row = Utils.el("div", {className: "legend__item"})
-						row.style.setProperty("--shape-color", initialColor)
-
-						row.innerHTML = Utils.html`<label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
-								<input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
-								${MarkerIcons.legendShapeSvg(shapeKind)}
-							</label>
-							<label class="legend__item-label" for="${checkboxId}">${label}</label>`
-
-						const checkbox = row.querySelector("input")
-						const iconToggle = row.querySelector(".legend__icon-toggle")
-
-						checkbox.addEventListener("change", () => {
-							const isOn = checkbox.checked
-							row.classList.toggle("is-off", !isOn)
-							iconToggle.classList.toggle("is-off", !isOn)
-							onChange(isOn)
-						})
-
-						return row
-					}
-
-					function groupTitle(text) {
-						return Utils.el("div", {className: "legend__group-title", text})
-					}
-
-					function divider() {
-						return Utils.el("div", {className: "legend__divider", role: "separator"})
-					}
-
-					function header(legendEl) {
-						const headerEl = Utils.el("div", {className: "legend__header"})
-						const title = Utils.el("span", {className: "legend__title", text: "Filters"})
-
-						const collapseBtn = Utils.el("button", {
-							className: "collapse-btn legend__collapse-btn",
-							"aria-label": "Collapse legend",
-							"aria-expanded": "true",
-							html: Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<polyline points="2,9 7,4 12,9" />
-							</svg>`
-						})
-
-						collapseBtn.addEventListener("click", () => {
-							const isNowCollapsed = legendEl.classList.toggle("is-collapsed")
-							collapseBtn.setAttribute("aria-expanded", String(!isNowCollapsed))
-							collapseBtn.setAttribute("aria-label", isNowCollapsed ? "Expand legend" : "Collapse legend")
-
-							if (!isNowCollapsed) {
-								const body = legendEl.querySelector(".legend__body")
-								body.style.maxHeight = `${body.scrollHeight}px`
-							}
-						})
-
-						headerEl.append(title, collapseBtn)
-						return headerEl
-					}
-
-					function creoleRoleGroup(body) {
-						body.appendChild(groupTitle("Creole"))
-
-						const entries = [
-							{key: "using", label: "Using creoles", shapeKind: "using"},
-							{key: "about", label: "About creoles", shapeKind: "about"},
-							{key: "unknown", label: "Unknown", shapeKind: "unknown"}
-						]
-
-						entries.forEach(({key, label, shapeKind}) => {
-							body.appendChild(
-								toggleRow({
-									id: `legend-creole-${key}`,
-									label,
-									shapeKind,
-									initialColor: "white",
-									onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)
-								})
-							)
-						})
-					}
-
-					function creoleTypeGroup(body) {
-						body.appendChild(groupTitle("Creole type"))
-
-						Object.entries(Theme.creoleTypeColors).forEach(([typeKey, color]) => {
-							body.appendChild(
-								toggleRow({
-									id: `legend-ctype-${typeKey}`,
-									label: Utils.capitalize(typeKey),
-									shapeKind: "ring",
-									initialColor: color,
-									onChange: isOn => FilterState.setCreoleTypeActive(typeKey, isOn)
-								})
-							)
-						})
-					}
-
-					function categoryGroup(body) {
-						body.appendChild(groupTitle("Document type"))
-
-						Object.entries(Theme.categoryColors).forEach(([catKey, color]) => {
-							body.appendChild(
-								toggleRow({
-									id: `legend-cat-${catKey}`,
-									label: Utils.capitalize(catKey),
-									shapeKind: "unknown",
-									initialColor: color,
-									onChange: isOn => FilterState.setCategoryActive(catKey, isOn)
-								})
-							)
-						})
-					}
-
-					function init() {
-						const legend = Utils.el("div", {className: "map-legend is-collapsed", "aria-label": "Map legend"})
-						document.getElementById("map").appendChild(legend)
-
-						const headerEl = header(legend)
-						legend.appendChild(headerEl)
-						const collapseBtn = headerEl.querySelector(".legend__collapse-btn")
-						collapseBtn.setAttribute("aria-expanded", "false")
-						collapseBtn.setAttribute("aria-label", "Expand legend")
-
-						const body = Utils.el("div", {className: "legend__body"})
-						legend.appendChild(body)
-
-						creoleRoleGroup(body)
-						body.appendChild(divider())
-						creoleTypeGroup(body)
-						body.appendChild(divider())
-						categoryGroup(body)
-
-						requestAnimationFrame(() => {
-							body.style.maxHeight = `${body.scrollHeight}px`
-						})
-
-						L.DomEvent.disableScrollPropagation(legend)
-						L.DomEvent.disableClickPropagation(legend)
-					}
-
-					return {init}
-				})()
-
-				/* ═══════════════════════════════════════════════════════════
-				   TIME SLIDER — thin wiring around noUiSlider; talks only to
-				   FilterState, knows nothing about markers.
-				═══════════════════════════════════════════════════════════ */
-
-				const TimeSlider = (() => {
-					function init() {
-						const sliderEl = document.getElementById("time-slider")
-						const rangeValueEl = document.getElementById("range-value")
-
-						noUiSlider.create(sliderEl, {
-							start: [FilterState.minYear, FilterState.maxYear],
-							connect: true,
-							step: 1,
-							range: {min: FilterState.minYear, max: FilterState.maxYear}
-						})
-
-						sliderEl.noUiSlider.on("update", values => {
-							const [min, max] = values.map(Math.round)
-							rangeValueEl.textContent = `${min} – ${max}`
-							FilterState.setYearRange(min, max)
-						})
-					}
-
-					return {init}
-				})()
-
-				/* ═══════════════════════════════════════════════════════════
-				   GEOMETRY — pure hit-testing math, no DOM/Leaflet coupling
-				   beyond the container-point conversion it's handed.
-				═══════════════════════════════════════════════════════════ */
+	                GEOMETRY — pure hit-testing math, no DOM/Leaflet coupling
+	                beyond the container-point conversion it's handed.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const Geometry = (() => {
 					function inRectangle(point, start, end) {
@@ -2384,7 +2154,7 @@
 						return dx * dx + dy * dy <= 1
 					}
 
-					/** Standard ray-casting point-in-polygon test. */
+					// Standard ray-casting point-in-polygon test.
 					function inPolygon(point, vertices) {
 						let inside = false
 						for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
@@ -2407,10 +2177,10 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   DRAW OVERLAY — the transient visual shape while dragging.
-				   Owns its own DOM element(s); callers just tell it what to
-				   render or when to clear.
-				═══════════════════════════════════════════════════════════ */
+	                DRAW OVERLAY — the transient visual shape while dragging.
+	                Owns its own DOM element(s); callers just tell it what to
+	                render or when to clear.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const DrawOverlay = (() => {
 					let el = null
@@ -2468,10 +2238,240 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   SELECTION TOOLBAR — arms a draw tool, tracks in-progress
-				   pointer input, and resolves finished shapes into hits that
-				   are handed off to SelectionState.
-				═══════════════════════════════════════════════════════════ */
+	                PANELS — shared behaviour for every floating surface on the
+	                map: keeping Leaflet from swallowing their pointer/scroll
+	                events, and a reusable collapse/expand controller with
+	                consistent aria handling (optionally height-animated).
+	            ═══════════════════════════════════════════════════════════ */
+
+				const Panels = (() => {
+					// Stop Leaflet from treating clicks/scroll/drag inside `el` as map interaction.
+					function isolateFromMap(el) {
+						L.DomEvent.disableScrollPropagation(el)
+						L.DomEvent.disableClickPropagation(el)
+					}
+
+					/*
+					 *   A collapse/expand controller shared by any panel with a toggle
+					 *   button. If `bodyEl` is supplied, expanding also sets an explicit
+					 *   `max-height` from the body's measured content height (the CSS
+					 *   transition animates from 0 to that value); panels that collapse
+					 *   purely via a CSS class (no measured animation) omit `bodyEl`.
+					 */
+					function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
+						function setCollapsed(collapsed) {
+							panelEl.classList.toggle(collapsedClass, collapsed)
+							collapseBtn.setAttribute("aria-expanded", String(!collapsed))
+							collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
+
+							if (!collapsed && bodyEl) {
+								bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
+							}
+						}
+
+						function isCollapsed() {
+							return panelEl.classList.contains(collapsedClass)
+						}
+
+						return {setCollapsed, isCollapsed}
+					}
+
+					return {isolateFromMap, createCollapsible}
+				})()
+
+				/* ═══════════════════════════════════════════════════════════
+	                VISUALIZER MODAL — the "read source text" overlay.
+	                Placeholder content; isolated so it's easy to replace later.
+	            ═══════════════════════════════════════════════════════════ */
+
+				const VisualizerModal = (() => {
+					function init() {
+						const visualizer = document.getElementById("visualizer")
+						Panels.isolateFromMap(visualizer)
+
+						function toggle() {
+							visualizer.classList.toggle("show")
+						}
+
+						// Exposed globally: referenced by inline onclick in static HTML
+						// and in dynamically-injected popup markup.
+						window.toggleWindowPopup = toggle
+					}
+
+					return {init}
+				})()
+
+				/* ═══════════════════════════════════════════════════════════
+	                LEGEND — builds the filter legend UI. Reads current state
+	                for initial checked-ness, writes changes back through
+	                FilterState; has no knowledge of marker visibility itself.
+	            ═══════════════════════════════════════════════════════════ */
+
+				const Legend = (() => {
+					function toggleRow({id, label, shapeKind, initialColor, onChange}) {
+						const checkboxId = `cb-${id}`
+						const row = Utils.el("div", {className: "legend__item"})
+						row.style.setProperty("--shape-color", initialColor)
+
+						row.innerHTML = Utils.html` <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
+					                                    <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
+					                                    ${Shapes.legendSvg(shapeKind)}
+				                                    </label>
+				                                    <label class="legend__item-label" for="${checkboxId}">${label}</label>`
+
+						const checkbox = row.querySelector("input")
+						const iconToggle = row.querySelector(".legend__icon-toggle")
+
+						checkbox.addEventListener("change", () => {
+							const isOn = checkbox.checked
+							row.classList.toggle("is-off", !isOn)
+							iconToggle.classList.toggle("is-off", !isOn)
+							onChange(isOn)
+						})
+
+						return row
+					}
+
+					function groupTitle(text) {
+						return Utils.el("div", {className: "legend__group-title", text})
+					}
+
+					function divider() {
+						return Utils.el("div", {className: "legend__divider", role: "separator"})
+					}
+
+					function header() {
+						const headerEl = Utils.el("div", {className: "legend__header"})
+						const title = Utils.el("span", {className: "legend__title", text: "Filters"})
+
+						const collapseBtn = Utils.el("button", {
+							className: "collapse-btn legend__collapse-btn",
+							"aria-label": "Expand legend",
+							"aria-expanded": "false",
+							html: Utils.html`   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						                            <polyline points="2,9 7,4 12,9" />
+					                            </svg>`
+						})
+
+						headerEl.append(title, collapseBtn)
+						return {headerEl, collapseBtn}
+					}
+
+					const creoleRoleEntries = [
+						{key: "using", label: "Using creoles", shapeKind: "using"},
+						{key: "about", label: "About creoles", shapeKind: "about"},
+						{key: "unknown", label: "Unknown", shapeKind: "unknown"}
+					]
+
+					function creoleRoleGroup(body) {
+						body.appendChild(groupTitle("Creole"))
+						creoleRoleEntries.forEach(({key, label, shapeKind}) => {
+							body.appendChild(
+								toggleRow({
+									id: `legend-creole-${key}`,
+									label,
+									shapeKind,
+									initialColor: "white",
+									onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)
+								})
+							)
+						})
+					}
+
+					function authorTypeGroup(body) {
+						body.appendChild(groupTitle("Author type"))
+						Object.entries(Theme.authorTypeColors).forEach(([typeKey, color]) => {
+							body.appendChild(
+								toggleRow({
+									id: `legend-atype-${typeKey}`,
+									label: Utils.capitalize(typeKey),
+									shapeKind: "ring",
+									initialColor: color,
+									onChange: isOn => FilterState.setauthorTypeActive(typeKey, isOn)
+								})
+							)
+						})
+					}
+
+					function categoryGroup(body) {
+						body.appendChild(groupTitle("Document type"))
+						Object.entries(Theme.categoryColors).forEach(([catKey, color]) => {
+							body.appendChild(
+								toggleRow({
+									id: `legend-cat-${catKey}`,
+									label: Utils.capitalize(catKey),
+									shapeKind: "unknown",
+									initialColor: color,
+									onChange: isOn => FilterState.setCategoryActive(catKey, isOn)
+								})
+							)
+						})
+					}
+
+					function init() {
+						const legend = Utils.el("div", {className: "map-legend is-collapsed", "aria-label": "Map legend"})
+						document.getElementById("map").appendChild(legend)
+
+						const {headerEl, collapseBtn} = header()
+						legend.appendChild(headerEl)
+
+						const body = Utils.el("div", {className: "legend__body"})
+						legend.appendChild(body)
+
+						creoleRoleGroup(body)
+						body.appendChild(divider())
+						authorTypeGroup(body)
+						body.appendChild(divider())
+						categoryGroup(body)
+
+						const collapsible = Panels.createCollapsible({
+							panelEl: legend,
+							collapseBtn,
+							bodyEl: body,
+							expandLabel: "Expand legend",
+							collapseLabel: "Collapse legend"
+						})
+
+						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
+
+						Panels.isolateFromMap(legend)
+					}
+
+					return {init}
+				})()
+
+				/* ═══════════════════════════════════════════════════════════
+	                TIME SLIDER — thin wiring around noUiSlider; talks only to
+	                FilterState, knows nothing about markers.
+	            ═══════════════════════════════════════════════════════════ */
+
+				const TimeSlider = (() => {
+					function init() {
+						const sliderEl = document.getElementById("time-slider")
+						const rangeValueEl = document.getElementById("range-value")
+
+						noUiSlider.create(sliderEl, {
+							start: [FilterState.minYear, FilterState.maxYear],
+							connect: true,
+							step: 1,
+							range: {min: FilterState.minYear, max: FilterState.maxYear}
+						})
+
+						sliderEl.noUiSlider.on("update", values => {
+							const [min, max] = values.map(Math.round)
+							rangeValueEl.textContent = `${min} – ${max}`
+							FilterState.setYearRange(min, max)
+						})
+					}
+
+					return {init}
+				})()
+
+				/* ═══════════════════════════════════════════════════════════
+	                SELECTION TOOLBAR — arms a draw tool, tracks in-progress
+	                pointer input, and resolves finished shapes into hits that
+	                are handed off to SelectionState.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const SelectionToolbar = (() => {
 					const hitTesters = {
@@ -2503,6 +2503,7 @@
 						MapCore.getContainer().classList.add("is-drawing-select")
 						MapCore.map.dragging.disable()
 						MapCore.map.doubleClickZoom.disable()
+						if (MapCore.map.tap) MapCore.map.tap.disable()
 					}
 
 					function disarm() {
@@ -2512,6 +2513,7 @@
 						MapCore.getContainer().classList.remove("is-drawing-select")
 						MapCore.map.dragging.enable()
 						MapCore.map.doubleClickZoom.enable()
+						if (MapCore.map.tap) MapCore.map.tap.enable()
 						cancelDraw()
 					}
 
@@ -2539,7 +2541,7 @@
 						EventBus.emit("selection:toolUsed")
 						cancelDraw()
 					}
-
+					// Mouse Events
 					function onMouseDown(evt) {
 						if (!armedShape) return
 						if (evt.target.closest("#map-select-toolbar") || evt.target.closest(".selection-results")) return
@@ -2592,6 +2594,76 @@
 						}
 					}
 
+					// Touchscreen Events
+					function relativePointFromTouch(touch) {
+						const rect = MapCore.getContainer().getBoundingClientRect()
+						return {x: touch.clientX - rect.left, y: touch.clientY - rect.top}
+					}
+
+					function onTouchStart(evt) {
+						if (!armedShape) return
+						if (evt.target.closest("#map-select-toolbar") || evt.target.closest(".selection-results")) return
+						if (evt.touches.length !== 1) return // ignore multi-touch (pinch etc.)
+
+						evt.preventDefault() // stop map panning/scrolling while drawing
+						const touch = evt.touches[0]
+						const point = relativePointFromTouch(touch)
+
+						if (armedShape === "polygon") {
+							if (!isDrawing) {
+								isDrawing = true
+								drawPoints = [point]
+							} else {
+								drawPoints.push(point)
+							}
+							DrawOverlay.path([...drawPoints], true)
+							return
+						}
+
+						isDrawing = true
+						drawStart = point
+						drawPoints = [point]
+					}
+
+					function onTouchMove(evt) {
+						if (!isDrawing || !armedShape) return
+						if (evt.touches.length !== 1) return
+
+						evt.preventDefault()
+						const touch = evt.touches[0]
+						const point = relativePointFromTouch(touch)
+
+						if (armedShape === "rectangle") {
+							drawPoints = [drawStart, point]
+							DrawOverlay.rectangle(drawStart, point)
+						} else if (armedShape === "ellipse") {
+							drawPoints = [drawStart, point]
+							DrawOverlay.ellipse(drawStart, point)
+						} else if (armedShape === "lasso") {
+							drawPoints.push(point)
+							DrawOverlay.path(drawPoints, false)
+						} else if (armedShape === "polygon") {
+							DrawOverlay.path([...drawPoints, point], true)
+						}
+					}
+
+					function onTouchEnd(evt) {
+						if (!isDrawing || !armedShape || armedShape === "polygon") return
+						evt.preventDefault()
+						finishDraw()
+					}
+
+					let lastTapTime = 0 // Simple double-tap detection for polygon finish on touch
+					function onTouchEndPolygon(evt) {
+						if (armedShape !== "polygon" || !isDrawing) return
+						const now = Date.now()
+						if (now - lastTapTime < 300) {
+							evt.preventDefault()
+							finishDraw()
+						}
+						lastTapTime = now
+					}
+
 					function onKeyDown(evt) {
 						if (evt.key === "Escape" && armedShape) disarm()
 					}
@@ -2601,8 +2673,7 @@
 						shapeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-shape]"))
 						modeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-mode]"))
 
-						L.DomEvent.disableScrollPropagation(document.getElementById("map-select-toolbar"))
-						L.DomEvent.disableClickPropagation(document.getElementById("map-select-toolbar"))
+						Panels.isolateFromMap(document.getElementById("map-select-toolbar"))
 
 						shapeButtons.forEach(btn => {
 							btn.addEventListener("click", () => (armedShape === btn.dataset.shape ? disarm() : arm(btn.dataset.shape)))
@@ -2620,6 +2691,10 @@
 						container.addEventListener("mousemove", onMouseMove)
 						container.addEventListener("mouseup", onMouseUp)
 						container.addEventListener("dblclick", onDoubleClick)
+						container.addEventListener("touchstart", onTouchStart, {passive: false})
+						container.addEventListener("touchmove", onTouchMove, {passive: false})
+						container.addEventListener("touchend", onTouchEnd, {passive: false})
+						container.addEventListener("touchend", onTouchEndPolygon, {passive: false})
 						document.addEventListener("keydown", onKeyDown)
 					}
 
@@ -2627,31 +2702,20 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   SELECTION RESULTS — renders the selected-features panel;
-				   reacts to "selection:changed", owns its own open/closed
-				   and sort-order UI state.
-				═══════════════════════════════════════════════════════════ */
+	                SELECTION RESULTS — renders the selected-features panel;
+	                reacts to "selection:changed", owns its own open/closed
+	                and sort-order UI state.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const SelectionResults = (() => {
-					/** Compares two nullable values, always placing null/undefined last. */
-					function compareNullsLast(a, b, compareFn) {
-						const aNull = a === null || a === undefined
-						const bNull = b === null || b === undefined
-						if (aNull && bNull) return 0
-						if (aNull) return 1
-						if (bNull) return -1
-						return compareFn(a, b)
-					}
-
 					const sorters = {
-						date: (a, b) => compareNullsLast(a.properties.time, b.properties.time, (x, y) => x - y),
-						documentType: (a, b) => compareNullsLast(a.properties.category, b.properties.category, (x, y) => x.localeCompare(y)),
-						creoleType: (a, b) => compareNullsLast(a.properties.creoleType, b.properties.creoleType, (x, y) => x.localeCompare(y)),
-						name: (a, b) => compareNullsLast(a.properties.name, b.properties.name, (x, y) => x.localeCompare(y))
+						date: (a, b) => Utils.compareNullsLast(a.properties.time, b.properties.time, (x, y) => x - y),
+						documentType: (a, b) => Utils.compareNullsLast(a.properties.category, b.properties.category, (x, y) => x.localeCompare(y)),
+						authorType: (a, b) => Utils.compareNullsLast(a.properties.authorType, b.properties.authorType, (x, y) => x.localeCompare(y)),
+						name: (a, b) => Utils.compareNullsLast(a.properties.name, b.properties.name, (x, y) => x.localeCompare(y))
 					}
 
-					let panelEl, listEl, countEl, sortInputEl
-					let isPanelClosed = false
+					let listEl, countEl, sortInputEl, collapsible
 
 					function currentSortKey() {
 						return sortInputEl.value
@@ -2659,34 +2723,32 @@
 
 					function sortedIndices() {
 						const indices = SelectionState.indices()
-						const sortBy = currentSortKey()
-						const comparator = sorters[sortBy]
+						const comparator = sorters[currentSortKey()]
 
 						if (!comparator) return indices.sort((a, b) => a - b)
-
 						return indices.sort((a, b) => comparator(ArchiveData.features[a], ArchiveData.features[b]))
 					}
 
 					function buildRow(index) {
 						const feature = ArchiveData.features[index]
 						const marker = Markers.all()[index]
-						const {name, time, category, creoleType} = feature.properties
+						const {name, time, category, authorType} = feature.properties
 						const color = Theme.categoryColor(category)
 
 						const row = Utils.el("div", {className: "result-row"})
-						row.innerHTML = Utils.html`<div class="result-row__left">
-								<svg class="result-row__dot" viewBox="0 0 14 14" aria-hidden="true">
-									<circle cx="7" cy="7" r="6" fill="${color}" />
-								</svg>
-								<span class="result-row__name">${name}</span>
-							</div>
-							<div class="result-row__body">
-								<span class="result-row__year">${time}</span>
-								<span class="result-row__meta">${creoleType ? Utils.capitalize(creoleType) + " " : ""}${Utils.capitalize(category)}</span>
-							</div>`
+						row.innerHTML = Utils.html` <div class="result-row__left">
+				                                    	<svg class="result-row__dot" viewBox="0 0 14 14" aria-hidden="true">
+				                                    		<circle cx="7" cy="7" r="6" fill="${color}" />
+				                                    	</svg>
+				                                    	<span class="result-row__name">${name}</span>
+				                                    </div>
+				                                    <div class="result-row__body">
+				                                    	<span class="result-row__year">${time}</span>
+				                                    	<span class="result-row__meta">${authorType ? Utils.capitalize(authorType) + " " : ""}${Utils.capitalize(category)}</span>
+				                                    </div>`
 
 						row.addEventListener("click", () => {
-							MapCore.map.flyTo(marker.getLatLng(), Math.max(MapCore.map.getZoom(), 11))
+							MapCore.map.flyTo(marker.getLatLng(), Math.max(MapCore.map.getZoom(), Config.flyTo.minZoom))
 							marker.openPopup()
 						})
 
@@ -2701,40 +2763,36 @@
 						})
 					}
 
-					function setCollapsed(collapsed) {
-						panelEl.classList.toggle("is-collapsed", collapsed)
-						isPanelClosed = collapsed
-						const collapseBtn = document.getElementById("selectionCollapseBtn")
-						collapseBtn.setAttribute("aria-expanded", String(!collapsed))
-						collapseBtn.setAttribute("aria-label", collapsed ? "Expand selection panel" : "Collapse selection panel")
-					}
-
 					function render() {
 						const count = SelectionState.size()
 						countEl.textContent = String(count)
 						listEl.innerHTML = ""
 
 						if (count === 0) return
-
 						sortedIndices().forEach(index => listEl.appendChild(buildRow(index)))
 					}
 
 					function init() {
-						panelEl = document.getElementById("selectionResults")
+						const panelEl = document.getElementById("selectionResults")
+						const collapseBtn = document.getElementById("selectionCollapseBtn")
 						listEl = document.getElementById("selectionList")
 						countEl = document.getElementById("selectionCount")
-						sortInputEl = document.getElementById("selection-results__sort")
+						sortInputEl = document.getElementById("selectionSortValue")
 
-						L.DomEvent.disableScrollPropagation(panelEl)
-						L.DomEvent.disableClickPropagation(panelEl)
+						Panels.isolateFromMap(panelEl)
+
+						collapsible = Panels.createCollapsible({
+							panelEl,
+							collapseBtn,
+							expandLabel: "Expand selection panel",
+							collapseLabel: "Collapse selection panel"
+						})
 
 						document.getElementById("selectionClearBtn").addEventListener("click", () => SelectionState.clear())
-
-						const collapseBtn = document.getElementById("selectionCollapseBtn")
-						collapseBtn.addEventListener("click", () => setCollapsed(!panelEl.classList.contains("is-collapsed")))
+						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 
 						// Collapsed by default: nothing is selected on load.
-						setCollapsed(true)
+						collapsible.setCollapsed(true)
 
 						let previousCount = 0
 
@@ -2743,20 +2801,17 @@
 							render()
 
 							const count = SelectionState.size()
-							if (count === 0) {
-								setCollapsed(true)
-							} else if (previousCount === 0) {
-								setCollapsed(false)
-							}
+							if (count === 0) collapsible.setCollapsed(true)
+							else if (previousCount === 0) collapsible.setCollapsed(false)
 							previousCount = count
 						})
 
 						EventBus.on("selection:toolUsed", () => {
-							if (SelectionState.size() > 0) setCollapsed(false)
+							if (SelectionState.size() > 0) collapsible.setCollapsed(false)
 						})
 					}
 
-					/** Re-render with the current sort key; called by the sort dropdown. */
+					// Re-render with the current sort key; called by the sort dropdown.
 					function refresh() {
 						render()
 					}
@@ -2765,9 +2820,9 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   CUSTOM SELECT — generic dropdown component, reusable for
-				   any `.custom-select` root, not tied to selection results.
-				═══════════════════════════════════════════════════════════ */
+	                CUSTOM SELECT — generic dropdown component, reusable for
+	                any `.custom-select` root, not tied to selection results.
+	            ═══════════════════════════════════════════════════════════ */
 
 				const CustomSelect = (() => {
 					function init(rootEl, {onSelect} = {}) {
@@ -2776,9 +2831,14 @@
 						const hiddenInput = rootEl.querySelector("input")
 						const options = rootEl.querySelectorAll(".custom-select__option")
 
+						function close() {
+							rootEl.classList.remove("open")
+							trigger.setAttribute("aria-expanded", "false")
+						}
+
 						trigger.addEventListener("click", () => {
 							const open = rootEl.classList.toggle("open")
-							trigger.setAttribute("aria-expanded", open)
+							trigger.setAttribute("aria-expanded", String(open))
 						})
 
 						options.forEach(option => {
@@ -2789,18 +2849,13 @@
 								valueEl.textContent = option.textContent
 								hiddenInput.value = option.dataset.value
 
-								rootEl.classList.remove("open")
-								trigger.setAttribute("aria-expanded", "false")
-
+								close()
 								onSelect?.(option.dataset.value)
 							})
 						})
 
 						document.addEventListener("click", evt => {
-							if (!rootEl.contains(evt.target)) {
-								rootEl.classList.remove("open")
-								trigger.setAttribute("aria-expanded", "false")
-							}
+							if (!rootEl.contains(evt.target)) close()
 						})
 					}
 
@@ -2808,90 +2863,15 @@
 				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   Searchbar — searchbar animations and logic.
-				═══════════════════════════════════════════════════════════ */
+	                SEARCHBAR — expanding search field wired into SelectionState,
+	                so a query drives the same selection pipeline as the toolbar's
+	                draw tools.
+	            ═══════════════════════════════════════════════════════════ */
 
-				function searchbar() {
-					const bar = document.getElementById("map-searchbar")
-					const trigger = document.getElementById("trigger")
-					const fieldBox = document.getElementById("field-box")
-					const input = document.getElementById("field")
-					const clearBtn = document.getElementById("searchClearBtn")
-
-					// Match every other floating panel (legend, toolbar, results,
-					// visualizer): the map must not see clicks/scroll/drag that
-					// originate inside this control.
-					L.DomEvent.disableClickPropagation(bar)
-					L.DomEvent.disableScrollPropagation(bar)
-
-					let open = false,
-						animating = false,
-						pendingOpen = null
-
-					function setOpen(next) {
-						if (next === open) {
-							pendingOpen = null
-							return
-						}
-						if (animating) {
-							// Don't drop the request: a rapid map grab can blur the
-							// input mid-open-animation, and CSS (:focus-within) reacts
-							// instantly while this queue used to just discard the
-							// close — leaving the bar/handle stuck open forever with
-							// no way to recover. Replay the latest request once the
-							// in-flight animation finishes instead.
-							pendingOpen = next
-							return
-						}
-
-						animating = true
-						open = next
-
-						bar.classList.toggle("is-open", open)
-						trigger.setAttribute("aria-expanded", String(open))
-
-						if (open) {
-							setTimeout(() => input.focus())
-						} else {
-							input.blur()
-							input.value = ""
-							clearBtn.classList.remove("is-visible")
-							clearTimeout(searchTimer)
-							runSearch("")
-						}
-
-						setTimeout(() => {
-							animating = false
-							if (pendingOpen !== null && pendingOpen !== open) {
-								const queued = pendingOpen
-								pendingOpen = null
-								setOpen(queued)
-							} else {
-								pendingOpen = null
-							}
-						}, 200)
-					}
-
-					trigger.addEventListener("click", () => setOpen(!open))
-
-					// Clicking the bar's own background (its border/frame, or the
-					// empty space in field-box) doesn't reliably blur the input on
-					// its own since neither is a focusable element — handle it
-					// explicitly so closing is deterministic either way.
-					bar.addEventListener("mousedown", e => {
-						if (e.target === bar || e.target === fieldBox) setOpen(false)
-					})
-
-					// Wire the searchbar's text input up to SelectionState, so a
-					// query drives the same selection pipeline as the toolbar's
-					// draw tools — which is what the selection-results panel
-					// already listens to via "selection:changed".
-					const SEARCH_DEBOUNCE_MS = 200
-					let searchTimer = null
-
+				const Searchbar = (() => {
 					function matchesQuery(feature, query) {
-						const {name, time, category, creole, creoleType} = feature.properties
-						const haystack = [name, time, category, creole, creoleType].filter(Boolean).join(" ").toLowerCase()
+						const {name, time, category, creole, authorType} = feature.properties
+						const haystack = [name, time, category, creole, authorType].filter(Boolean).join(" ").toLowerCase()
 
 						const escaped = query.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 						const regex = new RegExp(`\\b${escaped}`, "i")
@@ -2909,71 +2889,148 @@
 
 						const matchingIndices = ArchiveData.features.map((feature, index) => (matchesQuery(feature, query) ? index : -1)).filter(index => index !== -1)
 
-						// A search always replaces the current selection outright,
-						// regardless of whatever boolean mode (add/subtract/intersect)
-						// the selection toolbar currently has armed.
+						/*
+						 *   A search always replaces the current selection outright,
+						 *   regardless of whatever boolean mode (add/subtract/intersect)
+						 *   the selection toolbar currently has armed.
+						 */
 						const previousMode = SelectionState.getMode()
 						SelectionState.setMode("new")
 						SelectionState.applyHits(matchingIndices)
 						SelectionState.setMode(previousMode)
 					}
 
-					input.addEventListener("input", () => {
-						clearBtn.classList.toggle("is-visible", input.value.length > 0)
+					function init() {
+						const bar = document.getElementById("map-searchbar")
+						const trigger = document.getElementById("trigger")
+						const fieldBox = document.getElementById("field-box")
+						const input = document.getElementById("field")
+						const clearBtn = document.getElementById("searchClearBtn")
 
-						clearTimeout(searchTimer)
-						searchTimer = setTimeout(() => runSearch(input.value), SEARCH_DEBOUNCE_MS)
-					})
+						/*
+						 *   Match every other floating panel (legend, toolbar, results,
+						 *   visualizer): the map must not see clicks/scroll/drag that
+						 *   originate inside this control.
+						 */
+						Panels.isolateFromMap(bar)
 
-					clearBtn.addEventListener("click", () => {
-						input.value = ""
-						clearBtn.classList.remove("is-visible")
-						input.focus()
+						let open = false,
+							animating = false,
+							pendingOpen = null
+						const searchDebounced = Utils.debounce(runSearch, Config.search.debounceMs)
 
-						clearTimeout(searchTimer)
-						runSearch("")
-					})
+						function setOpen(next) {
+							if (next === open) {
+								pendingOpen = null
+								return
+							}
+							if (animating) {
+								/*
+								 *   Don't drop the request: a rapid map grab can blur the
+								 *   input mid-open-animation, and CSS (:focus-within) reacts
+								 *   instantly while this queue used to just discard the
+								 *   close — leaving the bar/handle stuck open forever with
+								 *   no way to recover. Replay the latest request once the
+								 *   in-flight animation finishes instead.
+								 */
+								pendingOpen = next
+								return
+							}
 
-					input.addEventListener("blur", () => {
-						// Deferred one tick: if focus is moving to something else
-						// inside the bar (the clear button), stay open. Otherwise
-						// close in the same instant the CSS :focus-within ring
-						// drops, instead of waiting for a full click (mouseup) —
-						// grabbing the map only fires mousedown/blur, not a click,
-						// until release, which used to desync the two animations.
-						setTimeout(() => {
-							if (open && !bar.contains(document.activeElement)) setOpen(false)
-						}, 0)
-					})
+							animating = true
+							open = next
 
-					document.addEventListener("keydown", e => {
-						if (e.key === "Escape" && open) setOpen(false)
-					})
-				}
-				searchbar()
+							bar.classList.toggle("is-open", open)
+							trigger.setAttribute("aria-expanded", String(open))
+
+							if (open) {
+								setTimeout(() => input.focus())
+							} else {
+								input.blur()
+								input.value = ""
+								clearBtn.classList.remove("is-visible")
+								runSearch("")
+							}
+
+							setTimeout(() => {
+								animating = false
+								if (pendingOpen !== null && pendingOpen !== open) {
+									const queued = pendingOpen
+									pendingOpen = null
+									setOpen(queued)
+								} else {
+									pendingOpen = null
+								}
+							}, Config.searchbarAnimationMs)
+						}
+
+						trigger.addEventListener("click", () => setOpen(!open))
+
+						/*
+						 *   Clicking the bar's own background (its border/frame, or the
+						 *   empty space in field-box) doesn't reliably blur the input on
+						 *   its own since neither is a focusable element — handle it
+						 *   explicitly so closing is deterministic either way.
+						 */
+						bar.addEventListener("mousedown", e => {
+							if (e.target === bar || e.target === fieldBox) setOpen(false)
+						})
+
+						input.addEventListener("input", () => {
+							clearBtn.classList.toggle("is-visible", input.value.length > 0)
+							searchDebounced(input.value)
+						})
+
+						clearBtn.addEventListener("click", () => {
+							input.value = ""
+							clearBtn.classList.remove("is-visible")
+							input.focus()
+							runSearch("")
+						})
+
+						input.addEventListener("blur", () => {
+							/*
+							 *   Deferred one tick: if focus is moving to something else
+							 *   inside the bar (the clear button), stay open. Otherwise
+							 *   close in the same instant the CSS :focus-within ring
+							 *   drops, instead of waiting for a full click (mouseup) —
+							 *   grabbing the map only fires mousedown/blur, not a click,
+							 *   until release, which used to desync the two animations.
+							 */
+							setTimeout(() => {
+								if (open && !bar.contains(document.activeElement)) setOpen(false)
+							}, 0)
+						})
+
+						document.addEventListener("keydown", e => {
+							if (e.key === "Escape" && open) setOpen(false)
+						})
+					}
+
+					return {init}
+				})()
 
 				/* ═══════════════════════════════════════════════════════════
-				   APP — bootstraps modules in dependency order.
-				═══════════════════════════════════════════════════════════ */
+	                APP — bootstraps modules in dependency order.
+	            ═══════════════════════════════════════════════════════════ */
 
-				function bootstrap() {
-					VisualizerModal.init()
-					Markers.init(ArchiveData.features)
-					Legend.init()
-					TimeSlider.init()
-					SelectionToolbar.init()
-					SelectionResults.init()
-					CustomSelect.init(document.querySelector(".custom-select"), {onSelect: () => SelectionResults.refresh()})
-				}
-				bootstrap()
+				const App = (() => {
+					function bootstrap() {
+						VisualizerModal.init()
+						Markers.init(ArchiveData.features)
+						Legend.init()
+						TimeSlider.init()
+						SelectionToolbar.init()
+						SelectionResults.init()
+						Searchbar.init()
+						CustomSelect.init(document.querySelector(".custom-select"), {onSelect: () => SelectionResults.refresh()})
+					}
+
+					return {bootstrap}
+				})()
+
+				App.bootstrap()
 			})()
 		</script>
 	</body>
 </html>
-
-<!--
-
-    - MOBILE LAYOUT
-    - REFACTOR IN MULTIPLE FILES
-    
--->

@@ -33,8 +33,8 @@
 
 		<main id="map" aria-label="Archive map">
 			<!-- Document viewer overlay, toggled by "Read source text" links -->
-			<section class="visualizer" id="visualizer" role="dialog" aria-modal="true" aria-label="Document viewer" onclick="toggleWindowPopup()">
-				<article class="lorem_main">
+			<section class="visualizer" id="visualizer" role="dialog" aria-modal="true" aria-label="Document viewer" onclick="if(event.target===this) toggleWindowPopup()">
+				<article class="lorem_main" id="lorem">
 					<header class="lorem_header__">
 						<h2 class="lorem_header__h1">Lorem Ipsum</h2>
 						<p class="lorem_header__h2">Illustrative data only</p>
@@ -57,7 +57,7 @@
 						<p>Phasellus elementum tellus erat, ut varius risus viverra a. Sed mi diam, vehicula sit amet fringilla sit amet, lacinia eu neque. Duis scelerisque maximus nunc, et euismod augue bibendum eget. Etiam molestie cursus magna, in semper nunc gravida a. Donec sollicitudin ut ante sit amet suscipit. Suspendisse potenti. Quisque turpis turpis, maximus nec pretium non, efficitur ut justo. Vestibulum ullamcorper ante nunc, sed viverra dui finibus id. Nam gravida sed leo sit amet rutrum. Nulla facilisi. Fusce quis nibh dignissim, euismod ante id, consequat diam. In pellentesque mauris eu odio auctor feugiat. In nec lacus interdum, scelerisque mi a, facilisis nibh. Nulla facilisi. Phasellus ut dui metus. Sed hendrerit commodo interdum.</p>
 					</div>
 				</article>
-				<button type="button" class="visualizer-close" aria-label="Close document viewer"><span aria-hidden="true">✕</span></button>
+				<button type="button" class="visualizer-close" aria-label="Close document viewer" onclick="toggleWindowPopup()"><span aria-hidden="true">✕</span></button>
 			</section>
 
 			<!-- Searchbar -->
@@ -184,81 +184,64 @@
                 Single-file app, organised into cohesive modules. Each module owns
                 one concern and exposes a small public surface; cross-module
                 communication goes through EventBus rather than shared globals.
-
-                Module map:
-                    Config          — every tunable constant, in one place
-                    Utils           — generic helpers, no app-specific knowledge
-                    EventBus        — pub/sub between state and UI modules
-                    ArchiveData     — sample dataset (swap for fetch() later)
-                    Theme           — colour palette, read once from CSS vars
-                    FilterState     — "which features are visible" (time/category/creole)
-                    SelectionAlgebra— pure new/add/subtract/intersect set combination
-                    SelectionState  — "which features are selected"
-                    MapCore         — the Leaflet map + base layer
-                    Shapes          — single source of shape geometry (marker + legend)
-                    PopupContent    — pure popup HTML from feature props
-                    Markers         — Leaflet markers, kept in sync with FilterState
-                    Geometry        — pure hit-testing math
-                    DrawOverlay      — the transient shape shown while dragging
-                    Panels          — shared "isolate from map" + collapsible-panel helpers
-                    VisualizerModal — the "read source text" document overlay
-                    Legend          — filter legend UI
-                    TimeSlider      — noUiSlider wiring
-                    SelectionToolbar— arms a draw tool, resolves shapes into hits
-                    SelectionResults— renders the selected-features panel
-                    CustomSelect    — generic dropdown, reusable for any .custom-select
-                    Searchbar       — expanding search field wired into SelectionState
-                    App             — bootstraps every module in dependency order
             ═══════════════════════════════════════════════════════════════ */
 
 			;(() => {
 				"use strict"
 
-				/* ═══════════════════════════════════════════════════════════
-	                CONFIG — every magic number/string that isn't purely local
-	                to a single line lives here, so tuning behaviour never means
-	                hunting through modules.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const Config = {
 					map: {
 						center: [15.5, -61.2],
 						zoom: 8,
-						tileUrl: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-						tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-						tileSubdomains: "abcd",
 						maxZoom: 19
 					},
+					basemaps: [
+						{
+							id: "dark",
+							label: "Dark",
+							tileUrl: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+							tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+							tileSubdomains: "abcd"
+						},
+						{
+							id: "light",
+							label: "Light",
+							tileUrl: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+							tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+							tileSubdomains: "abcd"
+						},
+						{
+							id: "atlas",
+							label: "World Atlas",
+							tileUrl: "https://wmts.oldmapsonline.org/maps/bca48631-ffd0-5797-a725-21d54ac4f67b/2017-11-01T22:10:49.806598Z/{z}/{x}/{y}.png?key=L9mp0mSv8QUT19QPhCnL",
+							tileAttribution: '&copy; <a href="https://www.oldmapsonline.org/">Old Maps Online</a>',
+							tileSubdomains: ""
+						},
+						{
+							id: "piccole",
+							label: "Piccole",
+							tileUrl: "https://wmts.oldmapsonline.org/maps/6091e498-082d-4e3e-a8d4-dd34aa26be74/2024-07-29T16:34:18.856393Z/{z}/{x}/{y}.png?key=L9mp0mSv8QUT19QPhCnL",
+							tileAttribution: '&copy; <a href="https://www.oldmapsonline.org/">Old Maps Online</a>',
+							tileSubdomains: ""
+						}
+					],
+					defaultBasemapId: "dark",
 					popup: {maxWidth: 512},
 					search: {debounceMs: 200},
 					flyTo: {minZoom: 11},
 					searchbarAnimationMs: 200
 				}
 
-				/* ═══════════════════════════════════════════════════════════
-	                UTILS — generic helpers with no app-specific knowledge.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const Utils = (() => {
-					/*
-					 *   Identity tagged-template: joins strings/values back into one
-					 *   string. Exists purely so template literals read as `html\`...\``
-					 *   for editor syntax highlighting; no escaping is performed, so
-					 *   only ever interpolate trusted/internal values.
-					 */
 					function html(strings, ...values) {
 						return strings.reduce((out, str, i) => out + str + (i < values.length ? values[i] : ""), "")
 					}
-
 					function capitalize(str) {
 						return str ? str.charAt(0).toUpperCase() + str.slice(1) : str
 					}
-
 					function readCssVar(name) {
 						return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 					}
-
-					// Build a DOM element with attributes/props and children in one call.
 					function el(tag, attrs = {}, children = []) {
 						const node = document.createElement(tag)
 						for (const [key, value] of Object.entries(attrs)) {
@@ -273,8 +256,6 @@
 						}
 						return node
 					}
-
-					// Compares two nullable values, always placing null/undefined last.
 					function compareNullsLast(a, b, compareFn) {
 						const aNull = a === null || a === undefined
 						const bNull = b === null || b === undefined
@@ -283,8 +264,6 @@
 						if (bNull) return -1
 						return compareFn(a, b)
 					}
-
-					// Debounce: delays `fn` until `waitMs` have passed with no further calls.
 					function debounce(fn, waitMs) {
 						let timer = null
 						return (...args) => {
@@ -292,139 +271,89 @@
 							timer = setTimeout(() => fn(...args), waitMs)
 						}
 					}
-
 					return {html, capitalize, readCssVar, el, compareNullsLast, debounce}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                EVENT BUS — decouples state modules from the UI modules
-	                that react to them.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const EventBus = (() => {
 					const listeners = new Map()
-
 					function on(event, handler) {
 						if (!listeners.has(event)) listeners.set(event, new Set())
 						listeners.get(event).add(handler)
 						return () => listeners.get(event).delete(handler)
 					}
-
 					function emit(event, payload) {
 						listeners.get(event)?.forEach(handler => handler(payload))
 					}
-
 					return {on, emit}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                DATA — sample archive dataset. Swap for a fetch() call
-	                without touching any other module.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const ArchiveData = (() => {
-					/** @typedef {{ name: string, time: number, category: string, creole: "using"|"about"|null, authorType: string|null, urlIMG: string, urlText: string, resume: string }} FeatureProps */
-
 					const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst."
 
 					const geojson = {
 						type: "FeatureCollection",
 						features: [
-							{
-								type: "Feature",
-								properties: {name: "A Voyage to Dominica", time: 1750, category: "poem", creole: "using", authorType: "clergy", urlIMG: "../img/book1.jpg", resume: LOREM},
-								geometry: {type: "Point", coordinates: [-61.409993, 15.523156]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "British Colonial Report", time: 1816, category: "report", creole: "about", authorType: "admin", urlIMG: "../img/book1.jpg", urlText: true, resume: LOREM},
-								geometry: {type: "Point", coordinates: [-61.316598, 15.37628]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "Caribbean Merchant Letter", time: 1691, category: "bible", creole: "using", authorType: "poet", urlIMG: "../img/book1.jpg", urlText: null, resume: null},
-								geometry: {type: "Point", coordinates: [-61.346091, 15.544468]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "poet Plantation Letter", time: 1763, category: "letter", creole: "about", authorType: null, urlIMG: "../img/book1.jpg", urlText: null, resume: null},
-								geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "Early Missionary Notes", time: 1847, category: "letter", creole: "about", authorType: "merchant", urlIMG: "", urlText: true, resume: LOREM},
-								geometry: {type: "Point", coordinates: [-61.387352, 16.315212]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "clergy Creole Verses", time: 1717, category: "report", creole: null, authorType: null, urlIMG: "../img/book2.jpg", urlText: true, resume: LOREM},
-								geometry: {type: "Point", coordinates: [-61.611308, 16.117324]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "Holy Scriptures Translation", time: 1648, category: "bible", creole: "about", authorType: "other", urlIMG: "../img/book2.jpg", urlText: true, resume: LOREM},
-								geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "Island Folk Ballad", time: 1689, category: "poem", creole: null, authorType: "clergy", urlIMG: "../img/book2.jpg", urlText: true, resume: LOREM},
-								geometry: {type: "Point", coordinates: [-60.964977, 14.693279]}
-							},
-							{
-								type: "Feature",
-								properties: {name: "Zanzibar Correspondence", time: 1777, category: "letter", creole: "using", authorType: null, urlIMG: "../img/book2.jpg", urlText: true, resume: LOREM},
-								geometry: {type: "Point", coordinates: [-60.885014, 14.484105]}
-							}
+							{type: "Feature", properties: {name: "A Voyage to Dominica", time: 1750, category: "poem", creole: "using", authorType: "other", urlIMG: "../img/book (1).jfif", resume: LOREM}, geometry: {type: "Point", coordinates: [-61.409993, 15.523156]}},
+							{type: "Feature", properties: {name: "British Colonial Report", time: 1816, category: "report", creole: "about", authorType: "admin", urlIMG: "../img/book (1).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.316598, 15.37628]}},
+							{type: "Feature", properties: {name: "Caribbean Merchant Letter", time: 1691, category: "letter", creole: "using", authorType: "poet", urlIMG: "../img/book (2).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.346091, 15.544468]}},
+							{type: "Feature", properties: {name: "Plantation Ledger", time: 1763, category: "other", creole: "about", authorType: null, urlIMG: "../img/book (2).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}},
+							{type: "Feature", properties: {name: "Early Missionary Notes", time: 1847, category: "notes", creole: "about", authorType: "merchant", urlIMG: "../img/book (3).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.387352, 16.315212]}},
+							{type: "Feature", properties: {name: "Creole Verses", time: 1717, category: "poem", creole: null, authorType: "poet", urlIMG: "../img/book (3).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.611308, 16.117324]}},
+							{type: "Feature", properties: {name: "Holy Scriptures Translation", time: 1648, category: "bible", creole: "about", authorType: "other", urlIMG: "../img/book (4).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}},
+							{type: "Feature", properties: {name: "Island Folk Ballad", time: 1689, category: "roman", creole: null, authorType: "clergy", urlIMG: "../img/book (4).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-60.964977, 14.693279]}},
+							{type: "Feature", properties: {name: "Zanzibar Correspondence", time: 1777, category: "letter", creole: "using", authorType: null, urlIMG: "../img/book (5).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-60.885014, 14.484105]}},
+							{type: "Feature", properties: {name: "Military Dispatch from Roseau", time: 1795, category: "report", creole: null, authorType: "military", urlIMG: "../img/book (5).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.392, 15.304]}},
+							{type: "Feature", properties: {name: "Governor's Private Correspondence", time: 1802, category: "letter", creole: "about", authorType: "admin", urlIMG: "../img/book (6).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.371, 15.301]}},
+							{type: "Feature", properties: {name: "Merchant's Harbour Journal", time: 1734, category: "notes", creole: "using", authorType: "merchant", urlIMG: "../img/book (6).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.545, 16.241]}},
+							{type: "Feature", properties: {name: "Songs from the Windward Coast", time: 1821, category: "poem", creole: "using", authorType: "writer", urlIMG: "../img/book (7).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.005, 14.017]}},
+							{type: "Feature", properties: {name: "Catechism for Island Communities", time: 1709, category: "bible", creole: "using", authorType: "clergy", urlIMG: "../img/book (7).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.118, 14.599]}},
+							{type: "Feature", properties: {name: "Chronicle of the Sugar Estates", time: 1766, category: "other", creole: null, authorType: "writer", urlIMG: "../img/book (8).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.476, 16.202]}},
+							{type: "Feature", properties: {name: "A Romance of Saint Lucia", time: 1843, category: "roman", creole: "about", authorType: "writer", urlIMG: "../img/book (8).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-60.984, 13.909]}},
+							{type: "Feature", properties: {name: "Captain's Field Notebook", time: 1782, category: "notes", creole: null, authorType: "military", urlIMG: "../img/book (9).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.662, 15.972]}},
+							{type: "Feature", properties: {name: "Poems for the Caribbean Colonies", time: 1756, category: "poem", creole: "about", authorType: "other", urlIMG: "../img/book (9).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.323, 15.428]}},
+							{type: "Feature", properties: {name: "Registry of Colonial Trade", time: 1819, category: "report", creole: "using", authorType: "admin", urlIMG: "../img/book (10).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.514, 16.071]}},
+							{type: "Feature", properties: {name: "Letter from a Parish Priest", time: 1698, category: "letter", creole: null, authorType: "clergy", urlIMG: "../img/book (10).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.175, 14.738]}},
+							{type: "Feature", properties: {name: "Narrative of the Lesser Antilles", time: 1837, category: "roman", creole: "using", authorType: "writer", urlIMG: "../img/book (11).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.259, 15.614]}},
+							{type: "Feature", properties: {name: "Survey of Indigenous Languages", time: 1771, category: "other", creole: "about", authorType: "other", urlIMG: "../img/book (11).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.421, 15.597]}},
+							{type: "Feature", properties: {name: "Account Book of a Cocoa Trader", time: 1811, category: "notes", creole: "about", authorType: "merchant", urlIMG: "../img/book (12).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.598, 15.998]}},
+							{type: "Feature", properties: {name: "Meditations in Creole Verse", time: 1861, category: "poem", creole: "using", authorType: "poet", urlIMG: "../img/book (12).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.028, 14.505]}},
+							{type: "Feature", properties: {name: "Naval Orders for the Leeward Islands", time: 1805, category: "report", creole: "about", authorType: "military", urlIMG: null, urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.702, 16.335]}}
 						]
 					}
-
 					return {geojson, features: geojson.features}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                THEME — single source of truth for palette, read once from
-	                the CSS custom properties defined in the stylesheet.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const Theme = (() => {
 					const categoryColors = {
 						bible: Utils.readCssVar("--color-cat-bible"),
 						letter: Utils.readCssVar("--color-cat-letter"),
+						notes: Utils.readCssVar("--color-cat-notes"),
 						poem: Utils.readCssVar("--color-cat-poem"),
-						report: Utils.readCssVar("--color-cat-report")
+						report: Utils.readCssVar("--color-cat-report"),
+						roman: Utils.readCssVar("--color-cat-roman"),
+						other: Utils.readCssVar("--color-cat-other")
 					}
-
 					const authorTypeColors = {
 						admin: Utils.readCssVar("--color-writ-admin"),
 						clergy: Utils.readCssVar("--color-writ-clergy"),
 						merchant: Utils.readCssVar("--color-writ-merchant"),
+						military: Utils.readCssVar("--color-writ-military"),
 						poet: Utils.readCssVar("--color-writ-poet"),
+						writer: Utils.readCssVar("--color-writ-writer"),
 						other: Utils.readCssVar("--color-writ-other")
 					}
-
 					const fallbackColor = "#8b949e"
-
 					function categoryColor(category) {
 						return categoryColors[category] ?? fallbackColor
 					}
-
 					function creoleColor(authorType) {
 						return authorType ? authorTypeColors[authorType] : null
 					}
-
 					return {categoryColors, authorTypeColors, categoryColor, creoleColor}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                FILTER STATE — the single owner of "which features are
-	                currently visible". UI modules read/write through these
-	                functions and react to "filters:changed"; nothing mutates
-	                the underlying object directly.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const FilterState = (() => {
 					const years = ArchiveData.features.map(f => f.properties.time)
-
 					const state = {
 						minYear: Math.min(...years),
 						maxYear: Math.max(...years),
@@ -432,42 +361,33 @@
 						activeCategories: new Set(Object.keys(Theme.categoryColors)),
 						activeauthorTypes: new Set(Object.keys(Theme.authorTypeColors))
 					}
-
 					function notify() {
 						EventBus.emit("filters:changed", state)
 					}
-
 					function setYearRange(minYear, maxYear) {
 						state.minYear = minYear
 						state.maxYear = maxYear
 						notify()
 					}
-
 					function setCreoleRoleActive(roleKey, isOn) {
 						state.showCreoleRole[roleKey] = isOn
 						notify()
 					}
-
 					function setCategoryActive(category, isOn) {
 						isOn ? state.activeCategories.add(category) : state.activeCategories.delete(category)
 						notify()
 					}
-
 					function setauthorTypeActive(authorType, isOn) {
 						isOn ? state.activeauthorTypes.add(authorType) : state.activeauthorTypes.delete(authorType)
 						notify()
 					}
-
-					// Map a feature's nullable `creole` value to a role-filter key.
 					function roleKeyFor(creole) {
 						return creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
 					}
-
 					function isFeatureVisible(properties) {
 						const {time, category, creole, authorType} = properties
 						return time >= state.minYear && time <= state.maxYear && state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeauthorTypes.has(authorType))
 					}
-
 					return {
 						get minYear() {
 							return state.minYear
@@ -483,13 +403,6 @@
 					}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                SELECTION ALGEBRA — pure combination of "hits from this draw"
-	                with "the existing selection", per boolean mode. Zero DOM/
-	                Leaflet dependency, so it can be reasoned about (and tested)
-	                in isolation from everything else.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const SelectionAlgebra = (() => {
 					const combinators = {
 						new: (existing, hits) => new Set(hits),
@@ -497,96 +410,124 @@
 						subtract: (existing, hits) => new Set([...existing].filter(i => !hits.has(i))),
 						intersect: (existing, hits) => new Set([...existing].filter(i => hits.has(i)))
 					}
-
-					/** @returns {Set<number>} a new selection Set; never mutates `existing`. */
 					function combine(existing, hitIndices, mode) {
 						const hits = new Set(hitIndices)
 						const combinator = combinators[mode] ?? combinators.new
 						return combinator(existing, hits)
 					}
-
 					return {combine}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                SELECTION STATE — the single owner of "which features are
-	                currently selected" via the draw-and-select tool.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const SelectionState = (() => {
 					let selectedIndices = new Set()
-					let mode = "new" // "new" | "add" | "subtract" | "intersect"
-
+					let mode = "new"
 					function setMode(nextMode) {
 						mode = nextMode
 					}
-
 					function getMode() {
 						return mode
 					}
-
-					// Combine a set of newly-hit indices into the selection per the active boolean mode.
 					function applyHits(hitIndices) {
 						selectedIndices = SelectionAlgebra.combine(selectedIndices, hitIndices, mode)
 						EventBus.emit("selection:changed", selectedIndices)
 					}
-
 					function clear() {
 						selectedIndices = new Set()
 						EventBus.emit("selection:changed", selectedIndices)
 					}
-
 					function has(index) {
 						return selectedIndices.has(index)
 					}
-
 					function indices() {
 						return Array.from(selectedIndices)
 					}
-
 					function size() {
 						return selectedIndices.size
 					}
-
 					return {setMode, getMode, applyHits, clear, has, indices, size}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                MAP CORE — the Leaflet map instance and base layer.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const MapCore = (() => {
 					const map = L.map("map", {center: Config.map.center, zoom: Config.map.zoom, zoomControl: true})
-
-					L.tileLayer(Config.map.tileUrl, {
-						attribution: Config.map.tileAttribution,
-						subdomains: Config.map.tileSubdomains,
-						maxZoom: Config.map.maxZoom
-					}).addTo(map)
-
 					return {map, getContainer: () => map.getContainer()}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                SHAPES — single source of shape geometry, shared by marker
-	                icons (coloured, glowing, map-scale) and legend swatches
-	                (CSS-driven, 14×14). Each shape "kind" is defined once as an
-	                SVG-fragment builder; the two renderers just choose the frame
-	                and styling strategy around it.
-	            ═══════════════════════════════════════════════════════════ */
+				const Basemaps = (() => {
+					let layers = new Map()
+					let currentId = null
+
+					function layerFor(def) {
+						if (!layers.has(def.id)) {
+							layers.set(
+								def.id,
+								L.tileLayer(def.tileUrl, {
+									attribution: def.tileAttribution,
+									subdomains: def.tileSubdomains ?? "abc",
+									maxZoom: Config.map.maxZoom
+								})
+							)
+						}
+						return layers.get(def.id)
+					}
+
+					function set(id) {
+						const def = Config.basemaps.find(b => b.id === id)
+						if (!def || id === currentId) return
+						const nextLayer = layerFor(def)
+						if (currentId) {
+							const prevDef = Config.basemaps.find(b => b.id === currentId)
+							MapCore.map.removeLayer(layerFor(prevDef))
+						}
+						nextLayer.addTo(MapCore.map)
+						currentId = id
+						EventBus.emit("basemap:changed", id)
+					}
+
+					function buildControl() {
+						const control = Utils.el("div", {className: "map-basemap-control", "aria-label": "Basemap selector"})
+						const row = Utils.el("div", {className: "map-basemap-control__row", role: "radiogroup", "aria-label": "Choose basemap"})
+
+						const buttons = Config.basemaps.map(def => {
+							const btn = Utils.el("button", {
+								type: "button",
+								className: "map-basemap-control__btn" + (def.id === currentId ? " is-active" : ""),
+								"data-basemap": def.id,
+								"aria-pressed": String(def.id === currentId),
+								text: def.label
+							})
+							btn.addEventListener("click", () => set(def.id))
+							return btn
+						})
+
+						buttons.forEach(btn => row.appendChild(btn))
+						control.appendChild(row)
+						document.getElementById("map").appendChild(control)
+
+						EventBus.on("basemap:changed", activeId => {
+							buttons.forEach(btn => {
+								const isActive = btn.dataset.basemap === activeId
+								btn.classList.toggle("is-active", isActive)
+								btn.setAttribute("aria-pressed", String(isActive))
+							})
+						})
+
+						Panels.isolateFromMap(control)
+					}
+
+					function init() {
+						buildControl()
+						set(Config.defaultBasemapId ?? Config.basemaps[0].id)
+					}
+
+					return {init, set}
+				})()
 
 				const Shapes = (() => {
-					const split = "#fff" // neutral separating stroke colour; swap for a theme var if you have one
-					const splitWidth = 1 // gap width, in px (marker scale)
-
-					// Marker-scale fragments.
-					// Layer order: inset fill (bottom) -> wide neutral ring -> thin colour stroke (top).
-					// The fill is drawn smaller than the shape boundary so the neutral ring has
-					// actual space to show in, instead of being centered under the colour stroke.
+					const split = "#fff"
+					const splitWidth = 1
 					const markerFragments = {
 						about: (fill, stroke) => {
 							const inset = splitWidth
-							// polygon scaled toward centroid (~10,19) to inset the fill
 							const cx = 15,
 								cy = 19
 							const scale = (px, py) => {
@@ -628,104 +569,86 @@
 						`
 						})
 					}
-
-					// Legend-scale fragments (14×14). Same layering, smaller inset.
 					const legendFragments = {
 						using: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
 						about: `<polygon class="shape-fill" points="7,1 13,13 1,13" stroke-width="1.5" stroke-linejoin="round" />`,
 						unknown: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
 						ring: `<circle class="shape-fill shape-fill--ring" cx="7" cy="7" r="5" stroke-width="3" />`
 					}
-
 					function markerSvg(creoleRole, fillColor, ringColor) {
 						const {size, svg} = (markerFragments[creoleRole] ?? markerFragments.unknown)(fillColor, ringColor)
 						const glow = `filter:drop-shadow(0 0 0.25rem ${ringColor})`
 						return Utils.html`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="overflow:visible; ${glow};">${svg}</svg>`
 					}
-
 					function legendSvg(kind) {
 						return Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${legendFragments[kind] ?? legendFragments.unknown}</svg>`
 					}
-
 					return {markerSvg, legendSvg}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                POPUP CONTENT — pure rendering of a feature's popup HTML.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const PopupContent = (() => {
 					function imageBlock(urlIMG, category) {
 						if (urlIMG) return Utils.html`<img src="${urlIMG}" alt="Document thumbnail: ${category}" />`
-						return Utils.html`  <div class="popup__image-empty">
-					                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-					                            	<rect width="18" height="18" x="3" y="3" rx="2" />
-					                            	<circle cx="9" cy="9" r="2" />
-					                            	<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-					                            </svg>
-				                            </div>`
+						return Utils.html`
+                            <div class="popup__image-empty">
+					            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+					            	<rect width="18" height="18" x="3" y="3" rx="2" />
+					            	<circle cx="9" cy="9" r="2" />
+					            	<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+					            </svg>
+				            </div>`
 					}
-
 					function authorTypePill(authorType) {
 						if (!authorType) return ""
 						const color = Theme.creoleColor(authorType)
 						return Utils.html`<span class="pill pill--creole-type" style="background:${color}22; color:${color}; border-color:${color}44"> ${Utils.capitalize(authorType)} </span>`
 					}
-
 					function creoleRolePill(creole) {
 						const label = creole === "using" ? "Written in creole" : creole === "about" ? "About creoles" : ""
 						return label ? Utils.html`<span class="pill pill--creole-role">${label}</span>` : ""
 					}
-
 					function sourceLink(urlText) {
 						if (!urlText) return ""
-						return Utils.html`  <a class="popup__source-link" target="_blank" rel="noopener noreferrer" onclick="toggleWindowPopup()">
-					                            Read source text
-				                            	<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				                            		<path d="M7 7h10v10" />
-				                            		<path d="M7 17 17 7" />
-				                            	</svg>
-				                            </a>`
+						return Utils.html`  
+                            <a class="popup__source-link" target="_blank" rel="noopener noreferrer" onclick="toggleWindowPopup()">
+					            Read source text
+				            	<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				            		<path d="M7 7h10v10" />
+				            		<path d="M7 17 17 7" />
+				            	</svg>
+				            </a>`
 					}
-
-					/** @param {FeatureProps} props */
 					function build(props) {
 						const {time, category, creole, authorType, urlIMG, urlText, resume} = props
 						const categoryPill = Utils.html`<span class="pill pill--category">${category}</span>`
-
-						return Utils.html`  <div class="popup__panels">
-				                                <div class="popup__left">
-				                                	<div class="popup__image-wrap">
-				                                		${imageBlock(urlIMG, category)}
-				                                		<span class="popup__year-badge">${time}</span>
-				                                	</div>
-				                                	<div class="popup__pills">${categoryPill} ${authorTypePill(authorType)} ${creoleRolePill(creole)}</div>
-				                                </div>
-			                                	<div class="popup__right">
-			                                		<div style="height:100%; display:flex; flex-direction:column; justify-content:center">${
-														resume
-															? `❝ ${resume} ❞`
-															: `
-                                                            <div style="font-size:var(--font-size-xl); color:var(--color-text)">
-                                                                We're sorry,
-                                                            </div>
-                                                            <div style="text-align:right; color:var(--color-text-secondary)">
-                                                                No resumés are available at the moment..
-                                                            </div>
-                                                        `
-													}</div>
-			                                		${sourceLink(urlText)}
-			                                	</div>
-			                                </div>`
+						return Utils.html`
+                            <div class="popup__panels">
+				                <div class="popup__left">
+				                	<div class="popup__image-wrap">
+				                		${imageBlock(urlIMG, category)}
+				                		<span class="popup__year-badge">${time}</span>
+				                	</div>
+				                	<div class="popup__pills">${categoryPill} ${authorTypePill(authorType)} ${creoleRolePill(creole)}</div>
+				                </div>
+			                	<div class="popup__right">
+			                		<div style="height:100%; display:flex; flex-direction:column; justify-content:center">${
+										resume
+											? `❝ ${resume} ❞`
+											: `
+                                            <div style="font-size:var(--font-size-xl); color:var(--color-text)">
+                                                We're sorry,
+                                            </div>
+                                            <div style="text-align:right; color:var(--color-text-secondary)">
+                                                No resumés are available at the moment..
+                                            </div>
+                                        `
+									}</div>
+			                		${sourceLink(urlText)}
+			                	</div>
+			                </div>`
 					}
-
 					return {build}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                MARKERS — builds Leaflet markers from features and keeps
-	                their visibility in sync with FilterState.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const Markers = (() => {
 					let markers = []
@@ -734,31 +657,26 @@
 					function createMarker(feature, index) {
 						const {category, creole, authorType} = feature.properties
 						const [lng, lat] = feature.geometry.coordinates
-
 						const fillColor = Theme.categoryColor(category)
 						const ringColor = Theme.creoleColor(authorType) ?? fillColor
-
 						const icon = L.divIcon({
 							className: "",
 							html: Shapes.markerSvg(creole, fillColor, ringColor),
 							iconSize: [20, 20],
 							iconAnchor: [10, 10]
 						})
-
 						const marker = L.marker([lat, lng], {icon})
 						marker.bindPopup(PopupContent.build(feature.properties), {maxWidth: Config.popup.maxWidth})
 						marker.feature = feature
 						indexByMarker.set(marker, index)
 						return marker
 					}
-
 					function applyVisibility() {
 						markers.forEach(marker => {
 							const visible = FilterState.isFeatureVisible(marker.feature.properties)
 							visible ? marker.addTo(MapCore.map) : MapCore.map.removeLayer(marker)
 						})
 					}
-
 					function init(features) {
 						markers = features.map((feature, index) => {
 							const marker = createMarker(feature, index)
@@ -768,27 +686,17 @@
 						EventBus.on("filters:changed", applyVisibility)
 						return markers
 					}
-
 					function all() {
 						return markers
 					}
-
 					function visible() {
 						return markers.filter(marker => MapCore.map.hasLayer(marker))
 					}
-
-					// O(1) lookup of a marker's index into ArchiveData.features, cached at creation time.
 					function featureIndex(marker) {
 						return indexByMarker.get(marker)
 					}
-
 					return {init, all, visible, featureIndex}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                GEOMETRY — pure hit-testing math, no DOM/Leaflet coupling
-	                beyond the container-point conversion it's handed.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const Geometry = (() => {
 					function inRectangle(point, start, end) {
@@ -798,7 +706,6 @@
 							maxY = Math.max(start.y, end.y)
 						return point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY
 					}
-
 					function inEllipse(point, start, end) {
 						const cx = (start.x + end.x) / 2,
 							cy = (start.y + end.y) / 2
@@ -809,8 +716,6 @@
 							dy = (point.y - cy) / ry
 						return dx * dx + dy * dy <= 1
 					}
-
-					// Standard ray-casting point-in-polygon test.
 					function inPolygon(point, vertices) {
 						let inside = false
 						for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
@@ -821,26 +726,17 @@
 						}
 						return inside
 					}
-
 					function pointsToPath(points, close) {
 						if (!points.length) return ""
 						const [first, ...rest] = points
 						const segs = rest.map(p => `L ${p.x} ${p.y}`).join(" ")
 						return `M ${first.x} ${first.y} ${segs}${close ? " Z" : ""}`
 					}
-
 					return {inRectangle, inEllipse, inPolygon, pointsToPath}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                DRAW OVERLAY — the transient visual shape while dragging.
-	                Owns its own DOM element(s); callers just tell it what to
-	                render or when to clear.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const DrawOverlay = (() => {
 					let el = null
-
 					function ensureBoxEl(className) {
 						if (!el || el.tagName !== "DIV") {
 							clear()
@@ -850,7 +746,6 @@
 						el.className = className
 						return el
 					}
-
 					function ensureSvgEl() {
 						if (!el || el.tagName.toLowerCase() !== "svg") {
 							clear()
@@ -861,7 +756,6 @@
 						}
 						return el
 					}
-
 					function box(className, start, end) {
 						const node = ensureBoxEl(className)
 						const x = Math.min(start.x, end.x),
@@ -871,135 +765,86 @@
 						node.style.width = `${Math.abs(end.x - start.x)}px`
 						node.style.height = `${Math.abs(end.y - start.y)}px`
 					}
-
 					function rectangle(start, end) {
 						box("select-draw-shape", start, end)
 					}
-
 					function ellipse(start, end) {
 						box("select-draw-shape select-draw-shape--ellipse", start, end)
 					}
-
 					function path(points, close) {
 						const node = ensureSvgEl()
 						node.querySelector("path").setAttribute("d", Geometry.pointsToPath(points, close))
 					}
-
 					function clear() {
 						el?.remove()
 						el = null
 					}
-
 					return {rectangle, ellipse, path, clear}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                PANELS — shared behaviour for every floating surface on the
-	                map: keeping Leaflet from swallowing their pointer/scroll
-	                events, and a reusable collapse/expand controller with
-	                consistent aria handling (optionally height-animated).
-	            ═══════════════════════════════════════════════════════════ */
-
 				const Panels = (() => {
-					// Stop Leaflet from treating clicks/scroll/drag inside `el` as map interaction.
 					function isolateFromMap(el) {
 						L.DomEvent.disableScrollPropagation(el)
 						L.DomEvent.disableClickPropagation(el)
 					}
-
-					/*
-					 *   A collapse/expand controller shared by any panel with a toggle
-					 *   button. If `bodyEl` is supplied, expanding also sets an explicit
-					 *   `max-height` from the body's measured content height (the CSS
-					 *   transition animates from 0 to that value); panels that collapse
-					 *   purely via a CSS class (no measured animation) omit `bodyEl`.
-					 */
 					function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
 						function setCollapsed(collapsed) {
 							panelEl.classList.toggle(collapsedClass, collapsed)
 							collapseBtn.setAttribute("aria-expanded", String(!collapsed))
 							collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
-
 							if (!collapsed && bodyEl) {
 								bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
 							}
 						}
-
 						function isCollapsed() {
 							return panelEl.classList.contains(collapsedClass)
 						}
-
 						return {setCollapsed, isCollapsed}
 					}
-
 					return {isolateFromMap, createCollapsible}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                VISUALIZER MODAL — the "read source text" overlay.
-	                Placeholder content; isolated so it's easy to replace later.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const VisualizerModal = (() => {
 					function init() {
 						const visualizer = document.getElementById("visualizer")
 						Panels.isolateFromMap(visualizer)
-
 						function toggle() {
 							visualizer.classList.toggle("show")
 						}
-
-						// Exposed globally: referenced by inline onclick in static HTML
-						// and in dynamically-injected popup markup.
 						window.toggleWindowPopup = toggle
 					}
-
 					return {init}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                LEGEND — builds the filter legend UI. Reads current state
-	                for initial checked-ness, writes changes back through
-	                FilterState; has no knowledge of marker visibility itself.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const Legend = (() => {
 					function toggleRow({id, label, shapeKind, initialColor, onChange}) {
 						const checkboxId = `cb-${id}`
 						const row = Utils.el("div", {className: "legend__item"})
 						row.style.setProperty("--shape-color", initialColor)
-
 						row.innerHTML = Utils.html` <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
 					                                    <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
 					                                    ${Shapes.legendSvg(shapeKind)}
 				                                    </label>
 				                                    <label class="legend__item-label" for="${checkboxId}">${label}</label>`
-
 						const checkbox = row.querySelector("input")
 						const iconToggle = row.querySelector(".legend__icon-toggle")
-
 						checkbox.addEventListener("change", () => {
 							const isOn = checkbox.checked
 							row.classList.toggle("is-off", !isOn)
 							iconToggle.classList.toggle("is-off", !isOn)
 							onChange(isOn)
 						})
-
 						return row
 					}
-
 					function groupTitle(text) {
 						return Utils.el("div", {className: "legend__group-title", text})
 					}
-
 					function divider() {
 						return Utils.el("div", {className: "legend__divider", role: "separator"})
 					}
-
 					function header() {
 						const headerEl = Utils.el("div", {className: "legend__header"})
 						const title = Utils.el("span", {className: "legend__title", text: "Filters"})
-
 						const collapseBtn = Utils.el("button", {
 							className: "collapse-btn legend__collapse-btn",
 							"aria-label": "Expand legend",
@@ -1008,126 +853,69 @@
 						                            <polyline points="2,9 7,4 12,9" />
 					                            </svg>`
 						})
-
 						headerEl.append(title, collapseBtn)
 						return {headerEl, collapseBtn}
 					}
-
 					const creoleRoleEntries = [
 						{key: "using", label: "Using creoles", shapeKind: "using"},
 						{key: "about", label: "About creoles", shapeKind: "about"},
 						{key: "unknown", label: "Unknown", shapeKind: "unknown"}
 					]
-
 					function creoleRoleGroup(body) {
 						body.appendChild(groupTitle("Creole"))
 						creoleRoleEntries.forEach(({key, label, shapeKind}) => {
-							body.appendChild(
-								toggleRow({
-									id: `legend-creole-${key}`,
-									label,
-									shapeKind,
-									initialColor: "white",
-									onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)
-								})
-							)
+							body.appendChild(toggleRow({id: `legend-creole-${key}`, label, shapeKind, initialColor: "white", onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)}))
 						})
 					}
-
 					function authorTypeGroup(body) {
 						body.appendChild(groupTitle("Author type"))
 						Object.entries(Theme.authorTypeColors).forEach(([typeKey, color]) => {
-							body.appendChild(
-								toggleRow({
-									id: `legend-atype-${typeKey}`,
-									label: Utils.capitalize(typeKey),
-									shapeKind: "ring",
-									initialColor: color,
-									onChange: isOn => FilterState.setauthorTypeActive(typeKey, isOn)
-								})
-							)
+							body.appendChild(toggleRow({id: `legend-atype-${typeKey}`, label: Utils.capitalize(typeKey), shapeKind: "ring", initialColor: color, onChange: isOn => FilterState.setauthorTypeActive(typeKey, isOn)}))
 						})
 					}
-
 					function categoryGroup(body) {
 						body.appendChild(groupTitle("Document type"))
 						Object.entries(Theme.categoryColors).forEach(([catKey, color]) => {
-							body.appendChild(
-								toggleRow({
-									id: `legend-cat-${catKey}`,
-									label: Utils.capitalize(catKey),
-									shapeKind: "unknown",
-									initialColor: color,
-									onChange: isOn => FilterState.setCategoryActive(catKey, isOn)
-								})
-							)
+							body.appendChild(toggleRow({id: `legend-cat-${catKey}`, label: Utils.capitalize(catKey), shapeKind: "unknown", initialColor: color, onChange: isOn => FilterState.setCategoryActive(catKey, isOn)}))
 						})
 					}
-
 					function init() {
 						const legend = Utils.el("div", {className: "map-legend is-collapsed", "aria-label": "Map legend"})
 						document.getElementById("map").appendChild(legend)
-
 						const {headerEl, collapseBtn} = header()
 						legend.appendChild(headerEl)
-
 						const body = Utils.el("div", {className: "legend__body"})
 						legend.appendChild(body)
-
 						creoleRoleGroup(body)
 						body.appendChild(divider())
 						authorTypeGroup(body)
 						body.appendChild(divider())
 						categoryGroup(body)
-
-						const collapsible = Panels.createCollapsible({
-							panelEl: legend,
-							collapseBtn,
-							bodyEl: body,
-							expandLabel: "Expand legend",
-							collapseLabel: "Collapse legend"
-						})
-
+						const collapsible = Panels.createCollapsible({panelEl: legend, collapseBtn, bodyEl: body, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
 						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
-
 						Panels.isolateFromMap(legend)
 					}
-
 					return {init}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                TIME SLIDER — thin wiring around noUiSlider; talks only to
-	                FilterState, knows nothing about markers.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const TimeSlider = (() => {
 					function init() {
 						const sliderEl = document.getElementById("time-slider")
 						const rangeValueEl = document.getElementById("range-value")
-
 						noUiSlider.create(sliderEl, {
 							start: [FilterState.minYear, FilterState.maxYear],
 							connect: true,
 							step: 1,
 							range: {min: FilterState.minYear, max: FilterState.maxYear}
 						})
-
 						sliderEl.noUiSlider.on("update", values => {
 							const [min, max] = values.map(Math.round)
 							rangeValueEl.textContent = `${min} – ${max}`
 							FilterState.setYearRange(min, max)
 						})
 					}
-
 					return {init}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                SELECTION TOOLBAR — arms a draw tool, tracks in-progress
-	                pointer input, and resolves finished shapes into hits that
-	                are handed off to SelectionState.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const SelectionToolbar = (() => {
 					const hitTesters = {
@@ -1136,22 +924,18 @@
 						lasso: points => Markers.visible().filter(marker => Geometry.inPolygon(containerPoint(marker), points)),
 						polygon: points => (points.length < 3 ? [] : Markers.visible().filter(marker => Geometry.inPolygon(containerPoint(marker), points)))
 					}
-
 					let toolbarEl, shapeButtons, modeButtons
-					let armedShape = null // "rectangle" | "ellipse" | "lasso" | "polygon" | null
+					let armedShape = null
 					let isDrawing = false
 					let drawPoints = []
 					let drawStart = null
-
 					function containerPoint(marker) {
 						return MapCore.map.latLngToContainerPoint(marker.getLatLng())
 					}
-
 					function relativePoint(evt) {
 						const rect = MapCore.getContainer().getBoundingClientRect()
 						return {x: evt.clientX - rect.left, y: evt.clientY - rect.top}
 					}
-
 					function arm(shape) {
 						armedShape = shape
 						shapeButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.shape === shape))
@@ -1161,7 +945,6 @@
 						MapCore.map.doubleClickZoom.disable()
 						if (MapCore.map.tap) MapCore.map.tap.disable()
 					}
-
 					function disarm() {
 						armedShape = null
 						shapeButtons.forEach(btn => btn.classList.remove("is-active"))
@@ -1172,17 +955,14 @@
 						if (MapCore.map.tap) MapCore.map.tap.enable()
 						cancelDraw()
 					}
-
 					function cancelDraw() {
 						isDrawing = false
 						drawPoints = []
 						drawStart = null
 						DrawOverlay.clear()
 					}
-
 					function finishDraw() {
 						let hits = []
-
 						if (armedShape === "rectangle" && drawStart) {
 							hits = hitTesters.rectangle(drawStart, drawPoints[drawPoints.length - 1] ?? drawStart)
 						} else if (armedShape === "ellipse" && drawStart) {
@@ -1192,18 +972,14 @@
 						} else if (armedShape === "polygon") {
 							hits = hitTesters.polygon(drawPoints)
 						}
-
 						SelectionState.applyHits(hits.map(Markers.featureIndex))
 						EventBus.emit("selection:toolUsed")
 						cancelDraw()
 					}
-					// Mouse Events
 					function onMouseDown(evt) {
 						if (!armedShape) return
 						if (evt.target.closest("#map-select-toolbar") || evt.target.closest(".selection-results")) return
-
 						const point = relativePoint(evt)
-
 						if (armedShape === "polygon") {
 							if (!isDrawing) {
 								isDrawing = true
@@ -1214,16 +990,13 @@
 							DrawOverlay.path([...drawPoints], true)
 							return
 						}
-
 						isDrawing = true
 						drawStart = point
 						drawPoints = [point]
 					}
-
 					function onMouseMove(evt) {
 						if (!isDrawing || !armedShape) return
 						const point = relativePoint(evt)
-
 						if (armedShape === "rectangle") {
 							drawPoints = [drawStart, point]
 							DrawOverlay.rectangle(drawStart, point)
@@ -1237,34 +1010,27 @@
 							DrawOverlay.path([...drawPoints, point], true)
 						}
 					}
-
 					function onMouseUp() {
 						if (!isDrawing || !armedShape || armedShape === "polygon") return
 						finishDraw()
 					}
-
 					function onDoubleClick(evt) {
 						if (armedShape === "polygon" && isDrawing) {
 							evt.preventDefault()
 							finishDraw()
 						}
 					}
-
-					// Touchscreen Events
 					function relativePointFromTouch(touch) {
 						const rect = MapCore.getContainer().getBoundingClientRect()
 						return {x: touch.clientX - rect.left, y: touch.clientY - rect.top}
 					}
-
 					function onTouchStart(evt) {
 						if (!armedShape) return
 						if (evt.target.closest("#map-select-toolbar") || evt.target.closest(".selection-results")) return
-						if (evt.touches.length !== 1) return // ignore multi-touch (pinch etc.)
-
-						evt.preventDefault() // stop map panning/scrolling while drawing
+						if (evt.touches.length !== 1) return
+						evt.preventDefault()
 						const touch = evt.touches[0]
 						const point = relativePointFromTouch(touch)
-
 						if (armedShape === "polygon") {
 							if (!isDrawing) {
 								isDrawing = true
@@ -1275,20 +1041,16 @@
 							DrawOverlay.path([...drawPoints], true)
 							return
 						}
-
 						isDrawing = true
 						drawStart = point
 						drawPoints = [point]
 					}
-
 					function onTouchMove(evt) {
 						if (!isDrawing || !armedShape) return
 						if (evt.touches.length !== 1) return
-
 						evt.preventDefault()
 						const touch = evt.touches[0]
 						const point = relativePointFromTouch(touch)
-
 						if (armedShape === "rectangle") {
 							drawPoints = [drawStart, point]
 							DrawOverlay.rectangle(drawStart, point)
@@ -1302,14 +1064,12 @@
 							DrawOverlay.path([...drawPoints, point], true)
 						}
 					}
-
 					function onTouchEnd(evt) {
 						if (!isDrawing || !armedShape || armedShape === "polygon") return
 						evt.preventDefault()
 						finishDraw()
 					}
-
-					let lastTapTime = 0 // Simple double-tap detection for polygon finish on touch
+					let lastTapTime = 0
 					function onTouchEndPolygon(evt) {
 						if (armedShape !== "polygon" || !isDrawing) return
 						const now = Date.now()
@@ -1319,29 +1079,23 @@
 						}
 						lastTapTime = now
 					}
-
 					function onKeyDown(evt) {
 						if (evt.key === "Escape" && armedShape) disarm()
 					}
-
 					function init() {
 						toolbarEl = document.getElementById("selectToolbar")
 						shapeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-shape]"))
 						modeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-mode]"))
-
 						Panels.isolateFromMap(document.getElementById("map-select-toolbar"))
-
 						shapeButtons.forEach(btn => {
 							btn.addEventListener("click", () => (armedShape === btn.dataset.shape ? disarm() : arm(btn.dataset.shape)))
 						})
-
 						modeButtons.forEach(btn => {
 							btn.addEventListener("click", () => {
 								SelectionState.setMode(btn.dataset.mode)
 								modeButtons.forEach(b => b.classList.toggle("is-active", b === btn))
 							})
 						})
-
 						const container = MapCore.getContainer()
 						container.addEventListener("mousedown", onMouseDown)
 						container.addEventListener("mousemove", onMouseMove)
@@ -1353,15 +1107,8 @@
 						container.addEventListener("touchend", onTouchEndPolygon, {passive: false})
 						document.addEventListener("keydown", onKeyDown)
 					}
-
 					return {init}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                SELECTION RESULTS — renders the selected-features panel;
-	                reacts to "selection:changed", owns its own open/closed
-	                and sort-order UI state.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const SelectionResults = (() => {
 					const sorters = {
@@ -1370,27 +1117,21 @@
 						authorType: (a, b) => Utils.compareNullsLast(a.properties.authorType, b.properties.authorType, (x, y) => x.localeCompare(y)),
 						name: (a, b) => Utils.compareNullsLast(a.properties.name, b.properties.name, (x, y) => x.localeCompare(y))
 					}
-
 					let listEl, countEl, sortInputEl, collapsible
-
 					function currentSortKey() {
 						return sortInputEl.value
 					}
-
 					function sortedIndices() {
 						const indices = SelectionState.indices()
 						const comparator = sorters[currentSortKey()]
-
 						if (!comparator) return indices.sort((a, b) => a - b)
 						return indices.sort((a, b) => comparator(ArchiveData.features[a], ArchiveData.features[b]))
 					}
-
 					function buildRow(index) {
 						const feature = ArchiveData.features[index]
 						const marker = Markers.all()[index]
 						const {name, time, category, authorType} = feature.properties
 						const color = Theme.categoryColor(category)
-
 						const row = Utils.el("div", {className: "result-row"})
 						row.innerHTML = Utils.html` <div class="result-row__left">
 				                                    	<svg class="result-row__dot" viewBox="0 0 14 14" aria-hidden="true">
@@ -1402,15 +1143,12 @@
 				                                    	<span class="result-row__year">${time}</span>
 				                                    	<span class="result-row__meta">${authorType ? Utils.capitalize(authorType) + " " : ""}${Utils.capitalize(category)}</span>
 				                                    </div>`
-
 						row.addEventListener("click", () => {
 							MapCore.map.flyTo(marker.getLatLng(), Math.max(MapCore.map.getZoom(), Config.flyTo.minZoom))
 							marker.openPopup()
 						})
-
 						return row
 					}
-
 					function highlightSelectedMarkers() {
 						Markers.all().forEach(marker => {
 							const isSelected = SelectionState.has(Markers.featureIndex(marker))
@@ -1418,67 +1156,42 @@
 							iconEl?.classList.toggle("is-selected-marker", isSelected)
 						})
 					}
-
 					function render() {
 						const count = SelectionState.size()
 						countEl.textContent = String(count)
 						listEl.innerHTML = ""
-
 						if (count === 0) return
 						sortedIndices().forEach(index => listEl.appendChild(buildRow(index)))
 					}
-
 					function init() {
 						const panelEl = document.getElementById("selectionResults")
 						const collapseBtn = document.getElementById("selectionCollapseBtn")
 						listEl = document.getElementById("selectionList")
 						countEl = document.getElementById("selectionCount")
 						sortInputEl = document.getElementById("selectionSortValue")
-
 						Panels.isolateFromMap(panelEl)
-
-						collapsible = Panels.createCollapsible({
-							panelEl,
-							collapseBtn,
-							expandLabel: "Expand selection panel",
-							collapseLabel: "Collapse selection panel"
-						})
-
+						collapsible = Panels.createCollapsible({panelEl, collapseBtn, expandLabel: "Expand selection panel", collapseLabel: "Collapse selection panel"})
 						document.getElementById("selectionClearBtn").addEventListener("click", () => SelectionState.clear())
 						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
-
-						// Collapsed by default: nothing is selected on load.
 						collapsible.setCollapsed(true)
-
 						let previousCount = 0
-
 						EventBus.on("selection:changed", () => {
 							highlightSelectedMarkers()
 							render()
-
 							const count = SelectionState.size()
 							if (count === 0) collapsible.setCollapsed(true)
 							else if (previousCount === 0) collapsible.setCollapsed(false)
 							previousCount = count
 						})
-
 						EventBus.on("selection:toolUsed", () => {
 							if (SelectionState.size() > 0) collapsible.setCollapsed(false)
 						})
 					}
-
-					// Re-render with the current sort key; called by the sort dropdown.
 					function refresh() {
 						render()
 					}
-
 					return {init, refresh}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                CUSTOM SELECT — generic dropdown component, reusable for
-	                any `.custom-select` root, not tied to selection results.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const CustomSelect = (() => {
 					function init(rootEl, {onSelect} = {}) {
@@ -1486,119 +1199,75 @@
 						const valueEl = rootEl.querySelector(".custom-select__value")
 						const hiddenInput = rootEl.querySelector("input")
 						const options = rootEl.querySelectorAll(".custom-select__option")
-
 						function close() {
 							rootEl.classList.remove("open")
 							trigger.setAttribute("aria-expanded", "false")
 						}
-
 						trigger.addEventListener("click", () => {
 							const open = rootEl.classList.toggle("open")
 							trigger.setAttribute("aria-expanded", String(open))
 						})
-
 						options.forEach(option => {
 							option.addEventListener("click", () => {
 								options.forEach(o => o.classList.remove("is-selected"))
 								option.classList.add("is-selected")
-
 								valueEl.textContent = option.textContent
 								hiddenInput.value = option.dataset.value
-
 								close()
 								onSelect?.(option.dataset.value)
 							})
 						})
-
 						document.addEventListener("click", evt => {
 							if (!rootEl.contains(evt.target)) close()
 						})
 					}
-
 					return {init}
 				})()
-
-				/* ═══════════════════════════════════════════════════════════
-	                SEARCHBAR — expanding search field wired into SelectionState,
-	                so a query drives the same selection pipeline as the toolbar's
-	                draw tools.
-	            ═══════════════════════════════════════════════════════════ */
 
 				const Searchbar = (() => {
 					function matchesQuery(feature, query) {
 						const {name, time, category, creole, authorType} = feature.properties
 						const haystack = [name, time, category, creole, authorType].filter(Boolean).join(" ").toLowerCase()
-
 						const escaped = query.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 						const regex = new RegExp(`\\b${escaped}`, "i")
-
 						return regex.test(haystack)
 					}
-
 					function runSearch(rawQuery) {
 						const query = rawQuery.trim().toLowerCase()
-
 						if (!query) {
 							SelectionState.clear()
 							return
 						}
-
 						const matchingIndices = ArchiveData.features.map((feature, index) => (matchesQuery(feature, query) ? index : -1)).filter(index => index !== -1)
-
-						/*
-						 *   A search always replaces the current selection outright,
-						 *   regardless of whatever boolean mode (add/subtract/intersect)
-						 *   the selection toolbar currently has armed.
-						 */
 						const previousMode = SelectionState.getMode()
 						SelectionState.setMode("new")
 						SelectionState.applyHits(matchingIndices)
 						SelectionState.setMode(previousMode)
 					}
-
 					function init() {
 						const bar = document.getElementById("map-searchbar")
 						const trigger = document.getElementById("trigger")
 						const fieldBox = document.getElementById("field-box")
 						const input = document.getElementById("field")
 						const clearBtn = document.getElementById("searchClearBtn")
-
-						/*
-						 *   Match every other floating panel (legend, toolbar, results,
-						 *   visualizer): the map must not see clicks/scroll/drag that
-						 *   originate inside this control.
-						 */
 						Panels.isolateFromMap(bar)
-
 						let open = false,
 							animating = false,
 							pendingOpen = null
 						const searchDebounced = Utils.debounce(runSearch, Config.search.debounceMs)
-
 						function setOpen(next) {
 							if (next === open) {
 								pendingOpen = null
 								return
 							}
 							if (animating) {
-								/*
-								 *   Don't drop the request: a rapid map grab can blur the
-								 *   input mid-open-animation, and CSS (:focus-within) reacts
-								 *   instantly while this queue used to just discard the
-								 *   close — leaving the bar/handle stuck open forever with
-								 *   no way to recover. Replay the latest request once the
-								 *   in-flight animation finishes instead.
-								 */
 								pendingOpen = next
 								return
 							}
-
 							animating = true
 							open = next
-
 							bar.classList.toggle("is-open", open)
 							trigger.setAttribute("aria-expanded", String(open))
-
 							if (open) {
 								setTimeout(() => input.focus())
 							} else {
@@ -1607,7 +1276,6 @@
 								clearBtn.classList.remove("is-visible")
 								runSearch("")
 							}
-
 							setTimeout(() => {
 								animating = false
 								if (pendingOpen !== null && pendingOpen !== open) {
@@ -1619,59 +1287,35 @@
 								}
 							}, Config.searchbarAnimationMs)
 						}
-
 						trigger.addEventListener("click", () => setOpen(!open))
-
-						/*
-						 *   Clicking the bar's own background (its border/frame, or the
-						 *   empty space in field-box) doesn't reliably blur the input on
-						 *   its own since neither is a focusable element — handle it
-						 *   explicitly so closing is deterministic either way.
-						 */
 						bar.addEventListener("mousedown", e => {
 							if (e.target === bar || e.target === fieldBox) setOpen(false)
 						})
-
 						input.addEventListener("input", () => {
 							clearBtn.classList.toggle("is-visible", input.value.length > 0)
 							searchDebounced(input.value)
 						})
-
 						clearBtn.addEventListener("click", () => {
 							input.value = ""
 							clearBtn.classList.remove("is-visible")
 							input.focus()
 							runSearch("")
 						})
-
 						input.addEventListener("blur", () => {
-							/*
-							 *   Deferred one tick: if focus is moving to something else
-							 *   inside the bar (the clear button), stay open. Otherwise
-							 *   close in the same instant the CSS :focus-within ring
-							 *   drops, instead of waiting for a full click (mouseup) —
-							 *   grabbing the map only fires mousedown/blur, not a click,
-							 *   until release, which used to desync the two animations.
-							 */
 							setTimeout(() => {
 								if (open && !bar.contains(document.activeElement)) setOpen(false)
 							}, 0)
 						})
-
 						document.addEventListener("keydown", e => {
 							if (e.key === "Escape" && open) setOpen(false)
 						})
 					}
-
 					return {init}
 				})()
 
-				/* ═══════════════════════════════════════════════════════════
-	                APP — bootstraps modules in dependency order.
-	            ═══════════════════════════════════════════════════════════ */
-
 				const App = (() => {
 					function bootstrap() {
+						Basemaps.init()
 						VisualizerModal.init()
 						Markers.init(ArchiveData.features)
 						Legend.init()
@@ -1681,7 +1325,6 @@
 						Searchbar.init()
 						CustomSelect.init(document.querySelector(".custom-select"), {onSelect: () => SelectionResults.refresh()})
 					}
-
 					return {bootstrap}
 				})()
 

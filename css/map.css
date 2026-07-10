@@ -9,17 +9,18 @@
       2.  Page layout
       3.  Map surface & overlay positioning
       4.  Panel primitive (shared "glass" treatment)
-      5.  Selection toolbar
-      6.  Selection results panel
-      7.  Searchbar
-      8.  Map legend
-      9.  Leaflet popup
-     10.  Pills
-     11.  Leaflet chrome overrides
-     12.  Document viewer overlay
-     13.  Custom select
-     14.  Time slider (layout + noUiSlider theme)
-     15.  Responsive
+      5.  Basemap control
+      6.  Selection toolbar
+      7.  Selection results panel
+      8.  Searchbar
+      9.  Map legend
+     10.  Leaflet popup
+     11.  Pills
+     12.  Leaflet chrome overrides
+     13.  Document viewer overlay
+     14.  Custom select
+     15.  Time slider (layout + noUiSlider theme)
+     16.  Responsive
             
     Responsive approach: sizes that can scale continuously (popup,
     searchbar, toolbar spacing) use clamp()/dvw/dvh in their base
@@ -37,17 +38,22 @@
 
 :root {
 	/* Category colours — orange (warm) to purple (cool), diverging */
-	--color-cat-bible: #d95f02;
-	--color-cat-letter: #f0a838;
-	--color-cat-poem: #8f83c4;
-	--color-cat-report: #542788;
+	--color-cat-bible: #d95f5f; /* #d95f02*/
+	--color-cat-letter: #e89e4f; /* #f0a838*/
+	--color-cat-notes: #e6d84f;
+	--color-cat-poem: #6dbf6d; /* #8f83c4*/
+	--color-cat-report: #5f8edb; /* #542788*/
+	--color-cat-roman: #a47cc8;
+	--color-cat-other: #9e9e9e;
 
 	/* Creole-type colours — magenta/pink to green, diverging */
-	--color-writ-admin: #b5187a;
-	--color-writ-clergy: #de6fac;
-	--color-writ-merchant: #377113;
-	--color-writ-poet: #8fc93a;
-	--color-writ-other: #f6d392;
+	--color-writ-admin: #d95f5f; /*#b5187a*/
+	--color-writ-clergy: #e89e4f; /*#de6fac*/
+	--color-writ-merchant: #e6d84f; /*#377113*/
+	--color-writ-military: #6dbf6d;
+	--color-writ-poet: #5f8edb; /*#8fc93a*/
+	--color-writ-writer: #a47cc8;
+	--color-writ-other: #9e9e9e; /*#f6d392*/
 
 	/*  
      *   Fluid sizing: shrinks continuously with viewport instead of
@@ -234,13 +240,54 @@ body {
 .searchbar,
 .leaflet-popup-content-wrapper,
 .visualizer .lorem_main,
-.lorem_boxed {
+.lorem_boxed,
+.map-basemap-control {
 	background: var(--color-overlay);
 	border: var(--panel-border);
 	border-radius: var(--panel-radius);
 	box-shadow: var(--panel-shadow);
 	backdrop-filter: var(--panel-blur);
 	color: var(--color-text);
+	cursor: auto;
+}
+
+/* ─────────────────────────────────────────
+    5. BASEMAP CONTROLS
+───────────────────────────────────────── */
+
+.map-basemap-control {
+	position: absolute;
+	bottom: var(--space-8);
+	left: var(--space-6);
+	z-index: 1000;
+	padding: 0.25rem;
+	font-family: "DM Sans", sans-serif;
+}
+.map-basemap-control__row {
+	display: flex;
+	gap: 0.25rem;
+}
+.map-basemap-control__btn {
+	appearance: none;
+	border: 1px solid transparent;
+	border-radius: 0.35rem;
+	background: transparent;
+	color: var(--color-text-secondary);
+	font-family: inherit;
+	font-size: 0.8rem;
+	line-height: 1;
+	padding: 0.45rem 0.7rem;
+	cursor: pointer;
+	transition: background-color 120ms ease, color 120ms ease;
+	white-space: nowrap;
+}
+.map-basemap-control__btn:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--color-text);
+}
+.map-basemap-control__btn.is-active {
+	background: var(--color-accent, #3a7bfd);
+	color: var(--color-text-muted);
 }
 
 /* ─────────────────────────────────────────
@@ -250,7 +297,7 @@ body {
 #map-select-toolbar {
 	position: absolute;
 	z-index: var(--z-map-overlay);
-	bottom: var(--space-8);
+	bottom: var(--space-11);
 	left: var(--space-6);
 	max-width: var(--toolbar-max-width);
 }
@@ -747,8 +794,9 @@ body {
 	transition: color var(--duration-slow);
 }
 
-.collapse-btn:hover {
-	color: var(--color-accent);
+.collapse-btn:hover,
+.leaflet-popup-close-button:hover {
+	color: var(--color-accent) !important;
 }
 
 .legend__collapse-btn svg {
@@ -980,6 +1028,10 @@ body {
 	transition: color var(--duration-fast);
 }
 
+.popup__source-link:hover {
+	color: var(--color-accent);
+}
+
 .popup__source-link svg {
 	opacity: var(--opacity-icon);
 	flex-shrink: 0;
@@ -1093,6 +1145,7 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	cursor: initial;
 }
 
 .visualizer.show {
@@ -1248,7 +1301,7 @@ body {
 	margin: 0;
 	padding: 0.35rem;
 	list-style: none;
-	background: var(--color-elevated);
+	background: var(--color-surface);
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-md);
 	box-shadow: var(--shadow-lg);
@@ -1296,11 +1349,11 @@ body {
 }
 
 #time-slider .noUi-base {
-	background: transparent;
+	background: var(--color-elevated);
 }
 
 #time-slider .noUi-connect {
-	background: var(--color-accent);
+	background: var(--color-accent-glow);
 	border-radius: var(--radius-pill);
 }
 
@@ -1309,8 +1362,8 @@ body {
 	height: var(--slider-handle-size);
 	top: -0.5rem;
 	border-radius: var(--radius-circle);
-	background: var(--color-text);
-	border: 0.125rem solid var(--color-accent);
+	background: var(--color-accent);
+	border: 0.125rem solid var(--color-accent-glow);
 	box-shadow: 0 0 0 0.1875rem var(--color-accent-dim);
 	cursor: grab;
 	transition: box-shadow var(--duration-slow);
@@ -1318,16 +1371,11 @@ body {
 
 #time-slider .noUi-handle::before,
 #time-slider .noUi-handle::after {
-	display: none;
-}
-
-#time-slider .noUi-handle:hover {
-	background: var(--color-text-secondary);
-	box-shadow: 0 0 0 0.1875rem var(--color-accent-glow);
+	display: none; /* Hidden default handles */
 }
 
 #time-slider .noUi-handle.noUi-active {
-	background: var(--color-text-muted);
+	border: 0.125rem solid var(--color-accent-dim);
 	box-shadow: 0 0 0 0.1875rem var(--color-accent-glow);
 	cursor: grabbing;
 }

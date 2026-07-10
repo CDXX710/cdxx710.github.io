@@ -44,39 +44,56 @@
 >>“Migration patterns after emancipation”
 *   [ ] **Multi files refactor**
 <code>
-/src
-├──/data
-│   ├── archive-data.js            feature dataset (or fetched JSON)
-│   └── visualizer-content.html    (or .js template) — placeholder document content
-├──/core
-│   ├── utils.js                   html tag, capitalize, readCssVar, el, isolateFromMap, ompareNullsLast
-│   ├── event-bus.js
-│   └── theme.js
-├──/state
-│   ├── filter-state.js
-│   └── selection-state.js         pure selection-algebra submodule, unit-testable
-├──/map
-│   ├── map-core.js
-│   ├── marker-icons.js            single shape-geometry source, used by markers + legend
-│   ├── markers.js
-│   └── popup-content.js
-├──/geometry
-│   ├── geometry.js                pure math, framework-agnostic
-│   └── draw-overlay.js
-├──/ui
-│   ├── collapsible-panel.js       shared by legend + selection-results
-│   ├── legend.js
-│   ├── selection-toolbar.js
-│   ├── selection-results.js
-│   ├── custom-select.js
-│   ├── searchbar.js
-│   ├── visualizer-modal.js
-│   └── time-slider.js
-├── app.js                         bootstrap() — dependency-ordered init, onlfile that ouches all modules
-├──/styles
+/
+├── index.html                      # Markup + <link>/<script type="module"> wiring only
+│
+├── js/
+│   ├── data/
+│   │   ├── archive-data.js         # Feature dataset (or fetched JSON)
+│   │   └── visualizer-content.html # Placeholder document content (or .js template)
+│   │
+│   ├── core/
+│   │   ├── utils.js                # htmlTag, capitalize, readCssVar, el,
+│   │   │                           # isolateFromMap, compareNullsLast
+│   │   ├── event-bus.js
+│   │   └── theme.js
+│   │
+│   ├── state/
+│   │   ├── filter-state.js
+│   │   └── selection-state.js      # Pure selection-algebra module, unit-testable
+│   │
+│   ├── map/
+│   │   ├── map-core.js
+│   │   ├── marker-icons.js         # Single geometry source for markers + legend
+│   │   ├── markers.js
+│   │   └── popup-content.js
+│   │
+│   ├── geometry/
+│   │   ├── geometry.js             # Pure math, framework-agnostic
+│   │   └── draw-overlay.js
+│   │
+│   ├── ui/
+│   │   ├── collapsible-panel.js    # Shared by legend + selection results
+│   │   ├── legend.js
+│   │   ├── selection-toolbar.js
+│   │   ├── selection-results.js
+│   │   ├── custom-select.js
+│   │   ├── searchbar.js
+│   │   ├── visualizer-modal.js
+│   │   └── time-slider.js
+│   │
+│   └── app.js                      # bootstrap() — dependency-ordered init;
+│                                   # only file that touches all modules
+│
+├── css/
 │   ├── shared.css
 │   ├── index.css
 │   ├── cheatsheet.css
 │   └── map.css
-├── index.html                     markup + ``<link>/<script type="module">`` wiring only
+│
+├── web/
+│   ├── cheatsheet.html
+│   └── map.html
+│
+└── img/
 </code>

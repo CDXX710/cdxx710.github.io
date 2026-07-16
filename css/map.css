@@ -64,7 +64,7 @@
 	--popup-width: clamp(20rem, 32dvw, 34rem);
 	--popup-height: clamp(16rem, 42dvh, 26rem);
 	--slider-handle-size: 2rem;
-	--toolbar-max-width: min(80vw, calc(100dvw - var(--space-6) * 2));
+	--toolbar-width: 11rem;
 	--legend-min-width: 2rem;
 	--legend-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
 
@@ -228,6 +228,10 @@ body {
 	pointer-events: none;
 }
 
+a.leaflet-popup-close-button {
+	font: 24px / 24px Tahoma, Verdana, sans-serif !important;
+}
+
 /* ─────────────────────────────────────────
     4. PANEL PRIMITIVE
     One "glass" treatment shared by every floating surface, instead
@@ -262,11 +266,21 @@ body {
 	z-index: 1000;
 	padding: 0.25rem;
 	font-family: "DM Sans", sans-serif;
+	width: var(--toolbar-width);
 }
+
 .map-basemap-control__row {
 	display: flex;
+	justify-content: space-evenly;
 	gap: 0.25rem;
 }
+
+.map-basemap-control__row--overlay {
+	margin-top: 0.35rem;
+	padding-top: 0.35rem;
+	border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+}
+
 .map-basemap-control__btn {
 	appearance: none;
 	border: 1px solid transparent;
@@ -281,13 +295,19 @@ body {
 	transition: background-color 120ms ease, color 120ms ease;
 	white-space: nowrap;
 }
+
 .map-basemap-control__btn:hover {
 	background: rgba(255, 255, 255, 0.06);
 	color: var(--color-text);
 }
+
 .map-basemap-control__btn.is-active {
 	background: var(--color-accent, #3a7bfd);
 	color: var(--color-text-muted);
+}
+
+.map-basemap-control__btn--overlay.is-active {
+	box-shadow: inset 0 0 0 1px var(--color-accent, currentColor);
 }
 
 /* ─────────────────────────────────────────
@@ -297,9 +317,9 @@ body {
 #map-select-toolbar {
 	position: absolute;
 	z-index: var(--z-map-overlay);
-	bottom: var(--space-11);
+	bottom: calc(var(--space-14) - var(--space-6));
 	left: var(--space-6);
-	max-width: var(--toolbar-max-width);
+	width: var(--toolbar-width);
 }
 
 .select-toolbar {
@@ -353,13 +373,13 @@ body {
 .select-toolbar__modes {
 	max-height: 0;
 	overflow: hidden;
-	border-top: 0.0625rem solid transparent;
+	border-bottom: 0.0625rem solid transparent;
 	transition: max-height var(--duration-normal) var(--ease-standard), border-color var(--duration-normal);
 }
 
 .select-toolbar.is-armed .select-toolbar__modes {
 	max-height: 2.4rem;
-	border-top-color: var(--color-border);
+	border-bottom-color: var(--color-border);
 }
 
 /* Live in-progress drawing shape on the map */
@@ -580,7 +600,7 @@ body {
 	position: absolute;
 	z-index: var(--z-map-overlay);
 	top: var(--space-8);
-	left: var(--space-11);
+	left: var(--space-12);
 	color: var(--color-text-secondary);
 	height: var(--searchbar-height);
 	width: var(--searchbar-height);
@@ -1387,6 +1407,156 @@ body {
 	to {
 		opacity: 1;
 	}
+}
+
+/* ─────────────────────────────────────────
+    15. Analytics Summary panel
+    
+    Reuses .map-legend/.legend__* chrome 
+    so it matches the existing panels;
+    Only positioning + chart-specific bits
+    are added here.
+───────────────────────────────────────── */
+
+.analytics-panel.map-legend {
+	top: var(--space-14);
+	left: var(--space-4);
+	bottom: auto;
+	right: auto;
+}
+
+.analytics-panel .legend__body {
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+	min-width: 15rem;
+}
+
+.analytics-section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.analytics-section__title {
+	font-size: 0.68rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--color-text-secondary);
+}
+
+.analytics-hero {
+	display: flex;
+	align-items: baseline;
+	gap: 0.45rem;
+}
+
+.analytics-hero__count {
+	font-family: "Space Mono", monospace;
+	font-size: 1.7rem;
+	line-height: 1;
+	color: var(--color-text);
+}
+
+.analytics-hero__total {
+	font-size: 0.72rem;
+	color: var(--color-text-secondary);
+}
+
+.analytics-hero__label {
+	font-size: 0.7rem;
+	color: var(--color-text-secondary);
+}
+
+.analytics-bar-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.72rem;
+}
+
+.analytics-bar-row__dot {
+	flex: 0 0 0.5rem;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+}
+
+.analytics-bar-row__label {
+	flex: 0 0 5rem;
+	color: var(--color-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.analytics-bar-row__track {
+	flex: 1;
+	height: 0.4rem;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.09);
+	overflow: hidden;
+}
+
+.analytics-bar-row__fill {
+	display: flex;
+	height: 100%;
+	border-radius: 999px;
+	transition: width 0.3s ease;
+	background: var(--color-accent);
+}
+
+.analytics-bar-row__value {
+	flex: 0 0 2.4rem;
+	text-align: right;
+	color: var(--color-accent);
+	font-family: "Space Mono", monospace;
+}
+
+.analytics-timeline {
+	width: 100%;
+	height: 3.4rem;
+	display: block;
+	cursor: pointer;
+	user-select: none;
+	touch-action: none;
+}
+
+.analytics-timeline__bar {
+	fill: rgba(255, 255, 255, 0.16);
+	transition: fill 0.15s ease;
+}
+
+.analytics-timeline__bar.is-active {
+	fill: var(--color-writ-admin, #6ea8fe);
+}
+
+.analytics-timeline__bar.is-brushing {
+	fill: var(--color-writ-military, #f2b134);
+}
+
+.analytics-timeline__bar:hover {
+	fill: rgba(255, 255, 255, 0.34);
+}
+
+.analytics-timeline__range {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.64rem;
+	color: var(--color-text-secondary);
+	font-family: "Space Mono", monospace;
+}
+
+.analytics-timeline__hint {
+	font-size: 0.62rem;
+	color: var(--color-text-secondary);
+	opacity: 0.75;
+}
+
+.analytics-empty {
+	font-size: 0.72rem;
+	font-style: italic;
+	color: var(--color-text-secondary);
 }
 
 /* ─────────────────────────────────────────

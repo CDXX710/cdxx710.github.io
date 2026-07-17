@@ -195,14 +195,7 @@
 						zoom: 8,
 						maxZoom: 19
 					},
-					basemaps: [
-						{
-							id: "dark",
-							label: "Dark",
-							tileUrl: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-							tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-							tileSubdomains: "abcd"
-						},
+					baseLayers: [
 						{
 							id: "light",
 							label: "Light",
@@ -211,21 +204,36 @@
 							tileSubdomains: "abcd"
 						},
 						{
+							id: "dark",
+							label: "Dark",
+							tileUrl: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+							tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+							tileSubdomains: "abcd"
+						}
+					],
+					// Overlay layers: optional historical maps drawn on top of whichever base layer is active.
+					// Selecting one deselects the other (mutually exclusive amongst themselves), but either
+					// can be toggled off entirely to show just the base layer beneath.
+					overlayLayers: [
+						{
 							id: "atlas",
 							label: "World Atlas",
 							tileUrl: "https://wmts.oldmapsonline.org/maps/bca48631-ffd0-5797-a725-21d54ac4f67b/2017-11-01T22:10:49.806598Z/{z}/{x}/{y}.png?key=L9mp0mSv8QUT19QPhCnL",
 							tileAttribution: '&copy; <a href="https://www.oldmapsonline.org/">Old Maps Online</a>',
-							tileSubdomains: ""
+							tileSubdomains: "",
+							opacity: 0.85
 						},
 						{
 							id: "piccole",
 							label: "Piccole",
 							tileUrl: "https://wmts.oldmapsonline.org/maps/6091e498-082d-4e3e-a8d4-dd34aa26be74/2024-07-29T16:34:18.856393Z/{z}/{x}/{y}.png?key=L9mp0mSv8QUT19QPhCnL",
 							tileAttribution: '&copy; <a href="https://www.oldmapsonline.org/">Old Maps Online</a>',
-							tileSubdomains: ""
+							tileSubdomains: "",
+							opacity: 0.85
 						}
 					],
-					defaultBasemapId: "dark",
+					defaultBaseLayerId: window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark",
+					defaultOverlayLayerId: null,
 					popup: {maxWidth: 512},
 					search: {debounceMs: 200},
 					flyTo: {minZoom: 11},
@@ -293,13 +301,13 @@
 					const geojson = {
 						type: "FeatureCollection",
 						features: [
-							{type: "Feature", properties: {name: "A Voyage to Dominica", time: 1750, category: "poem", creole: "using", authorType: "other", urlIMG: "../img/book (1).jfif", resume: LOREM}, geometry: {type: "Point", coordinates: [-61.409993, 15.523156]}},
+							{type: "Feature", properties: {name: "A Voyage to Dominica", time: 1750, category: "poem", creole: "using", authorType: "others", urlIMG: "../img/book (1).jfif", resume: LOREM}, geometry: {type: "Point", coordinates: [-61.409993, 15.523156]}},
 							{type: "Feature", properties: {name: "British Colonial Report", time: 1816, category: "report", creole: "about", authorType: "admin", urlIMG: "../img/book (1).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.316598, 15.37628]}},
 							{type: "Feature", properties: {name: "Caribbean Merchant Letter", time: 1691, category: "letter", creole: "using", authorType: "poet", urlIMG: "../img/book (2).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.346091, 15.544468]}},
-							{type: "Feature", properties: {name: "Plantation Ledger", time: 1763, category: "other", creole: "about", authorType: null, urlIMG: "../img/book (2).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}},
+							{type: "Feature", properties: {name: "Plantation Ledger", time: 1763, category: "others", creole: "about", authorType: null, urlIMG: "../img/book (2).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.76047, 16.285686]}},
 							{type: "Feature", properties: {name: "Early Missionary Notes", time: 1847, category: "notes", creole: "about", authorType: "merchant", urlIMG: "../img/book (3).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.387352, 16.315212]}},
 							{type: "Feature", properties: {name: "Creole Verses", time: 1717, category: "poem", creole: null, authorType: "poet", urlIMG: "../img/book (3).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.611308, 16.117324]}},
-							{type: "Feature", properties: {name: "Holy Scriptures Translation", time: 1648, category: "bible", creole: "about", authorType: "other", urlIMG: "../img/book (4).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}},
+							{type: "Feature", properties: {name: "Holy Scriptures Translation", time: 1648, category: "bible", creole: "about", authorType: "others", urlIMG: "../img/book (4).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.145557, 14.819471]}},
 							{type: "Feature", properties: {name: "Island Folk Ballad", time: 1689, category: "roman", creole: null, authorType: "clergy", urlIMG: "../img/book (4).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-60.964977, 14.693279]}},
 							{type: "Feature", properties: {name: "Zanzibar Correspondence", time: 1777, category: "letter", creole: "using", authorType: null, urlIMG: "../img/book (5).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-60.885014, 14.484105]}},
 							{type: "Feature", properties: {name: "Military Dispatch from Roseau", time: 1795, category: "report", creole: null, authorType: "military", urlIMG: "../img/book (5).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.392, 15.304]}},
@@ -307,14 +315,14 @@
 							{type: "Feature", properties: {name: "Merchant's Harbour Journal", time: 1734, category: "notes", creole: "using", authorType: "merchant", urlIMG: "../img/book (6).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.545, 16.241]}},
 							{type: "Feature", properties: {name: "Songs from the Windward Coast", time: 1821, category: "poem", creole: "using", authorType: "writer", urlIMG: "../img/book (7).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.005, 14.017]}},
 							{type: "Feature", properties: {name: "Catechism for Island Communities", time: 1709, category: "bible", creole: "using", authorType: "clergy", urlIMG: "../img/book (7).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.118, 14.599]}},
-							{type: "Feature", properties: {name: "Chronicle of the Sugar Estates", time: 1766, category: "other", creole: null, authorType: "writer", urlIMG: "../img/book (8).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.476, 16.202]}},
+							{type: "Feature", properties: {name: "Chronicle of the Sugar Estates", time: 1766, category: "others", creole: null, authorType: "writer", urlIMG: "../img/book (8).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.476, 16.202]}},
 							{type: "Feature", properties: {name: "A Romance of Saint Lucia", time: 1843, category: "roman", creole: "about", authorType: "writer", urlIMG: "../img/book (8).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-60.984, 13.909]}},
 							{type: "Feature", properties: {name: "Captain's Field Notebook", time: 1782, category: "notes", creole: null, authorType: "military", urlIMG: "../img/book (9).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.662, 15.972]}},
-							{type: "Feature", properties: {name: "Poems for the Caribbean Colonies", time: 1756, category: "poem", creole: "about", authorType: "other", urlIMG: "../img/book (9).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.323, 15.428]}},
+							{type: "Feature", properties: {name: "Poems for the Caribbean Colonies", time: 1756, category: "poem", creole: "about", authorType: "others", urlIMG: "../img/book (9).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.323, 15.428]}},
 							{type: "Feature", properties: {name: "Registry of Colonial Trade", time: 1819, category: "report", creole: "using", authorType: "admin", urlIMG: "../img/book (10).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.514, 16.071]}},
 							{type: "Feature", properties: {name: "Letter from a Parish Priest", time: 1698, category: "letter", creole: null, authorType: "clergy", urlIMG: "../img/book (10).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.175, 14.738]}},
 							{type: "Feature", properties: {name: "Narrative of the Lesser Antilles", time: 1837, category: "roman", creole: "using", authorType: "writer", urlIMG: "../img/book (11).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.259, 15.614]}},
-							{type: "Feature", properties: {name: "Survey of Indigenous Languages", time: 1771, category: "other", creole: "about", authorType: "other", urlIMG: "../img/book (11).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.421, 15.597]}},
+							{type: "Feature", properties: {name: "Survey of Indigenous Languages", time: 1771, category: "others", creole: "about", authorType: "others", urlIMG: "../img/book (11).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.421, 15.597]}},
 							{type: "Feature", properties: {name: "Account Book of a Cocoa Trader", time: 1811, category: "notes", creole: "about", authorType: "merchant", urlIMG: "../img/book (12).jfif", urlText: null, resume: null}, geometry: {type: "Point", coordinates: [-61.598, 15.998]}},
 							{type: "Feature", properties: {name: "Meditations in Creole Verse", time: 1861, category: "poem", creole: "using", authorType: "poet", urlIMG: "../img/book (12).jfif", urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.028, 14.505]}},
 							{type: "Feature", properties: {name: "Naval Orders for the Leeward Islands", time: 1805, category: "report", creole: "about", authorType: "military", urlIMG: null, urlText: true, resume: LOREM}, geometry: {type: "Point", coordinates: [-61.702, 16.335]}}
@@ -395,7 +403,7 @@
 							if (!indexed.length) return unmappedLabel
 							const [lng, lat] = feature.geometry.coordinates
 							const match = indexed.find(({bbox, feature: boundary}) => bboxContains(bbox, lng, lat) && pointInGeometry(lng, lat, boundary.geometry))
-							return match?.feature?.properties?.COUNTRY || unmappedLabel
+							return match?.feature?.properties?.NAME_0 || unmappedLabel
 						})
 					}
 					function islandFor(index) {
@@ -413,7 +421,7 @@
 						poem: Utils.readCssVar("--color-cat-poem"),
 						report: Utils.readCssVar("--color-cat-report"),
 						roman: Utils.readCssVar("--color-cat-roman"),
-						other: Utils.readCssVar("--color-cat-other")
+						others: Utils.readCssVar("--color-cat-others")
 					}
 					const authorTypeColors = {
 						admin: Utils.readCssVar("--color-writ-admin"),
@@ -422,7 +430,7 @@
 						military: Utils.readCssVar("--color-writ-military"),
 						poet: Utils.readCssVar("--color-writ-poet"),
 						writer: Utils.readCssVar("--color-writ-writer"),
-						other: Utils.readCssVar("--color-writ-other")
+						others: Utils.readCssVar("--color-writ-others")
 					}
 					const fallbackColor = "#8b949e"
 					function categoryColor(category) {
@@ -470,6 +478,15 @@
 						const {time, category, creole, authorType} = properties
 						return time >= state.minYear && time <= state.maxYear && state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeauthorTypes.has(authorType))
 					}
+					function isCategoryActive(category) {
+						return state.activeCategories.has(category)
+					}
+					function isauthorTypeActive(authorType) {
+						return state.activeauthorTypes.has(authorType)
+					}
+					function isCreoleRoleActive(roleKey) {
+						return !!state.showCreoleRole[roleKey]
+					}
 					return {
 						get minYear() {
 							return state.minYear
@@ -481,7 +498,10 @@
 						setCreoleRoleActive,
 						setCategoryActive,
 						setauthorTypeActive,
-						isFeatureVisible
+						isFeatureVisible,
+						isCategoryActive,
+						isauthorTypeActive,
+						isCreoleRoleActive
 					}
 				})()
 
@@ -535,12 +555,18 @@
 				})()
 
 				const Basemaps = (() => {
-					let layers = new Map()
-					let currentId = null
+					// Base layer: exactly one of Config.baseLayers is active at all times (radio behaviour).
+					let baseLayerInstances = new Map()
+					let currentBaseId = null
 
-					function layerFor(def) {
-						if (!layers.has(def.id)) {
-							layers.set(
+					// Overlay layer: at most one of Config.overlayLayers is active, drawn above the base
+					// layer, and can be switched off entirely to reveal just the base layer.
+					let overlayLayerInstances = new Map()
+					let currentOverlayId = null
+
+					function baseLayerFor(def) {
+						if (!baseLayerInstances.has(def.id)) {
+							baseLayerInstances.set(
 								def.id,
 								L.tileLayer(def.tileUrl, {
 									attribution: def.tileAttribution,
@@ -549,59 +575,117 @@
 								})
 							)
 						}
-						return layers.get(def.id)
+						return baseLayerInstances.get(def.id)
 					}
 
-					function set(id) {
-						const def = Config.basemaps.find(b => b.id === id)
-						if (!def || id === currentId) return
-						const nextLayer = layerFor(def)
-						if (currentId) {
-							const prevDef = Config.basemaps.find(b => b.id === currentId)
-							MapCore.map.removeLayer(layerFor(prevDef))
+					function overlayLayerFor(def) {
+						if (!overlayLayerInstances.has(def.id)) {
+							overlayLayerInstances.set(
+								def.id,
+								L.tileLayer(def.tileUrl, {
+									attribution: def.tileAttribution,
+									subdomains: def.tileSubdomains ?? "abc",
+									maxZoom: Config.map.maxZoom,
+									opacity: def.opacity ?? 0.85,
+									pane: "overlayPane"
+								})
+							)
+						}
+						return overlayLayerInstances.get(def.id)
+					}
+
+					function setBase(id) {
+						const def = Config.baseLayers.find(b => b.id === id)
+						if (!def || id === currentBaseId) return
+						const nextLayer = baseLayerFor(def)
+						if (currentBaseId) {
+							const prevDef = Config.baseLayers.find(b => b.id === currentBaseId)
+							MapCore.map.removeLayer(baseLayerFor(prevDef))
 						}
 						nextLayer.addTo(MapCore.map)
-						currentId = id
-						EventBus.emit("basemap:changed", id)
+						currentBaseId = id
+						EventBus.emit("basemap:baseChanged", id)
 					}
 
-					function buildControl() {
-						const control = Utils.el("div", {className: "map-basemap-control", "aria-label": "Basemap selector"})
-						const row = Utils.el("div", {className: "map-basemap-control__row", role: "radiogroup", "aria-label": "Choose basemap"})
+					function setOverlay(id) {
+						// Passing null (or the currently-active id, to allow toggling off) clears the overlay.
+						const nextId = id === currentOverlayId ? null : id
+						if (currentOverlayId) {
+							const prevDef = Config.overlayLayers.find(o => o.id === currentOverlayId)
+							MapCore.map.removeLayer(overlayLayerFor(prevDef))
+						}
+						currentOverlayId = nextId
+						if (nextId) {
+							const def = Config.overlayLayers.find(o => o.id === nextId)
+							overlayLayerFor(def).addTo(MapCore.map)
+						}
+						EventBus.emit("basemap:overlayChanged", currentOverlayId)
+					}
 
-						const buttons = Config.basemaps.map(def => {
+					function buildBaseControl(container) {
+						const row = Utils.el("div", {className: "map-basemap-control__row", role: "radiogroup", "aria-label": "Choose base map"})
+						const buttons = Config.baseLayers.map(def => {
 							const btn = Utils.el("button", {
 								type: "button",
-								className: "map-basemap-control__btn" + (def.id === currentId ? " is-active" : ""),
+								className: "map-basemap-control__btn" + (def.id === currentBaseId ? " is-active" : ""),
 								"data-basemap": def.id,
-								"aria-pressed": String(def.id === currentId),
+								"aria-pressed": String(def.id === currentBaseId),
 								text: def.label
 							})
-							btn.addEventListener("click", () => set(def.id))
+							btn.addEventListener("click", () => setBase(def.id))
 							return btn
 						})
-
 						buttons.forEach(btn => row.appendChild(btn))
-						control.appendChild(row)
-						document.getElementById("map").appendChild(control)
-
-						EventBus.on("basemap:changed", activeId => {
+						container.appendChild(row)
+						EventBus.on("basemap:baseChanged", activeId => {
 							buttons.forEach(btn => {
 								const isActive = btn.dataset.basemap === activeId
 								btn.classList.toggle("is-active", isActive)
 								btn.setAttribute("aria-pressed", String(isActive))
 							})
 						})
+					}
 
+					function buildOverlayControl(container) {
+						const row = Utils.el("div", {className: "map-basemap-control__row map-basemap-control__row--overlay", role: "group", "aria-label": "Toggle historical map overlay"})
+						const buttons = Config.overlayLayers.map(def => {
+							const btn = Utils.el("button", {
+								type: "button",
+								className: "map-basemap-control__btn map-basemap-control__btn--overlay",
+								"data-overlay": def.id,
+								"aria-pressed": "false",
+								title: `Toggle ${def.label} overlay on top of the base map`,
+								text: def.label
+							})
+							btn.addEventListener("click", () => setOverlay(def.id))
+							return btn
+						})
+						buttons.forEach(btn => row.appendChild(btn))
+						container.appendChild(row)
+						EventBus.on("basemap:overlayChanged", activeId => {
+							buttons.forEach(btn => {
+								const isActive = btn.dataset.overlay === activeId
+								btn.classList.toggle("is-active", isActive)
+								btn.setAttribute("aria-pressed", String(isActive))
+							})
+						})
+					}
+
+					function buildControl() {
+						const control = Utils.el("div", {className: "map-basemap-control", "aria-label": "Basemap selector"})
+						buildBaseControl(control)
+						buildOverlayControl(control)
+						document.getElementById("map").appendChild(control)
 						Panels.isolateFromMap(control)
 					}
 
 					function init() {
 						buildControl()
-						set(Config.defaultBasemapId ?? Config.basemaps[0].id)
+						setBase(Config.defaultBaseLayerId ?? Config.baseLayers[0].id)
+						if (Config.defaultOverlayLayerId) setOverlay(Config.defaultOverlayLayerId)
 					}
 
-					return {init, set}
+					return {init, setBase, setOverlay}
 				})()
 
 				const Shapes = (() => {
@@ -899,17 +983,19 @@
 				})()
 
 				const Legend = (() => {
-					function toggleRow({id, label, shapeKind, initialColor, onChange}) {
+					function toggleRow({id, label, shapeKind, initialColor, checked = true, onChange}) {
 						const checkboxId = `cb-${id}`
 						const row = Utils.el("div", {className: "legend__item"})
 						row.style.setProperty("--shape-color", initialColor)
 						row.innerHTML = Utils.html` <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
-					                                    <input type="checkbox" id="${checkboxId}" checked aria-label="Toggle ${label}" />
+					                                    <input type="checkbox" id="${checkboxId}" ${checked ? "checked" : ""} aria-label="Toggle ${label}" />
 					                                    ${Shapes.legendSvg(shapeKind)}
 				                                    </label>
 				                                    <label class="legend__item-label" for="${checkboxId}">${label}</label>`
 						const checkbox = row.querySelector("input")
 						const iconToggle = row.querySelector(".legend__icon-toggle")
+						row.classList.toggle("is-off", !checked)
+						iconToggle.classList.toggle("is-off", !checked)
 						checkbox.addEventListener("change", () => {
 							const isOn = checkbox.checked
 							row.classList.toggle("is-off", !isOn)
@@ -924,9 +1010,32 @@
 					function divider() {
 						return Utils.el("div", {className: "legend__divider", role: "separator"})
 					}
-					function header() {
+					// Combines the tab nav and the collapse button into a single header
+					// row: tabs on the left, collapse control on the right. No standalone
+					// "Legend" title — the tabs themselves communicate what the panel is.
+					function headerRow() {
 						const headerEl = Utils.el("div", {className: "legend__header"})
-						const title = Utils.el("span", {className: "legend__title", text: "Filters"})
+						const nav = Utils.el("div", {className: "legend__tabs", role: "tablist", "aria-label": "Legend tabs"})
+						const mapTab = Utils.el("button", {
+							type: "button",
+							className: "legend__tab is-active",
+							role: "tab",
+							id: "legend-tab-map",
+							"aria-selected": "true",
+							"aria-controls": "legend-panel-map",
+							text: "On map"
+						})
+						const filterTab = Utils.el("button", {
+							type: "button",
+							className: "legend__tab",
+							role: "tab",
+							id: "legend-tab-filter",
+							"aria-selected": "false",
+							"aria-controls": "legend-panel-filter",
+							text: "Filter"
+						})
+						nav.append(mapTab, filterTab)
+
 						const collapseBtn = Utils.el("button", {
 							className: "collapse-btn legend__collapse-btn",
 							"aria-label": "Expand legend",
@@ -935,51 +1044,147 @@
 						                            <polyline points="2,9 7,4 12,9" />
 					                            </svg>`
 						})
-						headerEl.append(title, collapseBtn)
-						return {headerEl, collapseBtn}
+
+						headerEl.append(nav, collapseBtn)
+						return {headerEl, collapseBtn, mapTab, filterTab}
 					}
 					const creoleRoleEntries = [
 						{key: "using", label: "Using creoles", shapeKind: "using"},
 						{key: "about", label: "About creoles", shapeKind: "about"},
 						{key: "unknown", label: "Unknown", shapeKind: "unknown"}
 					]
-					function creoleRoleGroup(body) {
+					// `presentKeys` limits a group to keys currently on the map (the "On map"
+					// tab); pass null to always render every possible key (the "Filter" tab).
+					// Rows stay interactive on both tabs, each one wired straight to
+					// FilterState so toggling either tab drives the same filter.
+					function creoleRoleGroup(body, presentKeys) {
+						const entries = creoleRoleEntries.filter(({key}) => !presentKeys || presentKeys.has(key))
+						if (!entries.length) return false
 						body.appendChild(groupTitle("Creole"))
-						creoleRoleEntries.forEach(({key, label, shapeKind}) => {
-							body.appendChild(toggleRow({id: `legend-creole-${key}`, label, shapeKind, initialColor: "white", onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)}))
+						entries.forEach(({key, label, shapeKind}) => {
+							body.appendChild(
+								toggleRow({
+									id: `legend-creole-${key}`,
+									label,
+									shapeKind,
+									initialColor: "white",
+									checked: FilterState.isCreoleRoleActive(key),
+									onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)
+								})
+							)
 						})
+						return true
 					}
-					function authorTypeGroup(body) {
+					function authorTypeGroup(body, presentKeys) {
+						const entries = Object.entries(Theme.authorTypeColors).filter(([key]) => !presentKeys || presentKeys.has(key))
+						if (!entries.length) return false
 						body.appendChild(groupTitle("Author type"))
-						Object.entries(Theme.authorTypeColors).forEach(([typeKey, color]) => {
-							body.appendChild(toggleRow({id: `legend-atype-${typeKey}`, label: Utils.capitalize(typeKey), shapeKind: "ring", initialColor: color, onChange: isOn => FilterState.setauthorTypeActive(typeKey, isOn)}))
+						entries.forEach(([typeKey, color]) => {
+							body.appendChild(
+								toggleRow({
+									id: `legend-atype-${typeKey}`,
+									label: Utils.capitalize(typeKey),
+									shapeKind: "ring",
+									initialColor: color,
+									checked: FilterState.isauthorTypeActive(typeKey),
+									onChange: isOn => FilterState.setauthorTypeActive(typeKey, isOn)
+								})
+							)
+						})
+						return true
+					}
+					function categoryGroup(body, presentKeys) {
+						const entries = Object.entries(Theme.categoryColors).filter(([key]) => !presentKeys || presentKeys.has(key))
+						if (!entries.length) return false
+						body.appendChild(groupTitle("Document type"))
+						entries.forEach(([catKey, color]) => {
+							body.appendChild(
+								toggleRow({
+									id: `legend-cat-${catKey}`,
+									label: Utils.capitalize(catKey),
+									shapeKind: "unknown",
+									initialColor: color,
+									checked: FilterState.isCategoryActive(catKey),
+									onChange: isOn => FilterState.setCategoryActive(catKey, isOn)
+								})
+							)
+						})
+						return true
+					}
+					function buildPanel(body, presentKeys) {
+						body.innerHTML = ""
+						const groupBuilders = [b => creoleRoleGroup(b, presentKeys?.creoleRoles ?? null), b => authorTypeGroup(b, presentKeys?.authorTypes ?? null), b => categoryGroup(b, presentKeys?.categories ?? null)]
+						groupBuilders.forEach(build => {
+							const before = body.children.length
+							const added = build(body)
+							if (added && before > 0) body.insertBefore(divider(), body.children[before])
 						})
 					}
-					function categoryGroup(body) {
-						body.appendChild(groupTitle("Document type"))
-						Object.entries(Theme.categoryColors).forEach(([catKey, color]) => {
-							body.appendChild(toggleRow({id: `legend-cat-${catKey}`, label: Utils.capitalize(catKey), shapeKind: "unknown", initialColor: color, onChange: isOn => FilterState.setCategoryActive(catKey, isOn)}))
+					// Reads what's *actually rendered on the map right now* (post time-range
+					// and filter toggles) rather than the raw dataset, so the "On map" tab
+					// stays in sync as the visible markers change (missing values fall back
+					// to "unknown").
+					function computePresentKeys() {
+						const categories = new Set()
+						const authorTypes = new Set()
+						const creoleRoles = new Set()
+						Markers.visible().forEach(marker => {
+							const {category, authorType, creole} = marker.feature.properties
+							categories.add(category ?? "unknown")
+							authorTypes.add(authorType ?? "unknown")
+							creoleRoles.add(creole ?? "unknown")
 						})
+						return {categories, authorTypes, creoleRoles}
 					}
 					function init() {
 						const legend = Utils.el("div", {className: "map-legend is-collapsed", "aria-label": "Map legend"})
 						document.getElementById("map").appendChild(legend)
-						const {headerEl, collapseBtn} = header()
+						const {headerEl, collapseBtn, mapTab, filterTab} = headerRow()
 						legend.appendChild(headerEl)
-						const body = Utils.el("div", {className: "legend__body"})
-						legend.appendChild(body)
-						creoleRoleGroup(body)
-						body.appendChild(divider())
-						authorTypeGroup(body)
-						body.appendChild(divider())
-						categoryGroup(body)
-						const collapsible = Panels.createCollapsible({panelEl: legend, collapseBtn, bodyEl: body, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
+
+						const bodyWrap = Utils.el("div", {className: "legend__body"})
+						legend.appendChild(bodyWrap)
+
+						const mapPanel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel-map", role: "tabpanel", "aria-labelledby": "legend-tab-map"})
+						const filterPanel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel-filter", role: "tabpanel", "aria-labelledby": "legend-tab-filter", hidden: ""})
+						bodyWrap.append(mapPanel, filterPanel)
+
+						const collapsible = Panels.createCollapsible({panelEl: legend, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
 						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
+
+						function resizeIfExpanded() {
+							if (!collapsible.isCollapsed()) bodyWrap.style.maxHeight = `${bodyWrap.scrollHeight}px`
+						}
+						// Rebuilds both tabs from current state. Doing both (not just the
+						// visible one) keeps a toggle made on one tab from leaving the other
+						// tab's checkboxes stale for whenever the user switches to it.
+						function renderPanels() {
+							buildPanel(mapPanel, computePresentKeys())
+							buildPanel(filterPanel, null)
+							resizeIfExpanded()
+						}
+						function activatePanel(activeTab, inactiveTab, panel, hiddenPanel) {
+							activeTab.classList.add("is-active")
+							inactiveTab.classList.remove("is-active")
+							activeTab.setAttribute("aria-selected", "true")
+							inactiveTab.setAttribute("aria-selected", "false")
+							hiddenPanel.hidden = true
+							panel.hidden = false
+							resizeIfExpanded()
+						}
+						mapTab.addEventListener("click", () => activatePanel(mapTab, filterTab, mapPanel, filterPanel))
+						filterTab.addEventListener("click", () => activatePanel(filterTab, mapTab, filterPanel, mapPanel))
+
+						renderPanels()
+						// Keep both tabs honest as filters/time-range change which markers are
+						// actually rendered — including toggles made from either tab.
+						EventBus.on("filters:changed", renderPanels)
+
 						Panels.isolateFromMap(legend)
 					}
 					return {init}
 				})()
-
+                
 				const TimeSlider = (() => {
 					let sliderEl
 					function init() {
@@ -1031,13 +1236,13 @@
 						return SelectionState.size() > 0 ? SelectionState.indices() : inViewIndices()
 					}
 
-					function topEntries(counts, total, limit) {
+					function topEntries(counts, total) {
 						const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
-						const top = sorted.slice(0, limit)
-						const rest = sorted.slice(limit).reduce((sum, [, c]) => sum + c, 0)
-						const rows = top.map(([key, count]) => ({key, count, pct: total ? Math.round((count / total) * 100) : 0}))
-						if (rest > 0) rows.push({key: "Others", count: rest, pct: total ? Math.round((rest / total) * 100) : 0})
-						return rows
+						return sorted.map(([key, count]) => ({
+							key,
+							count,
+							pct: total ? Math.round((count / total) * 100) : 0
+						}))
 					}
 					function barRow({label, pct, count, color}) {
 						const row = Utils.el("div", {className: "analytics-bar-row"})
@@ -1090,7 +1295,7 @@
 							counts[category] = (counts[category] ?? 0) + 1
 						})
 						topEntries(counts, scope.length, 6).forEach(({key, pct, count}) => {
-							const color = key === "Others" ? null : Theme.categoryColor(key)
+							const color = key === "Unknown" ? Utils.readCssVar("--color-unknown") : Theme.categoryColor(key)
 							categoriesEl.appendChild(barRow({label: Utils.capitalize(key), pct, count, color}))
 						})
 					}
@@ -1642,7 +1847,6 @@
 					}
 					return {bootstrap}
 				})()
-
 				App.bootstrap()
 			})()
 		</script>

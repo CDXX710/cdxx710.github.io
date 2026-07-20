@@ -410,7 +410,21 @@
 						if (!islandByFeatureIndex) build()
 						return islandByFeatureIndex[index]
 					}
-					return {islandFor, unmappedLabel}
+					// Combined lat/lng bounds for every boundary feature matching a given
+					// island name, so the UI can pan/zoom the map to that island.
+					function boundsForIsland(name) {
+						if (name === unmappedLabel) return null
+						const indexed = getIndexedBoundaries()
+						const matches = indexed.filter(({feature}) => feature?.properties?.NAME_0 === name)
+						if (!matches.length) return null
+						const [minX, minY, maxX, maxY] = matches.reduce((acc, {bbox}) => [Math.min(acc[0], bbox[0]), Math.min(acc[1], bbox[1]), Math.max(acc[2], bbox[2]), Math.max(acc[3], bbox[3])], [Infinity, Infinity, -Infinity, -Infinity])
+						if (!isFinite(minX)) return null
+						return [
+							[minY, minX],
+							[maxY, maxX]
+						]
+					}
+					return {islandFor, boundsForIsland, unmappedLabel}
 				})()
 
 				const Theme = (() => {
@@ -471,12 +485,26 @@
 						isOn ? state.activeauthorTypes.add(authorType) : state.activeauthorTypes.delete(authorType)
 						notify()
 					}
+					function setAllVisible(isOn) {
+						state.activeCategories = isOn ? new Set(Object.keys(Theme.categoryColors)) : new Set()
+						state.activeauthorTypes = isOn ? new Set(Object.keys(Theme.authorTypeColors)) : new Set()
+						state.showCreoleRole = {using: isOn, about: isOn, unknown: isOn}
+						notify()
+					}
 					function roleKeyFor(creole) {
 						return creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
 					}
 					function isFeatureVisible(properties) {
 						const {time, category, creole, authorType} = properties
 						return time >= state.minYear && time <= state.maxYear && state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeauthorTypes.has(authorType))
+					}
+					// Same as isFeatureVisible but ignores the active year range. Used by
+					// the decade timeline itself, which needs to show the full
+					// distribution (so users have context for where to drag/click) even
+					// while a year filter is already narrowing what's on the map.
+					function isFeatureVisibleIgnoringYear(properties) {
+						const {category, creole, authorType} = properties
+						return state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeauthorTypes.has(authorType))
 					}
 					function isCategoryActive(category) {
 						return state.activeCategories.has(category)
@@ -498,7 +526,9 @@
 						setCreoleRoleActive,
 						setCategoryActive,
 						setauthorTypeActive,
+						setAllVisible,
 						isFeatureVisible,
+						isFeatureVisibleIgnoringYear,
 						isCategoryActive,
 						isauthorTypeActive,
 						isCreoleRoleActive
@@ -953,13 +983,28 @@
 						L.DomEvent.disableScrollPropagation(el)
 						L.DomEvent.disableClickPropagation(el)
 					}
-					function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
+					function createCollapsible({panelEl, headerEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
+						let dividerEl = null
+						function ensureDivider() {
+							if (!dividerEl && headerEl) {
+								dividerEl = Utils.el("div", {className: "legend-divider", role: "separator"})
+								headerEl.insertAdjacentElement("afterend", dividerEl)
+							}
+							return dividerEl
+						}
 						function setCollapsed(collapsed) {
 							panelEl.classList.toggle(collapsedClass, collapsed)
 							collapseBtn.setAttribute("aria-expanded", String(!collapsed))
 							collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
-							if (!collapsed && bodyEl) {
-								bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
+							// The divider between header and body only makes sense while the
+							// body is actually showing, so it's inserted/hidden in lockstep
+							// with the expanded state rather than living in the panel always.
+							if (!collapsed) {
+								const divider = ensureDivider()
+								if (divider) divider.hidden = false
+								if (bodyEl) bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
+							} else if (dividerEl) {
+								dividerEl.hidden = true
 							}
 						}
 						function isCollapsed() {
@@ -1145,11 +1190,29 @@
 						const bodyWrap = Utils.el("div", {className: "legend__body"})
 						legend.appendChild(bodyWrap)
 
+						const actionsRow = Utils.el("div", {className: "legend__actions"})
+						const defaultBtn = Utils.el("button", {
+							type: "button",
+							className: "selection-results__clear legend__action-btn",
+							"aria-label": "Show all features",
+							text: "Default"
+						})
+						const noneBtn = Utils.el("button", {
+							type: "button",
+							className: "selection-results__clear legend__action-btn",
+							"aria-label": "Hide all features",
+							text: "None"
+						})
+						defaultBtn.addEventListener("click", () => FilterState.setAllVisible(true))
+						noneBtn.addEventListener("click", () => FilterState.setAllVisible(false))
+						actionsRow.append(defaultBtn, noneBtn)
+						bodyWrap.appendChild(actionsRow)
+
 						const mapPanel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel-map", role: "tabpanel", "aria-labelledby": "legend-tab-map"})
 						const filterPanel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel-filter", role: "tabpanel", "aria-labelledby": "legend-tab-filter", hidden: ""})
 						bodyWrap.append(mapPanel, filterPanel)
 
-						const collapsible = Panels.createCollapsible({panelEl: legend, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
+						const collapsible = Panels.createCollapsible({panelEl: legend, headerEl, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
 						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 
 						function resizeIfExpanded() {
@@ -1184,7 +1247,7 @@
 					}
 					return {init}
 				})()
-                
+
 				const TimeSlider = (() => {
 					let sliderEl
 					function init() {
@@ -1235,6 +1298,23 @@
 					function currentScopeIndices() {
 						return SelectionState.size() > 0 ? SelectionState.indices() : inViewIndices()
 					}
+					// The timeline needs to show the full decade-by-decade distribution
+					// for context, even while a year filter is already narrowing the map
+					// (otherwise every decade outside the active range would read as
+					// zero, since those markers are hidden by the filter itself). It
+					// still respects the viewport and the other (non-year) filters, and
+					// still narrows to an explicit selection when one exists.
+					function timelineScopeIndices() {
+						if (SelectionState.size() > 0) return SelectionState.indices()
+						const bounds = MapCore.map.getBounds()
+						const indices = []
+						ArchiveData.features.forEach((feature, index) => {
+							if (!FilterState.isFeatureVisibleIgnoringYear(feature.properties)) return
+							const [lng, lat] = feature.geometry.coordinates
+							if (bounds.contains(L.latLng(lat, lng))) indices.push(index)
+						})
+						return indices
+					}
 
 					function topEntries(counts, total) {
 						const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
@@ -1244,7 +1324,7 @@
 							pct: total ? Math.round((count / total) * 100) : 0
 						}))
 					}
-					function barRow({label, pct, count, color}) {
+					function barRow({label, pct, count, color, onClick}) {
 						const row = Utils.el("div", {className: "analytics-bar-row"})
 						row.innerHTML = Utils.html`
 							${color ? `<span class="analytics-bar-row__dot" style="background:${color}"></span>` : ""}
@@ -1252,6 +1332,18 @@
 							<span class="analytics-bar-row__track"><span class="analytics-bar-row__fill" style="width:${pct}%"></span></span>
 							<span class="analytics-bar-row__value">${pct}%</span>`
 						row.title = `${label}: ${count} record${count === 1 ? "" : "s"}`
+						if (onClick) {
+							row.classList.add("is-clickable")
+							row.tabIndex = 0
+							row.setAttribute("role", "button")
+							row.addEventListener("click", onClick)
+							row.addEventListener("keydown", evt => {
+								if (evt.key === "Enter" || evt.key === " ") {
+									evt.preventDefault()
+									onClick(evt)
+								}
+							})
+						}
 						return row
 					}
 
@@ -1263,8 +1355,7 @@
 							<div class="analytics-hero">
 								<span class="analytics-hero__count">${scope.length}</span>
 								<span class="analytics-hero__total">/ ${total}</span>
-							</div>
-							<div class="analytics-hero__label">${label}</div>`
+							</div>`
 					}
 
 					function renderIslands(scope) {
@@ -1279,7 +1370,15 @@
 							counts[island] = (counts[island] ?? 0) + 1
 						})
 						topEntries(counts, scope.length, 3).forEach(({key, pct, count}) => {
-							islandsEl.appendChild(barRow({label: key, pct, count}))
+							const bounds = GeoIndex.boundsForIsland(key)
+							islandsEl.appendChild(
+								barRow({
+									label: key,
+									pct,
+									count,
+									onClick: bounds ? () => MapCore.map.flyToBounds(bounds, {padding: [24, 24]}) : null
+								})
+							)
 						})
 					}
 
@@ -1322,19 +1421,35 @@
 							})
 							.join("")
 						timelineEl.innerHTML = Utils.html`
-							<div class="analytics-section__title">Timeline</div>
+							<div class="analytics-section__title-row">
+								<div class="analytics-section__title">Timeline</div>
+								<button type="button" class="selection-results__clear analytics-timeline__clear" id="timelineClearBtn" aria-label="Clear timeline filter">Clear</button>
+							</div>
 							<svg class="analytics-timeline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-label="Records per decade, click or drag to filter by year">${bars}</svg>
 							<div class="analytics-timeline__range"><span>${decades[0]}s</span><span>${decades[decades.length - 1]}s</span></div>
 							<div class="analytics-timeline__hint">Click a decade, or drag to select a range</div>`
 						wireTimelineInteraction(timelineEl.querySelector("svg"))
+						timelineEl.querySelector("#timelineClearBtn").addEventListener("click", () => {
+							TimeSlider.setRange(dataMinYear, dataMaxYear)
+							render()
+						})
 					}
 
 					function wireTimelineInteraction(svg) {
 						if (!svg) return
 						let dragStartDecade = null
 						function decadeFromEvent(evt) {
-							const bar = evt.target.closest("[data-decade]")
-							return bar ? Number(bar.dataset.decade) : null
+							// Hit-testing the bar element itself (via evt.target or
+							// elementFromPoint) only works when the pointer is exactly over
+							// the drawn rect — which is often just a couple of pixels tall
+							// for low-count decades. Instead, map the pointer's x position to
+							// its column across the full height of the chart, so anywhere
+							// above/below a short bar still counts as that decade.
+							const rect = svg.getBoundingClientRect()
+							if (!rect.width) return null
+							const fraction = (evt.clientX - rect.left) / rect.width
+							const index = Math.min(decades.length - 1, Math.max(0, Math.floor(fraction * decades.length)))
+							return decades[index]
 						}
 						function setBrushHighlight(fromDecade, toDecade) {
 							const [lo, hi] = fromDecade <= toDecade ? [fromDecade, toDecade] : [toDecade, fromDecade]
@@ -1375,7 +1490,7 @@
 					function render() {
 						const scope = currentScopeIndices()
 						renderRecordsInView(scope)
-						renderTimeline(scope)
+						renderTimeline(timelineScopeIndices())
 						renderCategories(scope)
 						// Island lookup is the one genuinely expensive part (boundary point-in-
 						// polygon tests); skip it entirely while the panel is collapsed and no
@@ -1396,14 +1511,16 @@
 							className: "collapse-btn legend__collapse-btn",
 							"aria-label": "Expand research summary",
 							"aria-expanded": "false",
-							html: Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,9 7,4 12,9" /></svg>`
+							html: Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="12,5 7,10 2,5" /></svg>`
 						})
 						headerEl.append(title, collapseBtn)
 						return {headerEl, collapseBtn}
 					}
 
 					function init() {
-						const panel = Utils.el("div", {className: "map-legend analytics-panel is-collapsed", "aria-label": "Analytics summary"})
+						// Starts expanded (no is-collapsed class) so the research summary
+						// is visible as soon as the page loads.
+						const panel = Utils.el("div", {className: "map-legend analytics-panel", "aria-label": "Analytics summary"})
 						document.getElementById("map").appendChild(panel)
 						const {headerEl, collapseBtn} = header()
 						panel.appendChild(headerEl)
@@ -1415,7 +1532,8 @@
 						categoriesEl = Utils.el("div", {className: "analytics-section"})
 						bodyEl.append(recordsEl, islandsEl, timelineEl, categoriesEl)
 
-						collapsible = Panels.createCollapsible({panelEl: panel, collapseBtn, bodyEl, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
+						collapsible = Panels.createCollapsible({panelEl: panel, headerEl, collapseBtn, bodyEl, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
+						collapsible.setCollapsed(false)
 						collapseBtn.addEventListener("click", () => {
 							collapsible.setCollapsed(!collapsible.isCollapsed())
 							if (!collapsible.isCollapsed() && islandsStale) render()

@@ -833,7 +833,7 @@ a.leaflet-popup-close-button {
 }
 
 .legend__body {
-	padding: 0 var(--space-6) 0.875rem;
+	margin: 0 var(--space-3) 0;
 	overflow: hidden;
 	opacity: 1;
 	transition: max-height var(--duration-expand) var(--ease-standard), opacity 0.22s var(--ease-standard);
@@ -856,9 +856,12 @@ a.leaflet-popup-close-button {
 	margin-bottom: 0.65rem;
 }
 
+.legend__group-title:first-of-type {
+	margin-top: var(--space-6);
+}
+
 .legend-divider {
 	height: 1px;
-	margin-bottom: var(--space-5);
 	border: none;
 	background: var(--color-border, rgba(0, 0, 0, 0.12));
 }
@@ -914,6 +917,10 @@ a.leaflet-popup-close-button {
 	transition: color var(--duration-slow), opacity var(--duration-slow);
 }
 
+.legend__item:last-of-type {
+    margin-bottom: var(--space-5);
+}
+
 .legend__item:hover .legend__item-label {
 	color: var(--color-text);
 }
@@ -955,8 +962,8 @@ a.leaflet-popup-close-button {
 .legend__actions {
 	display: flex;
 	align-items: center;
-	gap: var(--space-5);
-	margin-bottom: var(--space-6);
+	justify-content: space-around;
+	margin: var(--space-3) var(--space-3);
 }
 
 .legend__tabs {

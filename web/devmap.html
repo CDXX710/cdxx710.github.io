@@ -983,7 +983,7 @@
 						L.DomEvent.disableScrollPropagation(el)
 						L.DomEvent.disableClickPropagation(el)
 					}
-					function createCollapsible({panelEl, headerEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
+					function createCollapsible({panelEl, headerEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel, extraDividers = []}) {
 						let dividerEl = null
 						function ensureDivider() {
 							if (!dividerEl && headerEl) {
@@ -1002,9 +1002,15 @@
 							if (!collapsed) {
 								const divider = ensureDivider()
 								if (divider) divider.hidden = false
+								extraDividers.forEach(el => {
+									el.hidden = false
+								})
 								if (bodyEl) bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
-							} else if (dividerEl) {
-								dividerEl.hidden = true
+							} else {
+								if (dividerEl) dividerEl.hidden = true
+								extraDividers.forEach(el => {
+									el.hidden = true
+								})
 							}
 						}
 						function isCollapsed() {
@@ -1077,7 +1083,7 @@
 							id: "legend-tab-filter",
 							"aria-selected": "false",
 							"aria-controls": "legend-panel-filter",
-							text: "Filter"
+							text: "Filters"
 						})
 						nav.append(mapTab, filterTab)
 
@@ -1201,18 +1207,21 @@
 							type: "button",
 							className: "selection-results__clear legend__action-btn",
 							"aria-label": "Hide all features",
-							text: "None"
+							text: "Clear"
 						})
 						defaultBtn.addEventListener("click", () => FilterState.setAllVisible(true))
 						noneBtn.addEventListener("click", () => FilterState.setAllVisible(false))
 						actionsRow.append(defaultBtn, noneBtn)
 						bodyWrap.appendChild(actionsRow)
 
+						const actionsDivider = Utils.el("div", {className: "legend-divider", role: "separator", hidden: ""})
+						bodyWrap.appendChild(actionsDivider)
+
 						const mapPanel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel-map", role: "tabpanel", "aria-labelledby": "legend-tab-map"})
 						const filterPanel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel-filter", role: "tabpanel", "aria-labelledby": "legend-tab-filter", hidden: ""})
 						bodyWrap.append(mapPanel, filterPanel)
 
-						const collapsible = Panels.createCollapsible({panelEl: legend, headerEl, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
+						const collapsible = Panels.createCollapsible({panelEl: legend, headerEl, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend", extraDividers: [actionsDivider]})
 						collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 
 						function resizeIfExpanded() {
@@ -1235,8 +1244,17 @@
 							panel.hidden = false
 							resizeIfExpanded()
 						}
-						mapTab.addEventListener("click", () => activatePanel(mapTab, filterTab, mapPanel, filterPanel))
-						filterTab.addEventListener("click", () => activatePanel(filterTab, mapTab, filterPanel, mapPanel))
+						function expandIfCollapsed() {
+							if (collapsible.isCollapsed()) collapsible.setCollapsed(false)
+						}
+						mapTab.addEventListener("click", () => {
+							expandIfCollapsed()
+							activatePanel(mapTab, filterTab, mapPanel, filterPanel)
+						})
+						filterTab.addEventListener("click", () => {
+							expandIfCollapsed()
+							activatePanel(filterTab, mapTab, filterPanel, mapPanel)
+						})
 
 						renderPanels()
 						// Keep both tabs honest as filters/time-range change which markers are

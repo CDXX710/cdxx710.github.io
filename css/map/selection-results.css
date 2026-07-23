@@ -1,0 +1,166 @@
+/* ─────────────────────────────────────────
+    SELECTION RESULTS
+───────────────────────────────────────── */
+
+.selection-results {
+	position: absolute;
+	top: var(--space-6);
+	right: var(--space-6);
+	z-index: var(--z-map-overlay);
+	width: clamp(16rem, 24vw, 18rem);
+	max-height: 70%;
+	display: flex;
+	flex-direction: column;
+	color: var(--color-text-muted);
+	transition: max-height var(--duration-normal) var(--ease-standard), opacity var(--duration-normal);
+}
+
+.selection-results__header {
+	display: flex;
+	justify-content: space-between;
+	padding: var(--space-5) var(--space-6) var(--space-4);
+	border-bottom: 0.0625rem solid var(--color-border);
+	flex-shrink: 0;
+}
+
+.selection-results.is-collapsed .selection-results__header {
+	border-bottom-color: transparent;
+}
+
+.selection-results__title {
+	display: flex;
+	width: 60%;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	line-height: 1rem;
+	letter-spacing: var(--letter-spacing-wide);
+	text-transform: uppercase;
+	color: var(--color-text);
+}
+
+.selection-results__title span {
+	color: var(--color-accent);
+	font-size: 1rem;
+}
+
+.selection-results__actions {
+	display: flex;
+	align-items: center;
+	gap: var(--space-4);
+	flex-direction: row-reverse;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}
+
+/*  
+ *  .collapse-btn (shared with the legend's collapse button, see §8)
+ *  already supplies the icon-button reset + hover; this adds only
+ *  what the text "Clear" button needs on top of it.
+ */
+.selection-results__clear {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color-text-secondary);
+	font-family: var(--font-mono);
+	font-size: var(--font-size-2xs);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	transition: color var(--duration-fast);
+}
+
+.selection-results__clear:hover {
+	color: var(--color-accent);
+}
+
+.selection__collapse-btn svg {
+	transform: rotate(180deg);
+	transition: transform var(--duration-slow) var(--ease-standard);
+}
+
+.selection-results.is-collapsed .selection__collapse-btn svg {
+	transform: rotate(0deg);
+}
+
+.selection-results__list {
+	overflow-y: auto;
+	padding: var(--space-4) var(--space-5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	max-height: 100%;
+	opacity: 1;
+	transition: opacity 0.44s var(--ease-standard);
+}
+
+.selection-results.is-collapsed .selection-results__list {
+	max-height: 0 !important;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.result-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.55rem 0.75rem;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	cursor: pointer;
+	transition: border-color var(--duration-fast), transform var(--duration-fast);
+}
+
+.result-row:hover {
+	border-color: var(--color-border-strong);
+	transform: translateY(-1px);
+}
+
+.result-row__left {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	min-width: 0;
+	flex: 1;
+}
+
+.result-row__dot {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+}
+
+.result-row__name {
+	font-size: var(--font-size-sm);
+	color: var(--color-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.result-row__body {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	flex-shrink: 0;
+	text-align: right;
+	gap: 2px;
+}
+
+.result-row__year {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	color: var(--color-text);
+}
+
+.result-row__meta {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	color: var(--color-text-secondary);
+	white-space: nowrap;
+}

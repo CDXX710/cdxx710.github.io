@@ -1,0 +1,113 @@
+/* ─────────────────────────────────────────
+    PAGE LAYOUT
+    
+    Full-viewport column: header → map → slider footer.
+    Overrides the scroll-page layout from shared.css.
+───────────────────────────────────────── */
+
+body {
+	height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.site-header {
+	margin: 0;
+	padding: 0 clamp(var(--space-5), 3vw, var(--space-8));
+	height: var(--header-height);
+	display: flex;
+	align-items: center;
+	gap: clamp(var(--space-4), 2vw, var(--space-6));
+	flex-shrink: 0;
+	background: var(--color-surface);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__dot {
+	width: var(--dot-size-lg);
+	height: var(--dot-size-lg);
+	border-radius: var(--radius-circle);
+	background: var(--color-accent);
+	box-shadow: var(--shadow-glow-accent);
+	flex-shrink: 0;
+}
+
+.site-header__title {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xl);
+	font-weight: var(--font-weight-bold);
+	color: var(--color-text);
+	letter-spacing: -0.02em;
+	white-space: nowrap;
+}
+
+.site-header__divider {
+	width: 0.0625rem;
+	height: 3rem;
+	background: var(--color-border);
+	flex-shrink: 0;
+}
+
+.site-header__sub {
+	margin: 0;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	color: var(--color-text-secondary);
+	letter-spacing: var(--letter-spacing-widest);
+	text-transform: uppercase;
+	font-weight: var(--font-weight-normal);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* Shrinks out of the way before it ever needs a breakpoint to hide it. */
+	flex-shrink: 3;
+	min-width: 0;
+}
+
+.map-header__back {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: var(--letter-spacing-wide);
+	text-transform: uppercase;
+	color: var(--color-text-secondary);
+	text-decoration: none;
+	white-space: nowrap;
+	flex-shrink: 0;
+	transition: color var(--duration-fast);
+}
+
+.site-header__back:hover {
+	color: var(--color-accent);
+}
+
+.slider-footer {
+	background: var(--color-surface);
+	border-top: 1px solid var(--color-border);
+	padding: var(--space-6) clamp(var(--space-5), 4vw, var(--space-9)) 1.1rem;
+	flex-shrink: 0;
+}
+
+.slider-footer__label {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	letter-spacing: var(--letter-spacing-widest);
+	text-transform: uppercase;
+	color: var(--color-text-secondary);
+	margin-bottom: 0.65rem;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.slider-footer__range-value {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-md);
+	letter-spacing: 0.02em;
+	color: var(--color-text);
+	font-weight: var(--font-weight-bold);
+}

@@ -29,8 +29,9 @@
 
 	/* ── Colour: Accent ── */
 	--color-accent: #c8ff57; /* lime green — primary accent */
-	--color-accent-dim: #c8ff5726;
+	--color-accent-fade: #c8ff5726;
 	--color-accent-glow: #c8ff574d;
+    --color-accent-dim:#3e462d;
 
 	/* ── Typography ── */
 	--font-mono: "Space Mono", monospace;
@@ -116,10 +117,10 @@
 	 *   jumping at a breakpoint, so narrow screens keep the same
 	 *   proportions as desktop rather than a distinct layout.
 	 */
-	--nav-width: clamp(10rem, 12vw, 14rem);
+	--nav-width: 10dvw;
 	--nav-height: 100svh;
 	--nav-padding-y: 1.2rem;
-	--nav-padding-x: clamp(1rem, 3vw, 2rem);
+	--nav-padding-x: 2rem;
 	--nav-gap: var(--space-2);
 	--nav-link-padding-y: 0.4rem;
 
@@ -198,6 +199,11 @@ body {
    The map page uses a top header instead.
 ───────────────────────────────────────── */
 
+.site-header__back {
+	padding: var(--space-4) 0 0 var(--space-2);
+	justify-content: center;
+}
+
 nav {
 	width: var(--nav-width);
 	flex-shrink: 0;
@@ -205,7 +211,6 @@ nav {
 	top: 0;
 	height: 100svh;
 	overflow-y: auto;
-	padding: var(--nav-padding-y) 0 var(--space-9) var(--nav-padding-x);
 	border-right: 1px solid var(--color-border);
 	display: flex;
 	flex-direction: column;
@@ -213,29 +218,37 @@ nav {
 }
 
 .nav-label {
-	width: 90%;
+	display: flex;
+	flex-wrap: nowrap;
 	font-family: var(--font-mono);
 	font-size: 1.2rem; /* intentional: nav label is larger than body label */
 	letter-spacing: var(--letter-spacing-wider);
 	text-transform: uppercase;
 	color: var(--color-text-secondary);
+	padding-left: var(--space-8);
+	padding-top: var(--space-2);
+}
+
+.nav-label:first-of-type {
+	margin-top: var(--space-6);
 }
 
 .nav-label:not(:first-of-type) {
-	padding-top: var(--space-9);
+	margin-top: var(--space-10);
 }
 
 nav a {
-	width: 90%;
+	width: 95%;
 	font-family: var(--font-mono);
 	font-size: var(--font-size-nav);
 	color: var(--color-text-secondary);
 	text-decoration: none;
-	padding: var(--nav-link-padding-y) 0;
+	padding-left: var(--space-10);
 	display: flex;
 	align-items: center;
 	gap: var(--space-4);
 	transition: color var(--duration-fast);
+	justify-content: space-between;
 }
 
 nav a:hover {

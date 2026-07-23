@@ -1,0 +1,50 @@
+/* ─────────────────────────────────────────
+    SURFACES
+    
+    #map is the positioning context for every floating panel (the
+    toolbar, results card, legend, and searchbar). Each panel's own
+    section below owns its full position + size definition in one
+    place — this section only holds rules generic to the map surface
+    itself, not to any one panel.
+    
+    One "glass" treatment shared by every floating surface, instead
+    of each panel redeclaring background/blur/border/shadow.
+───────────────────────────────────────── */
+
+/* MAP */
+
+#map {
+	flex: 1;
+	width: 100%;
+	position: relative;
+	min-height: 0;
+	margin: 0 !important;
+	padding: 0 !important;
+	max-width: none !important;
+}
+
+.leaflet-container.is-drawing-select {
+	cursor: crosshair !important;
+}
+
+a.leaflet-popup-close-button {
+	font: 24px / 24px Tahoma, Verdana, sans-serif !important;
+}
+
+/* PANEL PRIMITIVE */
+
+.selection-results,
+.map-legend,
+.searchbar,
+.leaflet-popup-content-wrapper,
+.visualizer .lorem_main,
+.lorem_boxed,
+.map-basemap-control {
+	background: var(--color-overlay);
+	border: var(--panel-border);
+	border-radius: var(--panel-radius);
+	box-shadow: var(--panel-shadow);
+	backdrop-filter: var(--panel-blur);
+	color: var(--color-text);
+	cursor: auto;
+}

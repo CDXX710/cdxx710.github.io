@@ -1,0 +1,163 @@
+/* ─────────────────────────────────────────
+    SELECTION TOOLS
+───────────────────────────────────────── */
+
+#map-select-toolbar {
+	position: absolute;
+	z-index: var(--z-map-overlay);
+	bottom: var(--space-14);
+	left: var(--space-6);
+
+	--select-btn-w: 3.4rem;
+
+	width: max-content;
+}
+
+.select-toolbar {
+	background: transparent !important;
+	overflow: hidden;
+}
+
+.select-toolbar__row {
+	display: flex;
+	width: max-content;
+}
+
+.select-toolbar__btn {
+	width: var(--select-btn-w);
+	height: 3rem;
+
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	border: none;
+	background: var(--color-overlay);
+	color: var(--color-text-secondary);
+	transition: color var(--duration-normal), background var(--duration-normal);
+	cursor: pointer;
+}
+
+.select-toolbar__btn:hover {
+	color: var(--color-accent);
+	background: var(--color-surface);
+}
+
+.select-toolbar__btn.is-active {
+	color: var(--color-accent);
+	background: var(--color-accent-dim);
+}
+
+.select-toolbar__btn svg {
+	width: 50%;
+	height: 50%;
+	pointer-events: none;
+}
+
+/* Select mode bar hidden when unarmed */
+
+.select-toolbar__modes {
+	max-height: 0;
+	overflow: hidden;
+}
+
+.select-toolbar.is-armed .select-toolbar__modes {
+	max-height: 3rem;
+	border-bottom-color: var(--color-border);
+}
+
+/*  Object mode buttons hidden when OBJECT unarmed */
+
+.select-toolbar__objectmode-btn {
+	width: 0;
+	overflow: hidden;
+}
+
+.select-toolbar.is-object .select-toolbar__objectmode-btn {
+	width: var(--select-btn-w);
+}
+
+/* Live in-progress drawing shape on the map */
+.select-draw-shape {
+	position: absolute;
+	z-index: var(--z-map-overlay);
+	pointer-events: none;
+	border: 0.125rem dashed var(--color-accent);
+	background: var(--color-accent-fade);
+	box-sizing: border-box;
+}
+
+.select-draw-shape--ellipse {
+	border-radius: 50%;
+}
+
+.select-draw-svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: var(--z-map-overlay);
+	pointer-events: none;
+}
+
+.select-draw-svg path {
+	fill: var(--color-accent-dim);
+	stroke: var(--color-accent);
+	stroke-width: 2;
+	stroke-dasharray: 5 4;
+}
+
+/* Selected markers get a glowing ring */
+.is-selected-marker {
+	filter: drop-shadow(0 0 0.4rem var(--color-accent)) brightness(1.25);
+}
+
+/* State dynamic borders radius */
+
+.select-toolbar__tools {
+	width: max-content;
+	border-bottom-left-radius: var(--panel-radius);
+}
+.select-toolbar__tools .select-toolbar__row {
+	border-radius: var(--panel-radius);
+	transition: ease var(--ease-standard);
+}
+
+.select-toolbar.is-armed .select-toolbar__tools .select-toolbar__row {
+	border-top-left-radius: 0;
+	transition: ease;
+}
+
+.select-toolbar__modes .select-toolbar__row {
+	border-top-left-radius: var(--panel-radius);
+	border-top-right-radius: var(--panel-radius);
+	transition: ease var(--ease-standard);
+}
+.select-toolbar__tools .select-toolbar__btn:first-of-type {
+	border-top-left-radius: var(--panel-radius);
+	border-bottom-left-radius: var(--panel-radius);
+}
+
+.select-toolbar__tools .select-toolbar__btn:last-of-type,
+.select-toolbar__btn#object {
+	border-top-right-radius: var(--panel-radius);
+	border-bottom-right-radius: var(--panel-radius);
+}
+
+.select-toolbar.is-armed.is-object .select-toolbar__btn#object {
+	border-radius: 0;
+}
+
+.select-toolbar.is-armed .select-toolbar__tools .select-toolbar__btn:first-of-type {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: var(--panel-radius);
+}
+
+.select-toolbar__modes .select-toolbar__btn:first-of-type {
+	border-top-left-radius: var(--panel-radius);
+}
+
+.select-toolbar__modes .select-toolbar__btn:last-of-type {
+	border-top-right-radius: var(--panel-radius);
+}

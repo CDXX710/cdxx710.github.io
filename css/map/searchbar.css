@@ -1,0 +1,178 @@
+/* ─────────────────────────────────────────
+    SEARCH BAR
+    
+    Sizing is driven entirely by CSS custom properties (rem/dvh/vw
+    based, not hard-coded SVG pixel geometry) so the bar tracks the
+    panel height and viewport width on resize. Colour comes from
+    the shared design tokens (currentColor + var(--color-*)) so it
+    follows the active theme instead of a baked-in hex value.
+───────────────────────────────────────── */
+
+#map-searchbar {
+	--searchbar-height: clamp(2.75rem, 6.8dvh, 3.5rem);
+	--searchbar-field-width: clamp(10rem, 20vw, 18rem);
+
+	position: absolute;
+	z-index: var(--z-map-overlay);
+	top: var(--space-8);
+	left: var(--space-12);
+	color: var(--color-text-secondary);
+	height: var(--searchbar-height);
+	width: var(--searchbar-height);
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+	transition: width var(--duration-normal) var(--ease-standard);
+	cursor: pointer;
+}
+
+#map-searchbar.is-open {
+	width: calc(var(--searchbar-height) + var(--searchbar-field-width));
+}
+
+.searchbar__trigger {
+	flex-shrink: 0;
+	width: var(--searchbar-height);
+	height: var(--searchbar-height);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: inherit;
+	transition: color var(--duration-fast);
+}
+
+.searchbar:hover {
+	background-color: var(--color-surface);
+}
+
+.searchbar__trigger:hover,
+.searchbar__trigger:focus-visible {
+	color: var(--color-accent);
+}
+
+.searchbar__icon {
+	width: 42%;
+	height: 42%;
+	overflow: visible;
+}
+
+.searchbar__icon-lens,
+.searchbar__icon-handle {
+	transform-box: fill-box;
+	transform-origin: center;
+	transition: transform var(--duration-normal) var(--ease-standard), opacity var(--duration-fast) ease;
+}
+
+#map-searchbar.is-open .searchbar__icon-handle {
+	transform: rotate(45deg) scale(2.5);
+	animation: search-caret-blink 1s steps(1, end) infinite;
+	animation-delay: var(--duration-normal);
+	translate: calc(-1 * var(--space-2)) calc(-1 * var(--space-2));
+}
+
+/*  
+ *  Lens: on open it just settles slightly larger; on focus it
+ *  grows and fades out exactly as the focus ring (below) grows
+ *  and fades in, so the circle visually "becomes" the box border.
+ */
+#map-searchbar.is-open .searchbar__icon-lens {
+	transform: scale(1.05);
+}
+
+#map-searchbar.is-open:focus-within .searchbar__icon-lens {
+	opacity: 0;
+	transform: scale(3);
+}
+
+.searchbar__focus-ring {
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	border: 0.125rem solid var(--color-accent);
+	opacity: 0;
+	transform: scale(0.9);
+	pointer-events: none;
+	transition: opacity var(--duration-normal) var(--ease-standard), transform var(--duration-normal) var(--ease-standard);
+}
+
+#map-searchbar.is-open:focus-within .searchbar__focus-ring {
+	opacity: 1;
+	transform: scale(1);
+}
+
+#field-box {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	padding-right: var(--space-4);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--duration-fast) ease;
+}
+
+#map-searchbar.is-open #field-box {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+#field {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	border: none;
+	background: transparent;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-sm);
+	color: var(--color-text);
+	outline: none;
+	padding: 0;
+}
+
+#field::placeholder {
+	color: var(--color-text-secondary);
+}
+
+.searchbar__clear {
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color-text-secondary);
+	font-size: var(--font-size-xs);
+	line-height: 1;
+	padding: 0.2rem;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--duration-fast), color var(--duration-fast);
+}
+
+.searchbar__clear.is-visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.searchbar__clear:hover {
+	color: var(--color-accent);
+}
+
+/*  
+ *  Handle: rotates in place from the diagonal "magnifier grip" angle
+ *  (45deg) to vertical, becoming a text caret once the field is
+ *  open. It keeps blinking like a real cursor once the morph
+ *  settles — the blink is delayed so it doesn't flicker mid-rotation.
+ */
+@keyframes search-caret-blink {
+	0%,
+	45% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0;
+	}
+}

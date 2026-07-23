@@ -1,0 +1,68 @@
+/* ─────────────────────────────────────────
+    IMPORTS
+───────────────────────────────────────── */
+
+@import url("./analytics-panel.css");
+@import url("./basemap-controls.css");
+@import url("./custom-dropdown.css");
+@import url("./layout.css");
+@import url("./leaflet-customisation.css");
+@import url("./legend-panel.css");
+@import url("./popup-pills.css");
+@import url("./responsive.css");
+@import url("./searchbar.css");
+@import url("./selection-results.css");
+@import url("./selection-tools.css");
+@import url("./surfaces.css");
+@import url("./time-slider.css");
+@import url("./visualizer.css");
+
+/* ─────────────────────────────────────────
+    TOKENS
+───────────────────────────────────────── */
+
+:root {
+	/* Category colours — orange (warm) to purple (cool), diverging */
+	--color-cat-bible: #d95f5f; /* #d95f02*/
+	--color-cat-letter: #e89e4f; /* #f0a838*/
+	--color-cat-notes: #e6d84f;
+	--color-cat-poem: #6dbf6d; /* #8f83c4*/
+	--color-cat-report: #5f8edb; /* #542788*/
+	--color-cat-roman: #a47cc8;
+	--color-cat-others: #9e9e9e;
+
+	/* Creole-type colours — magenta/pink to green, diverging */
+	--color-writ-admin: #d95f5f; /*#b5187a*/
+	--color-writ-clergy: #e89e4f; /*#de6fac*/
+	--color-writ-merchant: #e6d84f; /*#377113*/
+	--color-writ-military: #6dbf6d;
+	--color-writ-poet: #5f8edb; /*#8fc93a*/
+	--color-writ-writer: #a47cc8;
+	--color-writ-others: #9e9e9e; /*#f6d392*/
+
+	--color-unknown: #4f4f4f; /*#f6d392*/
+
+	/*  
+     *   Fluid sizing: shrinks continuously with viewport instead of
+	 *   jumping at a breakpoint, so narrow screens keep the same
+	 *   proportions as desktop rather than a distinct layout.
+     */
+	--header-height: 3.25rem;
+	--popup-width: clamp(20rem, 32dvw, 34rem);
+	--popup-height: clamp(16rem, 42dvh, 26rem);
+	--slider-handle-size: 2rem;
+	--toolbar-width: 11rem;
+	--legend-min-width: 2rem;
+	--legend-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
+
+	/*  
+     *   Shared "glass panel" treatment — one definition, reused by
+	 *   every floating surface (popup, legend, toolbar, results,
+	 *   document viewer) instead of six near-identical copies.
+     */
+	--panel-bg: var(--color-elevated);
+	--panel-border: 0.0625rem solid var(--color-border);
+	--panel-radius: var(--radius-lg);
+	--panel-blur: blur(0.75rem);
+	--panel-shadow: var(--shadow-popup);
+}

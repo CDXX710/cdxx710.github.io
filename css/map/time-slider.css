@@ -1,0 +1,52 @@
+/* ─────────────────────────────────────────
+    TIME SLIDER
+───────────────────────────────────────── */
+
+#time-slider .noUi-target {
+	background: var(--color-elevated);
+	border: 0.0625rem solid var(--color-border);
+	box-shadow: none;
+	height: 0.1875rem;
+	border-radius: var(--radius-pill);
+}
+
+#time-slider .noUi-base {
+	background: var(--color-elevated);
+}
+
+#time-slider .noUi-connect {
+	background: var(--color-accent-glow);
+	border-radius: var(--radius-pill);
+}
+
+#time-slider .noUi-handle {
+	width: var(--slider-handle-size);
+	height: var(--slider-handle-size);
+	top: -0.5rem;
+	border-radius: var(--radius-circle);
+	background: var(--color-accent);
+	border: 0.125rem solid var(--color-accent-glow);
+	box-shadow: 0 0 0 0.1875rem var(--color-accent-dim);
+	cursor: grab;
+	transition: box-shadow var(--duration-slow);
+}
+
+#time-slider .noUi-handle::before,
+#time-slider .noUi-handle::after {
+	display: none; /* Hidden default handles */
+}
+
+#time-slider .noUi-handle.noUi-active {
+	border: 0.125rem solid var(--color-accent-dim);
+	box-shadow: 0 0 0 0.1875rem var(--color-accent-glow);
+	cursor: grabbing;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}

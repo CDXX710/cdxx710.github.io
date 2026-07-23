@@ -1,0 +1,69 @@
+/* ─────────────────────────────────────────
+    15. RESPONSIVE
+    Most sizing above is already fluid (clamp/dvw/dvh), so mobile
+    tracks the desktop layout continuously and these breakpoints only
+    cover the handful of changes that are structural, not scalable:
+    the popup's two-column layout can't shrink below a usable column
+    width, so it stacks; the selection-results card becomes a bottom
+    sheet once there's no room for a floating card beside the map.
+───────────────────────────────────────── */
+
+@media (max-width: 48rem) {
+	.site-header {
+		gap: var(--space-3);
+	}
+
+	.leaflet-popup-content {
+		width: min(90dvw, 26rem) !important;
+	}
+
+	.popup__panels {
+		flex-direction: column;
+		height: auto;
+		max-height: 70dvh;
+	}
+
+	.popup__left {
+		border-right: none;
+		border-bottom: 0.0625rem solid var(--color-border-subtle);
+	}
+
+	.popup__image-wrap {
+		aspect-ratio: 4 / 3;
+		flex: none;
+	}
+}
+
+@media (max-width: 30rem) {
+	.select-toolbar__btn {
+		width: 2.4rem;
+		height: 2.25rem;
+	}
+
+	.selection-results {
+		top: auto;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		max-height: 60dvh;
+		border-radius: var(--panel-radius) var(--panel-radius) 0 0;
+	}
+
+	.visualizer .lorem_main {
+		width: 92dvw;
+		height: 95%;
+	}
+
+	.visualizer-close {
+		right: 5%;
+		top: 3%;
+	}
+
+	.lorem_header__ {
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 1.25rem 1rem;
+	}
+}

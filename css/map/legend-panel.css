@@ -1,0 +1,240 @@
+/* ─────────────────────────────────────────
+    MAP LEGEND
+───────────────────────────────────────── */
+
+.map-legend {
+	position: absolute;
+	bottom: var(--space-8);
+	right: var(--space-6);
+	z-index: var(--z-map-overlay);
+	min-width: var(--legend-min-width);
+	max-width: var(--legend-max-width);
+	padding: var(--space-3) 0.4rem;
+}
+
+.map-legend .legend__header {
+	padding: var(--space-3) var(--space-3) var(--space-6);
+}
+
+.legend__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.map-legend.is-collapsed .legend__header {
+	padding: var(--space-3);
+	margin-bottom: 0;
+}
+
+.legend__title {
+	font-size: 0.7rem;
+	letter-spacing: var(--letter-spacing-wide);
+	text-transform: uppercase;
+	color: var(--color-text-secondary);
+	font-weight: var(--font-weight-medium);
+}
+
+/*  
+ *  Shared icon-button reset: the legend's collapse button and the
+ *  selection-results' collapse button both carry this class, so
+ *  the hover/focus treatment for "collapse a panel" is defined once.
+ */
+.collapse-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color-text-secondary);
+	padding: 0.1rem 0.2rem;
+	border-radius: var(--radius-sm);
+	display: flex;
+	align-items: center;
+	transition: color var(--duration-slow);
+}
+
+.collapse-btn:hover,
+.leaflet-popup-close-button:hover {
+	color: var(--color-accent) !important;
+}
+
+.legend__collapse-btn svg {
+	transform: rotate(180deg);
+	transition: transform var(--duration-slow) var(--ease-standard);
+}
+
+.map-legend.is-collapsed .legend__collapse-btn svg {
+	transform: rotate(0deg);
+}
+
+.legend__body {
+	margin: 0 var(--space-3) 0;
+	overflow: hidden;
+	opacity: 1;
+	transition: max-height var(--duration-expand) var(--ease-standard), opacity 0.22s var(--ease-standard);
+	/* max-height is set by JS once the content height is known */
+}
+
+.map-legend.is-collapsed .legend__body {
+	max-height: 0 !important;
+	opacity: 0;
+	pointer-events: none;
+	padding-bottom: 0;
+}
+
+.legend__group-title {
+	font-size: 0.8rem;
+	letter-spacing: var(--letter-spacing-wider);
+	text-transform: uppercase;
+	color: var(--color-text-secondary);
+	font-weight: var(--font-weight-medium);
+	margin-bottom: 0.65rem;
+}
+
+.legend__group-title:first-of-type {
+	margin-top: var(--space-6);
+}
+
+.legend-divider {
+	height: 1px;
+	border: none;
+	background: var(--color-border, rgba(0, 0, 0, 0.12));
+}
+
+.legend-divider[hidden] {
+	display: none;
+}
+
+.legend__divider {
+	height: 0.0625rem;
+	background: var(--color-border);
+	margin: var(--space-5) 0;
+}
+
+.legend__item {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	margin-bottom: var(--space-3);
+	cursor: pointer;
+	user-select: none;
+}
+
+.legend__item:last-child {
+	margin-bottom: 0;
+}
+
+.legend__icon-toggle {
+	position: relative;
+	flex-shrink: 0;
+	width: 1.25rem;
+	height: 1.25rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+.legend__icon-toggle input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+.legend__item-label {
+	font-size: 0.95rem;
+	font-weight: var(--font-weight-normal);
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	letter-spacing: 0.03em;
+	transition: color var(--duration-slow), opacity var(--duration-slow);
+}
+
+.legend__item:last-of-type {
+	margin-bottom: var(--space-5);
+}
+
+.legend__item:hover .legend__item-label {
+	color: var(--color-text);
+}
+
+.legend__item.is-off .legend__item-label {
+	opacity: var(--opacity-ghost);
+}
+
+/*
+ *  SVG shape colour driven by --shape-color on the row.
+ *  Filled shapes use fill + stroke; ring shapes use stroke only.
+ *  When the row is toggled off, both collapse to --color-text-muted.
+ */
+.legend__item .shape-fill {
+	fill: var(--shape-color);
+	stroke: var(--shape-color);
+	transition: fill var(--duration-normal), stroke var(--duration-normal);
+}
+
+.legend__item .shape-fill--ring {
+	fill: transparent;
+}
+
+.legend__item.is-off .shape-fill {
+	fill: var(--color-text-muted);
+	stroke: var(--color-text-muted);
+}
+
+.legend__item.is-off .shape-fill--ring {
+	fill: transparent;
+}
+
+/* 
+ *  Legend tabs — added for the "On map" / "Filter" split. Kept minimal and
+ *  scoped so it layers on top of whatever map.css already defines for
+ *  .map-legend / .legend__* rather than fighting it. 
+ */
+
+.legend__actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	margin: var(--space-3) var(--space-3);
+}
+
+.legend__tabs {
+	display: flex;
+	gap: var(--space-9);
+	margin-right: var(--space-9);
+}
+.legend__tab {
+	appearance: none;
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+	font: inherit;
+	font-size: var(--font-size-sm);
+	letter-spacing: var(--letter-spacing-thin);
+	cursor: pointer;
+	padding: var(--space-1);
+	margin-bottom: -1px;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+.legend__tab:hover {
+	color: var(--color-text-muted);
+}
+.legend__tab.is-active {
+	color: var(--color-accent);
+	border-bottom-color: currentColor;
+}
+.legend__tab-panel[hidden] {
+	display: none;
+}
+.legend__item--static {
+	cursor: default;
+}
+.legend__icon-toggle--static {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: default;
+}

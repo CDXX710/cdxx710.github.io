@@ -2,20 +2,20 @@
     IMPORTS
 ───────────────────────────────────────── */
 
-@import url("./analytics-panel.css");
-@import url("./basemap-controls.css");
-@import url("./custom-dropdown.css");
-@import url("./layout.css");
-@import url("./leaflet-customisation.css");
-@import url("./legend-panel.css");
-@import url("./popup-pills.css");
-@import url("./responsive.css");
-@import url("./searchbar.css");
-@import url("./selection-results.css");
-@import url("./selection-tools.css");
-@import url("./surfaces.css");
-@import url("./time-slider.css");
-@import url("./visualizer.css");
+@import url("analytics-panel.css");
+@import url("basemap-controls.css");
+@import url("custom-dropdown.css");
+@import url("layout.css");
+@import url("leaflet-customisation.css");
+@import url("legend-panel.css");
+@import url("popup-pills.css");
+@import url("responsive.css");
+@import url("searchbar.css");
+@import url("selection-results.css");
+@import url("selection-tools.css");
+@import url("surfaces.css");
+@import url("time-slider.css");
+@import url("visualizer.css");
 
 /* ─────────────────────────────────────────
     TOKENS

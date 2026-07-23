@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Field Index — Authoritative GIS Boundary Sources</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+		<link rel="stylesheet" href="../css/shared.css" />
+		<link rel="stylesheet" href="../css/data-sources.css" />
+	</head>
+	<body>
+		<!-- Shared Side Navigation -->
+		<nav>
+			<span class="nav-label">Sources</span>
+			<a href="#geoboundaries"><span class="dot"></span>geoBoundaries</a>
+			<a href="#gadm"><span class="dot"></span>GADM</a>
+			<a href="#osm"><span class="dot"></span>OSM</a>
+			<a href="#cshapes"><span class="dot"></span>cShapes</a>
+			<a href="#naturalearth"><span class="dot"></span>Natural Earth</a>
+			<a href="#overture"><span class="dot"></span>Overture</a>
+
+			<span class="nav-label">Side by Side</span>
+			<a href="#compare"><span class="dot"></span>Comparison</a>
+		</nav>
+
+		<div class="content-wrapper">
+			<header class="hero">
+				<div class="tick-row">
+					<span>SHEET INDEX · GLOBAL BOUNDARY DATA</span>
+					<span>REV. 2026-07</span>
+				</div>
+				<h1 class="title">Where the lines<br />actually come <em>from.</em></h1>
+				<p class="subhead">A field guide to the boundary and basemap sources cartographers, researchers, and analysts return to again and again — what each one is really for, where they disagree, and what it costs you to use them.</p>
+				<div class="legend-strip">
+					<span class="item"><span class="swatch" style="background: var(--good)"></span>Open / permissive license</span>
+					<span class="item"><span class="swatch" style="background: var(--survey)"></span>Mixed / attribution required</span>
+					<span class="item"><span class="swatch" style="background: var(--bad)"></span>Restricted or fee-based</span>
+				</div>
+			</header>
+
+			<main>
+				<!-- geoBoundaries -->
+				<section class="sheet" id="geoboundaries">
+					<div class="sheet-head">
+						<span class="sheet-id">GB</span>
+						<h2>geoBoundaries</h2>
+						<span class="tagline">William &amp; Mary geoLab · est. 2020</span>
+					</div>
+					<div class="grid-2">
+						<div class="card">
+							<h3>Key focus</h3>
+							<p>A standardized, openly licensed database of political administrative boundaries — country, state/province, and district level — for every sovereign state, built specifically to fix the licensing and consistency problems in GADM.</p>
+							<h3>Main differences</h3>
+							<p>Every polygon carries a documented source and license chain back to the original government or humanitarian publisher. Coverage is versioned quarterly, and each boundary is scored for positional and topological quality against a reproducible methodology described in <em>Runfola et al. (2020), PLoS ONE</em>.</p>
+							<h3>Licensing</h3>
+							<span class="license-tag lic-open">CC BY 4.0 — commercial use OK</span>
+						</div>
+						<div class="pros-cons">
+							<div class="card pros">
+								<h3>Pros</h3>
+								<ul>
+									<li>Fully open, attribution-only license — safe for commercial products</li>
+									<li>Machine-readable API and quarterly release cadence</li>
+									<li>Transparent sourcing and per-boundary quality metadata</li>
+								</ul>
+							</div>
+							<div class="card cons">
+								<h3>Cons</h3>
+								<ul>
+									<li>Fewer administrative levels than GADM in some countries (typically ADM0–ADM2)</li>
+									<li>Younger project — historical archive is shallower</li>
+									<li>Some disputed-territory renderings still evolving release to release</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Available attributes</h3>
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>Field</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>shapeName</code></td>
+									<td>Local or official name of the unit</td>
+								</tr>
+								<tr>
+									<td><code>shapeISO</code></td>
+									<td>ISO 3166-2 subdivision code, where available</td>
+								</tr>
+								<tr>
+									<td><code>shapeID</code></td>
+									<td>Unique geoBoundaries identifier, stable across versions</td>
+								</tr>
+								<tr>
+									<td><code>shapeGroup</code></td>
+									<td>ISO 3166-1 alpha-3 country code</td>
+								</tr>
+								<tr>
+									<td><code>shapeType</code></td>
+									<td>Administrative level (ADM0–ADM2/3)</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- GADM -->
+				<section class="sheet" id="gadm">
+					<div class="sheet-head">
+						<span class="sheet-id">GD</span>
+						<h2>GADM</h2>
+						<span class="tagline">Global Administrative Areas · est. 2009</span>
+					</div>
+					<div class="grid-2">
+						<div class="card">
+							<h3>Key focus</h3>
+							<p>The deepest, most granular administrative hierarchy available for most countries — often down to level 3–5 (municipalities, wards, villages) — assembled from national statistical and mapping agencies.</p>
+							<h3>Main differences</h3>
+							<p><cite index="4-1">GADM has no restrictions for personal and academic use, but commercial use requires a licensing fee</cite> — the single biggest reason teams end up comparing it against geoBoundaries. In exchange, it typically offers more administrative depth and cleaner topology than most free alternatives.</p>
+							<h3>Licensing</h3>
+							<span class="license-tag lic-restricted">Free for academic/non-commercial · fee for commercial</span>
+						</div>
+						<div class="pros-cons">
+							<div class="card pros">
+								<h3>Pros</h3>
+								<ul>
+									<li>Finest administrative granularity of any global dataset</li>
+									<li>Clean geometries, minimal topology errors</li>
+									<li>Distributed as GeoPackage, Shapefile, KMZ, and R spatial objects</li>
+								</ul>
+							</div>
+							<div class="card cons">
+								<h3>Cons</h3>
+								<ul>
+									<li>Commercial licensing fee can be a blocker for small teams and products</li>
+									<li>Update cadence is slow and irregular compared to geoBoundaries</li>
+									<li>No public API — bulk downloads only, by country or globally</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Available attributes</h3>
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>Field</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>GID_0…GID_5</code></td>
+									<td>Hierarchical unique ID at each administrative level</td>
+								</tr>
+								<tr>
+									<td><code>NAME_0…NAME_5</code></td>
+									<td>Official name at each level</td>
+								</tr>
+								<tr>
+									<td><code>VARNAME_*</code></td>
+									<td>Alternate spellings and historical names</td>
+								</tr>
+								<tr>
+									<td><code>TYPE_*</code> / <code>ENGTYPE_*</code></td>
+									<td>Local designation (e.g. "Provincia") and English equivalent</td>
+								</tr>
+								<tr>
+									<td><code>HASC_*</code></td>
+									<td>Hierarchical administrative subdivision code</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- OSM -->
+				<section class="sheet" id="osm">
+					<div class="sheet-head">
+						<span class="sheet-id">OSM</span>
+						<h2>OpenStreetMap Boundaries</h2>
+						<span class="tagline">Volunteer-mapped · continuous updates</span>
+					</div>
+					<div class="grid-2">
+						<div class="card">
+							<h3>Key focus</h3>
+							<p>Not a boundary product per se — a crowd-mapped world database from which administrative relations, roads, buildings, land use, and points of interest are extracted. Tools like Geofabrik, the HOT export tool, and osm-boundaries.com turn raw OSM relations into usable boundary layers.</p>
+							<h3>Main differences</h3>
+							<p><cite index="9-1">OSM-derived boundaries are pulled directly from the live database and can reach much deeper administrative levels — down to neighborhoods and suburbs — in well-mapped regions, whereas GADM offers more consistent coverage but can lag behind fast-changing administrative areas.</cite> Quality is only as good as local mapping community activity.</p>
+							<h3>Licensing</h3>
+							<span class="license-tag lic-mixed">ODbL 1.0 — share-alike, attribution required</span>
+						</div>
+						<div class="pros-cons">
+							<div class="card pros">
+								<h3>Pros</h3>
+								<ul>
+									<li>Continuously updated by a global volunteer community, often within days of real-world change</li>
+									<li>Extends far beyond boundaries: streets, buildings, land use, POIs, transit</li>
+									<li>Free, extractable via API, bulk extracts, or QGIS plugins</li>
+								</ul>
+							</div>
+							<div class="card cons">
+								<h3>Cons</h3>
+								<ul>
+									<li>Coverage and accuracy vary sharply by region and mapper density</li>
+									<li>ODbL's share-alike clause complicates some closed commercial redistributions</li>
+									<li>No single authoritative "boundaries" file — requires extraction tooling and validation</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Available attributes (typical boundary relation)</h3>
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>Field</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>admin_level</code></td>
+									<td>Numeric depth, 2 (country) through 10–12 (neighborhood)</td>
+								</tr>
+								<tr>
+									<td><code>name</code> / <code>name:en</code></td>
+									<td>Local and localized names</td>
+								</tr>
+								<tr>
+									<td><code>boundary=administrative</code></td>
+									<td>Tag marking the relation as an admin boundary</td>
+								</tr>
+								<tr>
+									<td><code>ISO3166-1/2</code></td>
+									<td>Country/subdivision code tags, where mapped</td>
+								</tr>
+								<tr>
+									<td><code>wikidata</code></td>
+									<td>Cross-reference to a Wikidata entity</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- cShapes -->
+				<section class="sheet" id="cshapes">
+					<div class="sheet-head">
+						<span class="sheet-id">CS</span>
+						<h2>cShapes</h2>
+						<span class="tagline">Historical state boundaries · since 1946</span>
+					</div>
+					<div class="grid-2">
+						<div class="card">
+							<h3>Key focus</h3>
+							<p><cite index="4-1">cShapes exists to present historical state boundaries and capitals dating back to 1946, tracking the merger, emergence, disappearance, or dissolution of independent states over time</cite> — the tool of choice for political science and conflict research, not current-day mapping.</p>
+							<h3>Main differences</h3>
+							<p>Where GADM and geoBoundaries answer "what does the world look like today," cShapes answers "what did the world look like in any given year." <cite index="4-1">It is coded to both the Correlates of War and Gleditsch–Ward state lists, making it directly compatible with existing conflict and international-relations datasets</cite>, and ships an R package for computing inter-capital and inter-border distances.</p>
+							<h3>Licensing</h3>
+							<span class="license-tag lic-open">Free for research use, citation requested</span>
+						</div>
+						<div class="pros-cons">
+							<div class="card pros">
+								<h3>Pros</h3>
+								<ul>
+									<li>Only major dataset built explicitly for time-series, country-year analysis</li>
+									<li>Pre-coded to Correlates of War / Gleditsch-Ward identifiers</li>
+									<li>R package included for distance and adjacency calculations</li>
+								</ul>
+							</div>
+							<div class="card cons">
+								<h3>Cons</h3>
+								<ul>
+									<li>Country-level (ADM0) only — no subnational boundaries</li>
+									<li>Not maintained on a continuous release cycle like OSM or geoBoundaries</li>
+									<li>Not designed for present-day cartographic or web-mapping use</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Available attributes</h3>
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>Field</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>COWCODE</code></td>
+									<td>Correlates of War numeric state code</td>
+								</tr>
+								<tr>
+									<td><code>GWCODE</code></td>
+									<td>Gleditsch–Ward numeric state code</td>
+								</tr>
+								<tr>
+									<td><code>CNTRY_NAME</code></td>
+									<td>State name at the time</td>
+								</tr>
+								<tr>
+									<td><code>CAPNAME</code> / <code>CAPLONG</code> / <code>CAPLAT</code></td>
+									<td>Capital city name and coordinates</td>
+								</tr>
+								<tr>
+									<td><code>GWSDATE</code> / <code>GWEDATE</code></td>
+									<td>Start and end date of that territorial configuration</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Natural Earth -->
+				<section class="sheet" id="naturalearth">
+					<div class="sheet-head">
+						<span class="sheet-id">NE</span>
+						<h2>Natural Earth</h2>
+						<span class="tagline">Public-domain basemap · cartographic focus</span>
+					</div>
+					<div class="grid-2">
+						<div class="card">
+							<h3>Key focus</h3>
+							<p>A public-domain basemap dataset built by volunteer cartographers for making maps that look good at small scales — coastlines, countries, populated places, rivers, and physical features at 1:10m, 1:50m, and 1:110m resolutions.</p>
+							<h3>Main differences</h3>
+							<p>Unlike GADM or geoBoundaries, Natural Earth optimizes for visual generalization rather than administrative precision — boundaries are simplified deliberately so they render cleanly at world or continental zoom levels, not for parcel-level accuracy.</p>
+							<h3>Licensing</h3>
+							<span class="license-tag lic-open">Public domain — no attribution required</span>
+						</div>
+						<div class="pros-cons">
+							<div class="card pros">
+								<h3>Pros</h3>
+								<ul>
+									<li>Truly unrestricted public-domain license</li>
+									<li>Multiple pre-generalized resolutions, ideal for small-scale maps</li>
+									<li>Bundles physical, cultural, and raster layers, not just boundaries</li>
+								</ul>
+							</div>
+							<div class="card cons">
+								<h3>Cons</h3>
+								<ul>
+									<li>Not suitable where precise, legally accurate boundaries matter</li>
+									<li>Sparse subnational depth compared to GADM or OSM</li>
+									<li>Update cycle is slow and irregular, maintained by volunteers</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Available attributes</h3>
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>Field</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>ADMIN</code> / <code>ADM0_A3</code></td>
+									<td>Country name and ISO-based 3-letter code</td>
+								</tr>
+								<tr>
+									<td><code>SOVEREIGNT</code></td>
+									<td>Sovereign parent state, for dependencies/territories</td>
+								</tr>
+								<tr>
+									<td><code>POP_EST</code></td>
+									<td>Estimated population</td>
+								</tr>
+								<tr>
+									<td><code>CONTINENT</code> / <code>REGION_UN</code></td>
+									<td>Continental and UN regional grouping</td>
+								</tr>
+								<tr>
+									<td><code>MAPCOLOR7/9/13</code></td>
+									<td>Pre-computed color classes for adjacent-country map shading</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Overture -->
+				<section class="sheet" id="overture">
+					<div class="sheet-head">
+						<span class="sheet-id">OM</span>
+						<h2>Overture Maps</h2>
+						<span class="tagline">Foundation-backed · est. 2022</span>
+					</div>
+					<div class="grid-2">
+						<div class="card">
+							<h3>Key focus</h3>
+							<p>An industry-backed open map dataset (Linux Foundation, with Amazon, Meta, Microsoft, and TomTom among its members) that fuses OSM with commercial and government sources into a single, versioned, cloud-native schema covering places, buildings, transportation, and administrative divisions.</p>
+							<h3>Main differences</h3>
+							<p>Rather than replacing OSM, Overture conflates and cleans it alongside proprietary data, then republishes it as monthly-versioned Parquet releases designed for large-scale data engineering — a very different consumption model from downloading a shapefile.</p>
+							<h3>Licensing</h3>
+							<span class="license-tag lic-open">CDLA Permissive 2.0 / ODbL (varies by theme)</span>
+						</div>
+						<div class="pros-cons">
+							<div class="card pros">
+								<h3>Pros</h3>
+								<ul>
+									<li>Combines crowd-sourced and commercial data for better completeness</li>
+									<li>Cloud-native Parquet/GeoParquet format, built for querying at scale</li>
+									<li>Backed and funded by major mapping and tech companies for long-term stability</li>
+								</ul>
+							</div>
+							<div class="card cons">
+								<h3>Cons</h3>
+								<ul>
+									<li>Younger, evolving schema — breaking changes between releases are still common</li>
+									<li>Licensing varies by data theme, so it needs checking per layer</li>
+									<li>Heavier tooling requirement (DuckDB/Spark-style workflows) vs. a plain shapefile</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Available attributes (divisions theme)</h3>
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>Field</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>id</code></td>
+									<td>Globally unique Overture feature ID</td>
+								</tr>
+								<tr>
+									<td><code>subtype</code></td>
+									<td>country / region / county / locality, etc.</td>
+								</tr>
+								<tr>
+									<td><code>names.primary</code></td>
+									<td>Primary display name, with localized variants nested alongside</td>
+								</tr>
+								<tr>
+									<td><code>country</code> / <code>region</code></td>
+									<td>ISO country and region codes</td>
+								</tr>
+								<tr>
+									<td><code>sources</code></td>
+									<td>Provenance array listing contributing datasets per feature</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Comparison -->
+				<section class="sheet" id="compare">
+					<div class="sheet-head">
+						<span class="sheet-id">CMP</span>
+						<h2>Side by side</h2>
+						<span class="tagline">Pick by use case, not by reputation</span>
+					</div>
+
+					<div class="callout"><cite index="3-1">The main deciding factor between GADM and geoBoundaries is licensing: GADM is free for academic and non-commercial use, while geoBoundaries is fully open and the safer choice for commercial projects</cite> — but GADM often wins on administrative depth where that matters more than licensing.</div>
+
+					<div class="compare-wrap">
+						<table class="compare">
+							<thead>
+								<tr>
+									<th>Source</th>
+									<th>Best for</th>
+									<th>Max depth</th>
+									<th>Update cycle</th>
+									<th>License</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>geoBoundaries</td>
+									<td>Commercial products needing clean, citable admin boundaries</td>
+									<td>ADM0–ADM2/3</td>
+									<td>Quarterly</td>
+									<td>CC BY 4.0</td>
+								</tr>
+								<tr>
+									<td>GADM</td>
+									<td>Deep subnational analysis, non-commercial or licensed use</td>
+									<td>ADM0–ADM5</td>
+									<td>Irregular, slow</td>
+									<td>Free (non-comm.) / fee (comm.)</td>
+								</tr>
+								<tr>
+									<td>OSM Boundaries</td>
+									<td>Fine-grained, current, locally-verified boundaries</td>
+									<td>ADM0–ADM12*</td>
+									<td>Continuous</td>
+									<td>ODbL 1.0</td>
+								</tr>
+								<tr>
+									<td>cShapes</td>
+									<td>Historical / time-series country-level analysis since 1946</td>
+									<td>ADM0 only</td>
+									<td>Static releases</td>
+									<td>Free, research use</td>
+								</tr>
+								<tr>
+									<td>Natural Earth</td>
+									<td>Small-scale, stylized world and continental maps</td>
+									<td>ADM0–ADM1</td>
+									<td>Irregular</td>
+									<td>Public domain</td>
+								</tr>
+								<tr>
+									<td>Overture Maps</td>
+									<td>Large-scale data engineering pipelines, blended sourcing</td>
+									<td>ADM0–ADM4+</td>
+									<td>Monthly</td>
+									<td>Mixed (CDLA / ODbL)</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="coord" style="margin-top: 0.6rem">*Depth in well-mapped urban regions only; varies widely by country and local OSM community activity.</p>
+				</section>
+			</main>
+
+			<footer>
+				<span>FIELD INDEX · GIS BOUNDARY SOURCES</span>
+				<span>Compiled for reference — verify current license terms before redistribution</span>
+			</footer>
+		</div>
+	</body>
+</html>

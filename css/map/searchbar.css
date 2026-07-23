@@ -13,9 +13,9 @@
 	--searchbar-field-width: clamp(10rem, 20vw, 18rem);
 
 	position: absolute;
-	z-index: var(--z-map-overlay);
+	z-index: var(--z-modal);
 	top: var(--space-8);
-	left: var(--space-12);
+	right: var(--space-17);
 	color: var(--color-text-secondary);
 	height: var(--searchbar-height);
 	width: var(--searchbar-height);

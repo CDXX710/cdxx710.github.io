@@ -4,8 +4,8 @@
 
 .map-basemap-control {
 	position: absolute;
-	bottom: var(--space-8);
-	left: var(--space-6);
+	top: var(--space-5);
+	left: var(--space-12);
 	z-index: 1000;
 	padding: 0.25rem;
 	font-family: "DM Sans", sans-serif;
@@ -21,7 +21,7 @@
 .map-basemap-control__row--overlay {
 	margin-top: 0.35rem;
 	padding-top: 0.35rem;
-	border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+	border-top: 1px solid var(--color-border);
 }
 
 .map-basemap-control__btn {
@@ -40,15 +40,15 @@
 }
 
 .map-basemap-control__btn:hover {
-	background: rgba(255, 255, 255, 0.06);
+	background: var(--overlay-tint-subtle);
 	color: var(--color-text);
 }
 
 .map-basemap-control__btn.is-active {
-	background: var(--color-accent, #3a7bfd);
+	background: var(--color-accent);
 	color: var(--color-text-muted);
 }
 
 .map-basemap-control__btn--overlay.is-active {
-	box-shadow: inset 0 0 0 1px var(--color-accent, currentColor);
+	box-shadow: inset 0 0 0 1px var(--color-accent);
 }

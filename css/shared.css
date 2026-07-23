@@ -31,7 +31,7 @@
 	--color-accent: #c8ff57; /* lime green — primary accent */
 	--color-accent-fade: #c8ff5726;
 	--color-accent-glow: #c8ff574d;
-    --color-accent-dim:#3e462d;
+	--color-accent-dim: #3e462d;
 
 	/* ── Typography ── */
 	--font-mono: "Space Mono", monospace;
@@ -80,6 +80,9 @@
 	--space-14: 8rem; /* 128px */
 	--space-15: 10rem; /* 160px */
 	--space-16: 15rem; /* 240px */
+	--space-17: 20rem; /* 320px */
+	--space-16: 25rem; /* 400px */
+	--space-16: 30rem; /* 480px */
 
 	/* ── Border radius ── */
 	--radius-sm: 0.25rem; /*  4px */

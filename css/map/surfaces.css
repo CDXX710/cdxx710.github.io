@@ -31,8 +31,21 @@ a.leaflet-popup-close-button {
 	font: 24px / 24px Tahoma, Verdana, sans-serif !important;
 }
 
+/*
+ *  Collapse-chevron rotation, shared by the legend and selection-results
+ *  panels (each supplies its own base 180deg icon + duration-slow
+ *  transition; only the "collapsed" end-state differs per panel and
+ *  stays with each panel's own file).
+ */
+.__collapse-btn svg,
+.selection__collapse-btn svg {
+	transform: rotate(180deg);
+	transition: transform var(--duration-slow) var(--ease-standard);
+}
+
 /* PANEL PRIMITIVE */
 
+.analytics-panel,
 .selection-results,
 .map-legend,
 .searchbar,
@@ -47,4 +60,33 @@ a.leaflet-popup-close-button {
 	backdrop-filter: var(--panel-blur);
 	color: var(--color-text);
 	cursor: auto;
+}
+
+/* PANELS HEADERS AND SHARED ATTRIBUTES */
+
+.__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	color: var(--color-text-secondary);
+	text-transform: uppercase;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-md);
+	letter-spacing: var(--letter-spacing-wide);
+	padding: var(--space-3) var(--space-3) var(--space-6);
+	font-weight: var(--font-weight-medium);
+}
+
+.__divider {
+	height: 1px;
+	border: none;
+	margin: 0 5%;
+	background: var(--color-border);
+}
+
+.body__divider {
+	height: 1px;
+	border: none;
+	background: var(--color-border);
+	margin: 0 10%;
 }

@@ -16,7 +16,7 @@ const Panels = (() => {
 		let dividerEl = null
 		function ensureDivider() {
 			if (!dividerEl && headerEl) {
-				dividerEl = Utils.el("div", {className: "legend-divider", role: "separator"})
+				dividerEl = Utils.el("div", {className: "__divider", role: "separator"})
 				headerEl.insertAdjacentElement("afterend", dividerEl)
 			}
 			return dividerEl
@@ -34,7 +34,6 @@ const Panels = (() => {
 				extraDividers.forEach(el => {
 					el.hidden = false
 				})
-				if (bodyEl) bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
 			} else {
 				if (dividerEl) dividerEl.hidden = true
 				extraDividers.forEach(el => {
@@ -54,14 +53,14 @@ const Panels = (() => {
 	// optional.
 	// Returns {headerEl, collapseBtn} as expected by createCollapsible.
 	function buildHeader({title, collapseLabel}) {
-		const headerEl = Utils.el("div", {className: "legend__header"})
+		const headerEl = Utils.el("div", {className: "__header"})
 
 		if (title) {
-			headerEl.appendChild(Utils.el("span", {className: "legend__title", text: title}))
+			headerEl.appendChild(Utils.el("span", {className: "__title", text: title}))
 		}
 
 		const collapseBtn = Utils.el("button", {
-			className: "collapse-btn legend__collapse-btn",
+			className: "collapse-btn __collapse-btn",
 			"aria-label": collapseLabel,
 			"aria-expanded": "false",
 			html: collapseChevronSvg

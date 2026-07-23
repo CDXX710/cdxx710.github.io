@@ -90,7 +90,8 @@ const AnalyticsPanel = (() => {
 			<div class="analytics-hero">
 				<span class="analytics-hero__count">${scope.length}</span>
 				<span class="analytics-hero__total">/ ${total}</span>
-			</div>`
+			</div>
+            `
 	}
 
 	function renderIslands(scope) {
@@ -167,12 +168,6 @@ const AnalyticsPanel = (() => {
 		if (!svg) return
 		let dragStartDecade = null
 		function decadeFromEvent(evt) {
-			// Hit-testing the bar element itself (via evt.target or
-			// elementFromPoint) only works when the pointer is exactly over
-			// the drawn rect — which is often just a couple of pixels tall
-			// for low-count decades. Instead, map the pointer's x position to
-			// its column across the full height of the chart, so anywhere
-			// above/below a short bar still counts as that decade.
 			const rect = svg.getBoundingClientRect()
 			if (!rect.width) return null
 			const fraction = (evt.clientX - rect.left) / rect.width
@@ -225,19 +220,27 @@ const AnalyticsPanel = (() => {
 	function init() {
 		// Starts expanded (no is-collapsed class) so the research summary
 		// is visible as soon as the page loads.
-		const panel = Utils.el("div", {className: "map-legend analytics-panel", "aria-label": "Analytics summary"})
+		const panel = Utils.el("div", {className: "analytics-panel", "aria-label": "Analytics summary"})
 		document.getElementById("map").appendChild(panel)
 
 		const {headerEl, collapseBtn} = Panels.buildHeader({title: "Research Summary", collapseLabel: "Expand research summary"})
 		panel.appendChild(headerEl)
 
-		bodyEl = Utils.el("div", {className: "legend__body"})
+		bodyEl = Utils.el("div", {className: "analytics-panel__body"})
 		panel.appendChild(bodyEl)
 		recordsEl = Utils.el("div", {className: "analytics-section"})
 		islandsEl = Utils.el("div", {className: "analytics-section"})
 		timelineEl = Utils.el("div", {className: "analytics-section"})
 		categoriesEl = Utils.el("div", {className: "analytics-section"})
 		bodyEl.append(recordsEl, islandsEl, timelineEl, categoriesEl)
+
+		// Add dividers between analytics sections (but not after the last)
+		const analyticsSections = bodyEl.querySelectorAll(".analytics-section")
+		analyticsSections.forEach((section, index) => {
+			if (index !== analyticsSections.length - 1) {
+				section.insertAdjacentHTML("afterend", '<div class="__divider" role="separator"></div>')
+			}
+		})
 
 		collapsible = Panels.createCollapsible({panelEl: panel, headerEl, collapseBtn, bodyEl, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
 		collapsible.setCollapsed(false)

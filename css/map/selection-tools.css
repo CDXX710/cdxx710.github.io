@@ -5,7 +5,7 @@
 #map-select-toolbar {
 	position: absolute;
 	z-index: var(--z-map-overlay);
-	bottom: var(--space-14);
+	bottom: var(--space-8);
 	left: var(--space-6);
 
 	--select-btn-w: 3.4rem;

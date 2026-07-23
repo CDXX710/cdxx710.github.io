@@ -152,10 +152,10 @@ const Legend = (() => {
 		actionsRow.append(defaultBtn, noneBtn)
 		bodyWrap.appendChild(actionsRow)
 
-		const actionsDivider = Utils.el("div", {className: "legend-divider", role: "separator", hidden: ""})
+		const actionsDivider = Utils.el("div", {className: "__divider", role: "separator"})
 		bodyWrap.appendChild(actionsDivider)
 
-		const panel = Utils.el("div", {className: "legend__tab-panel", id: "legend-panel"})
+		const panel = Utils.el("div", {className: "legend__body", id: "legend-panel"})
 		bodyWrap.append(panel)
 
 		const collapsible = Panels.createCollapsible({panelEl: legend, headerEl, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend", extraDividers: [actionsDivider]})

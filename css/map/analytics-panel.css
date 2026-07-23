@@ -1,24 +1,54 @@
 /* ─────────────────────────────────────────
     15. Analytics Summary panel
-    
-    Reuses .map-legend/.legend__* chrome 
-    so it matches the existing panels;
-    Only positioning + chart-specific bits
-    are added here.
 ───────────────────────────────────────── */
 
-.analytics-panel.map-legend {
+.analytics-panel {
+	position: absolute;
 	top: var(--space-14);
-	left: var(--space-4);
-	bottom: auto;
-	right: auto;
+	left: var(--space-6);
+	z-index: var(--z-map-overlay);
+	min-width: var(--legend-min-width);
+	max-width: var(--legend-max-width);
+	padding: var(--space-3) 0.4rem;
 }
 
-.analytics-panel .legend__body {
+.analytics-panel.is-collapsed .__collapse-btn svg {
+	transform: rotate(180deg);
+}
+
+.analytics-panel .__collapse-btn svg {
+	transform: rotate(0deg);
+}
+
+.analytics-panel.is-collapsed {
+	height: 3rem;
+	width: 3rem;
+}
+
+.analytics-panel.is-collapsed .__title {
+	width: 0;
+	height: 0;
+	visibility: hidden;
+}
+
+.analytics-panel__body {
+	margin: var(--space-4) var(--space-5) var(--space-3);
+	opacity: 1;
 	display: flex;
 	flex-direction: column;
 	gap: 1.1rem;
 	min-width: 15rem;
+	transition: opacity 0.2s var(--ease-in-out);
+}
+
+.analytics-panel.is-collapsed .analytics-panel__body,
+.analytics-panel.is-collapsed .analytics-panel__ {
+	max-height: 0 !important;
+	opacity: 0;
+	pointer-events: none;
+	padding-bottom: 0;
+
+	transition: opacity 0.2s var(--ease-in-out);
 }
 
 .analytics-section {
@@ -52,7 +82,7 @@
 }
 
 .analytics-hero__count {
-	font-family: "Space Mono", monospace;
+	font-family: var(--font-mono);
 	font-size: 1.7rem;
 	line-height: 1;
 	color: var(--color-text);
@@ -86,8 +116,6 @@
 	flex: 0 0 5rem;
 	color: var(--color-text);
 	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 .analytics-bar-row__label:hover {
@@ -99,8 +127,7 @@
 	flex: 1;
 	height: 0.4rem;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.09);
-	overflow: hidden;
+	background: var(--overlay-tint-soft);
 }
 
 .analytics-bar-row__fill {
@@ -115,7 +142,7 @@
 	flex: 0 0 2.4rem;
 	text-align: right;
 	color: var(--color-accent);
-	font-family: "Space Mono", monospace;
+	font-family: var(--font-mono);
 }
 
 .analytics-timeline {
@@ -128,7 +155,7 @@
 }
 
 .analytics-timeline__bar {
-	fill: rgba(255, 255, 255, 0.16);
+	fill: var(--overlay-tint-medium);
 	transition: fill 0.15s ease;
 }
 
@@ -141,7 +168,7 @@
 }
 
 .analytics-timeline__bar:hover {
-	fill: rgba(255, 255, 255, 0.34);
+	fill: var(--overlay-tint-strong);
 }
 
 .analytics-timeline__range {
@@ -149,7 +176,7 @@
 	justify-content: space-between;
 	font-size: 0.64rem;
 	color: var(--color-text-secondary);
-	font-family: "Space Mono", monospace;
+	font-family: var(--font-mono);
 }
 
 .analytics-timeline__hint {

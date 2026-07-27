@@ -1,12 +1,12 @@
 -   [ ] **Add export options**
 
-    Researchers love:
+    Let users export:
 
-    > Exporting filtered datasets
+    > Filtered datasets
     >
-    > Exporting map screenshots
+    > Map screenshots
     >
-    > Exporting metadata summaries
+    > Metadata summaries
 
 -   [ ] **Enable comparisons**
 

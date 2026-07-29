@@ -15,8 +15,8 @@ body {
 }
 
 ::selection {
-    background: var(--color-accent-dim);
-    color: var(--color-accent);
+    background: var(--colorAccentDim);
+    color: var(--colorAccent);
 }
 
 .content-wrapper {
@@ -28,7 +28,7 @@ body {
     font-family: var(--font-mono);
     letter-spacing: 0.03em;
     font-size: 0.72rem;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     text-transform: uppercase;
 }
 
@@ -49,7 +49,7 @@ header.hero {
 .tick-row span {
     font-family: var(--font-mono);
     font-size: 0.7rem;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     letter-spacing: 0.05em;
 }
 
@@ -59,20 +59,20 @@ h1.title {
     font-size: clamp(2.6rem, 6vw, 4.6rem);
     line-height: 1.05;
     margin: 0 0 1.1rem;
-    color: var(--color-text);
+    color: var(--colorText);
     max-width: 14ch;
 }
 
 h1.title em {
     font-style: italic;
     font-weight: 400;
-    color: var(--color-accent);
+    color: var(--colorAccent);
 }
 
 .subhead {
     max-width: 56ch;
     font-size: 1.08rem;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     margin: 0 0 2.2rem;
 }
 
@@ -87,7 +87,7 @@ h1.title em {
 .legend-strip .item {
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -124,9 +124,9 @@ section.sheet {
 .sheet-id {
     font-family: var(--font-mono);
     font-size: 0.78rem;
-    color: var(--color-accent);
-    border: 1px solid var(--color-accent);
-    background: var(--color-accent-dim);
+    color: var(--colorAccent);
+    border: 1px solid var(--colorAccent);
+    background: var(--colorAccentDim);
     padding: 0.15rem 0.5rem;
     border-radius: var(--radius-sm);
 }
@@ -136,7 +136,7 @@ section.sheet {
     font-weight: 700;
     font-size: 1.9rem;
     margin: 0;
-    color: var(--color-text);
+    color: var(--colorText);
 }
 
 .sheet-head .tagline {
@@ -144,7 +144,7 @@ section.sheet {
     font-size: 0.72rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     margin-left: auto;
 }
 
@@ -164,14 +164,14 @@ section.sheet {
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     margin: 0 0 0.8rem;
 }
 
 .card p {
     margin: 0 0 0.7rem;
     font-size: 0.95rem;
-    color: var(--color-text);
+    color: var(--colorText);
     line-height: 1.6;
 }
 
@@ -188,7 +188,7 @@ section.sheet {
 .pros-cons ul {
     margin: 0;
     padding-left: 1.1rem;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
 }
 
 .pros-cons li {
@@ -217,14 +217,14 @@ section.sheet {
     padding: 0.5rem 0.6rem;
     font-size: 0.85rem;
     border-bottom: 1px solid var(--color-border);
-    color: var(--color-text);
+    color: var(--colorText);
 }
 
 .attr-table th {
     font-family: var(--font-mono);
     font-size: 0.65rem;
     text-transform: uppercase;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     letter-spacing: 0.04em;
 }
 
@@ -235,7 +235,7 @@ section.sheet {
     padding: 0.1rem 0.35rem;
     border-radius: 2px;
     font-size: 0.8rem;
-    color: var(--color-accent);
+    color: var(--colorAccent);
 }
 
 .license-tag {
@@ -254,8 +254,8 @@ section.sheet {
 }
 
 .lic-mixed {
-    background: var(--color-accent-dim);
-    color: var(--color-accent);
+    background: var(--colorAccentDim);
+    color: var(--colorAccent);
     border: 1px solid rgba(200, 255, 87, 0.28);
 }
 
@@ -286,7 +286,7 @@ table.compare td {
     font-size: 0.88rem;
     vertical-align: top;
     text-align: left;
-    color: var(--color-text);
+    color: var(--colorText);
 }
 
 table.compare thead th {
@@ -294,7 +294,7 @@ table.compare thead th {
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     background: var(--color-bg);
     position: sticky;
     top: 0;
@@ -306,16 +306,16 @@ table.compare tbody tr:hover {
 
 table.compare td:first-child {
     font-weight: 700;
-    color: var(--color-accent);
+    color: var(--colorAccent);
 }
 
 .callout {
-    border-left: 3px solid var(--color-accent);
+    border-left: 3px solid var(--colorAccent);
     padding: 0.9rem 1.2rem;
-    background: var(--color-accent-dim);
+    background: var(--colorAccentDim);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     font-size: 0.92rem;
-    color: var(--color-text);
+    color: var(--colorText);
     margin: 1.6rem 0;
 }
 
@@ -327,7 +327,7 @@ footer {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.04em;
-    color: var(--color-text-secondary);
+    color: var(--colorTextSecondary);
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;

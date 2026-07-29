@@ -23,15 +23,17 @@
 	--color-border-strong: #3a3a42;
 
 	/* ── Colour: Text ── */
-	--color-text: #e8e8ec; /* primary text */
-	--color-text-secondary: #6b6b78; /* subtly muted / secondary */
-	--color-text-muted: #3a3a42; /* very dim — counts, urls, placeholders */
+	--colorText: #e8e8ec; /* primary text */
+	--colorTextSecondary: #6b6b78; /* subtly muted / secondary */
+	--colorTextMuted: #3a3a42; /* very dim — counts, urls, placeholders */
 
 	/* ── Colour: Accent ── */
-	--color-accent: #c8ff57; /* lime green — primary accent */
-	--color-accent-fade: #c8ff5726;
-	--color-accent-glow: #c8ff574d;
-	--color-accent-dim: #3e462d;
+	--colorAccent: #c8ff57; /* lime green — primary accent */
+	--colorAccentFade: #c8ff5726;
+	--colorAccentGlow: #c8ff574d;
+	--colorAccentDim: #3e462d;
+
+	--colorSelection: #2563eb;
 
 	/* ── Typography ── */
 	--font-mono: "Space Mono", monospace;
@@ -59,6 +61,7 @@
 	--line-height-loose: 1.7;
 
 	--letter-spacing-thin: 0.05em;
+	--letter-spacing-medium: 0.08em;
 	--letter-spacing-wide: 0.14em;
 	--letter-spacing-wider: 0.18em;
 	--letter-spacing-widest: 0.2em;
@@ -81,8 +84,8 @@
 	--space-15: 10rem; /* 160px */
 	--space-16: 15rem; /* 240px */
 	--space-17: 20rem; /* 320px */
-	--space-16: 25rem; /* 400px */
-	--space-16: 30rem; /* 480px */
+	--space-18: 25rem; /* 400px */
+	--space-19: 30rem; /* 480px */
 
 	/* ── Border radius ── */
 	--radius-sm: 0.25rem; /*  4px */
@@ -94,10 +97,10 @@
 
 	/* ── Shadows ── */
 	--shadow-popup: 0 0.5rem 2rem rgba(0, 0, 0, 0.6), 0 0 0 0.0625rem var(--color-border-subtle);
-	--shadow-glow-accent: 0 0 0.375rem var(--color-accent-glow);
+	--shadow-glow-accent: 0 0 0.375rem var(--colorAccentGlow);
 
 	/* ── Scrollbar ── */
-	--scrollbar-width: 4px;
+	--scrollbar-width: 6px;
 	--scrollbar-radius: var(--radius-sm);
 
 	/* ── Z-index scale ── */
@@ -176,7 +179,7 @@ html {
 
 body {
 	background: var(--color-bg);
-	color: var(--color-text);
+	color: var(--colorText);
 	font-family: var(--font-sans);
 	font-weight: var(--font-weight-light);
 }
@@ -188,12 +191,16 @@ body {
 
 ::-webkit-scrollbar-track {
 	background: transparent;
+	margin: 4px 0;
 }
 
 ::-webkit-scrollbar-thumb {
-	background: var(--color-border);
+	background: var(--colorTextMuted);
 	border-radius: var(--scrollbar-radius);
 	cursor: row-resize;
+	overflow: hidden;
+	border: 2px solid transparent; /* creates visual inset */
+	background-clip: padding-box; /* critical: clips background to inside the border */
 }
 
 /* ─────────────────────────────────────────
@@ -227,7 +234,7 @@ nav {
 	font-size: 1.2rem; /* intentional: nav label is larger than body label */
 	letter-spacing: var(--letter-spacing-wider);
 	text-transform: uppercase;
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	padding-left: var(--space-8);
 	padding-top: var(--space-2);
 }
@@ -244,22 +251,22 @@ nav a {
 	width: 95%;
 	font-family: var(--font-mono);
 	font-size: var(--font-size-nav);
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	text-decoration: none;
 	padding-left: var(--space-10);
 	display: flex;
 	align-items: center;
 	gap: var(--space-4);
-	transition: color var(--duration-fast);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 	justify-content: space-between;
 }
 
 nav a:hover {
-	color: var(--color-text);
+	color: var(--colorText);
 }
 
 nav a.active {
-	color: var(--color-accent);
+	color: var(--colorAccent);
 }
 
 /* Dot indicator inside nav links */
@@ -272,7 +279,7 @@ nav a .dot {
 }
 
 nav a.active .dot {
-	background: var(--color-accent);
+	background: var(--colorAccent);
 }
 
 /* ─────────────────────────────────────────
@@ -300,7 +307,7 @@ header .eyebrow {
 	font-size: var(--font-size-label);
 	letter-spacing: var(--letter-spacing-widest);
 	text-transform: uppercase;
-	color: var(--color-accent);
+	color: var(--colorAccent);
 	margin-bottom: var(--space-6);
 }
 
@@ -309,12 +316,12 @@ header h1 {
 	font-size: var(--font-size-2xl);
 	font-weight: var(--font-weight-bold);
 	line-height: var(--line-height-tight);
-	color: var(--color-text);
+	color: var(--colorText);
 }
 
 header p {
 	margin-top: var(--space-6);
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	font-size: var(--font-size-md);
 	max-width: 30rem; /* ~480px — prose measure */
 	line-height: var(--line-height-loose);
@@ -334,7 +341,7 @@ section h2 {
 	font-size: var(--font-size-label);
 	letter-spacing: var(--letter-spacing-widest);
 	text-transform: uppercase;
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	margin-bottom: var(--space-8);
 	padding-bottom: var(--space-5);
 	border-bottom: 1px solid var(--color-border);

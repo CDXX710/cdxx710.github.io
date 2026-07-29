@@ -39,15 +39,15 @@ body {
 	padding: var(--space-3) var(--space-4);
 	font-family: var(--font-mono);
 	font-size: var(--font-size-label);
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-fast);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .color-card:hover .label {
-	color: var(--color-text);
+	color: var(--colorText);
 }
 
 /* ─────────────────────────────────────────
@@ -79,13 +79,13 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-fast);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .font-card:hover .label {
-	color: var(--color-text);
+	color: var(--colorText);
 }

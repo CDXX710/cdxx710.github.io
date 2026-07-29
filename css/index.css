@@ -44,17 +44,17 @@ body {
 	font-family: var(--font-mono);
 	font-size: var(--font-size-card-title);
 	font-weight: var(--font-weight-bold);
-	color: var(--color-text);
-	transition: color var(--duration-fast);
+	color: var(--colorText);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .link-card:hover .link-title {
-	color: var(--color-accent);
+	color: var(--colorAccent);
 }
 
 .link-desc {
 	font-size: var(--font-size-sm);
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	line-height: var(--line-height-normal);
 }
 
@@ -67,9 +67,9 @@ body {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-fast);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .link-card:hover .link-url {
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 }

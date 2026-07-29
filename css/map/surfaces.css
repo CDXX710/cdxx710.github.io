@@ -21,7 +21,7 @@
 	margin: 0 !important;
 	padding: 0 !important;
 	max-width: none !important;
-    background: var(--color-bg);
+    background-color: var(--color-bg);
 }
 
 .leaflet-container.is-drawing-select {

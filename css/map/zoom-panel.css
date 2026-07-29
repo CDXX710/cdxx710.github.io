@@ -1,0 +1,35 @@
+.zoom-panel {
+	position: absolute;
+	top: var(--space-5);
+	left: var(--space-6);
+	height: var(--top-left-panels-height);
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	pointer-events: auto;
+	cursor: auto;
+}
+
+.zoom-panel > * {
+	border-bottom: var(--glass-border);
+}
+
+.zoom-panel > *:last-child {
+	border-bottom: none;
+}
+
+.zoom-button {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	cursor: pointer;
+
+	color: var(--colorTextSecondary);
+
+	width: 2.5rem;
+	height: 50%;
+
+	font-size: var(--font-size-xl);
+}

@@ -45,21 +45,24 @@ a.leaflet-popup-close-button {
 
 /* PANEL PRIMITIVE */
 
+.export-overlay,
+.zoom-panel,
+.marker-popup,
 .analytics-panel,
-.selection-results,
+.results-panel,
 .map-legend,
-.searchbar,
+.searchbar-panel,
 .leaflet-popup-content-wrapper,
-.visualizer .lorem_main,
-.lorem_boxed,
-.map-basemap-control {
-	background: var(--color-overlay);
-	border: var(--panel-border);
-	border-radius: var(--panel-radius);
-	box-shadow: var(--panel-shadow);
-	backdrop-filter: var(--panel-blur);
-	color: var(--color-text);
-	cursor: auto;
+.basemap-panel {
+	z-index: var(--z-map-overlay);
+	color: var(--colorText);
+	/* LIQUID GLASS */
+	background: var(--glass-bg-color) !important;
+	border-radius: var(--glass-border-radius) !important;
+	backdrop-filter: var(--glass-blur) !important;
+	border: var(--glass-border) !important;
+	box-shadow: var(--glass-shadow) !important;
+	isolation: isolate !important;
 }
 
 /* PANELS HEADERS AND SHARED ATTRIBUTES */
@@ -68,7 +71,7 @@ a.leaflet-popup-close-button {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	text-transform: uppercase;
 	font-family: var(--font-mono);
 	font-size: var(--font-size-md);
@@ -81,7 +84,7 @@ a.leaflet-popup-close-button {
 	height: 1px;
 	border: none;
 	margin: 0 5%;
-	background: var(--color-border);
+	background: var(--glass-border-color);
 }
 
 .body__divider {
@@ -89,4 +92,25 @@ a.leaflet-popup-close-button {
 	border: none;
 	background: var(--color-border);
 	margin: 0 10%;
+}
+
+.panel-close {
+	position: relative;
+	z-index: var(--z-modal);
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: var(--colorTextSecondary);
+	font-size: var(--font-size-xl);
+	cursor: pointer;
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+}
+
+.panel-close:hover {
+	color: var(--colorAccent);
 }

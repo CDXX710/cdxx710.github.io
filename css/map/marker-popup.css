@@ -1,0 +1,159 @@
+/* ─────────────────────────────────────────────────────────────
+   Custom popup — replaces Leaflet's .leaflet-popup entirely.
+   JS only ever sets `left`/`top` (computed position) and toggles
+   the `is-open` class + `data-variant` attribute. Everything else
+   lives here.
+   ───────────────────────────────────────────────────────────── */
+
+.marker-popup {
+	position: absolute;
+	transform: translate(-50%, -100%) translateY(-1dvw); /* anchor bottom-center, offset above marker */
+	pointer-events: none;
+
+	max-width: var(--popup-max-width);
+
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.marker-popup.is-open {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.marker-popup__tail-mask {
+	position: absolute;
+	left: 50%;
+	bottom: calc(-1 * var(--tail-height));
+	width: var(--tail-size);
+	height: var(--tail-height);
+	transform: translateX(-50%);
+	overflow: hidden; /* the window that only reveals the diamond's tip */
+}
+
+.marker-popup__tail-mask::after {
+	content: "";
+	position: absolute;
+	bottom: calc(- (var(--tail-height) / 2));
+	left: 50%;
+	width: calc(var(--tail-size) * 0.70711);
+	height: calc(var(--tail-size) * 0.70711);
+	margin-left: calc(var(--tail-size) * -0.35355);
+	margin-top: calc(var(--tail-size) * -0.35355);
+	background: var(--glass-bg-color);
+	transform: rotate(45deg);
+}
+
+/* PANELS */
+.popup__panels {
+	display: flex;
+	height: var(--popup-height);
+}
+
+.popup__left,
+.popup__right {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.popup__left {
+	border-right: 0.0625rem solid var(--color-border-subtle);
+}
+
+.popup_resume {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.popup__image-wrap {
+	position: relative;
+	display: inline-block;
+	flex: 1;
+	min-height: 0;
+}
+
+.popup__image-wrap img,
+.popup__image-empty {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.popup__image-wrap img {
+	display: block;
+}
+
+.popup__image-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.popup__right {
+	padding: var(--space-5) 0.9rem 0.8rem;
+	gap: var(--space-3);
+	overflow: hidden;
+}
+
+.popup__abstract {
+	flex: 1;
+	height: auto;
+	overflow: auto;
+	font-size: 0.78rem;
+	color: var(--colorTextSecondary);
+	line-height: var(--line-height-normal);
+}
+
+a.popup__source-link {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	margin-top: auto;
+	font-size: 0.7rem;
+	letter-spacing: 0.06em;
+	color: var(--colorAccent);
+	text-decoration: none;
+	cursor: pointer;
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	color: var(--colorAccent);
+}
+
+.popup__source-link:hover {
+	color: var(--colorAccentGlow);
+}
+
+.popup__source-link svg {
+	opacity: var(--opacity-icon);
+	flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────
+PILLS (time / category / author / creoleRole)
+───────────────────────────────────────── */
+
+.popup__pills {
+	padding: 0.6rem 0.65rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+}
+
+.pill {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	width: fit-content;
+	padding: 0.15rem 0.55rem;
+	border: var(--glass-border);
+	background-color: var(--colorAccentFade);
+	border-radius: var(--radius-pill);
+	font-size: 0.6rem;
+	font-weight: var(--font-weight-medium);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}

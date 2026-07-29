@@ -15,7 +15,7 @@
 }
 
 #time-slider .noUi-connect {
-	background: var(--color-accent-glow);
+	background: var(--colorAccentGlow);
 	border-radius: var(--radius-pill);
 }
 
@@ -24,9 +24,9 @@
 	height: var(--slider-handle-size);
 	top: -0.5rem;
 	border-radius: var(--radius-circle);
-	background: var(--color-accent);
-	border: 0.125rem solid var(--color-accent-glow);
-	box-shadow: 0 0 0 0.1875rem var(--color-accent-dim);
+	background: var(--colorAccent);
+	border: 0.125rem solid var(--colorAccentGlow);
+	box-shadow: 0 0 0 0.1875rem var(--colorAccentDim);
 	cursor: grab;
 	transition: box-shadow var(--duration-slow);
 }
@@ -37,8 +37,8 @@
 }
 
 #time-slider .noUi-handle.noUi-active {
-	border: 0.125rem solid var(--color-accent-dim);
-	box-shadow: 0 0 0 0.1875rem var(--color-accent-glow);
+	border: 0.125rem solid var(--colorAccentDim);
+	box-shadow: 0 0 0 0.1875rem var(--colorAccentGlow);
 	cursor: grabbing;
 }
 

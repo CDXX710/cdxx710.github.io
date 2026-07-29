@@ -1,24 +1,35 @@
 /* ─────────────────────────────────────────
     IMPORTS
+
+    shared.css (site-wide tokens/reset/base)
+    is linked separately by the map page's
+    HTML, ahead of this file — every token
+    referenced below without a local
+    definition (--color-*, --space-*,
+    --radius-*, --font-mono, --shadow-popup,
+    etc.) comes from there. This file only
+    adds the map page's own local tokens.
 ───────────────────────────────────────── */
 
-@import url("analytics-panel.css");
-@import url("basemap-controls.css");
-@import url("custom-dropdown.css");
-@import url("layout.css");
-@import url("leaflet-customisation.css");
-@import url("legend-panel.css");
-@import url("popup-pills.css");
-@import url("responsive.css");
-@import url("searchbar.css");
-@import url("selection-results.css");
-@import url("selection-tools.css");
-@import url("surfaces.css");
-@import url("time-slider.css");
-@import url("visualizer.css");
+@import url("./analytics-panel.css");
+@import url("./basemap-panel.css");
+@import url("./export-panel.css");
+@import url("./layout.css");
+@import url("./legend-panel.css");
+@import url("./marker-popup.css");
+@import url("./overrides.css");
+@import url("./responsive.css");
+@import url("./results-sorting-dropdown.css");
+@import url("./results-panel.css");
+@import url("./searchbar.css");
+@import url("./selection-tool.css");
+@import url("./surfaces.css");
+@import url("./time-slider.css");
+@import url("./visualizer-panel.css");
+@import url("./zoom-panel.css");
 
 /* ─────────────────────────────────────────
-    TOKENS
+    LOCAL TOKENS (map page only)
 ───────────────────────────────────────── */
 
 :root {
@@ -53,7 +64,8 @@
 	--slider-handle-size: 2rem;
 	--toolbar-width: 11rem;
 	--legend-min-width: 2rem;
-	--legend-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
+	--analytics-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
+	--top-left-panels-height: 5rem;
 
 	/*  
      *   Shared "glass panel" treatment — one definition, reused by
@@ -65,4 +77,70 @@
 	--panel-radius: var(--radius-lg);
 	--panel-blur: blur(0.75rem);
 	--panel-shadow: var(--shadow-popup);
+
+	/*
+	 *   Repeated white-overlay tints used for hover/track/fill states
+	 *   on translucent surfaces (analytics bars, basemap control
+	 *   dividers). Named once instead of five inline rgba() repeats.
+	 */
+	--overlay-tint-subtle: rgba(255, 255, 255, 0.06);
+	--overlay-tint-soft: rgba(255, 255, 255, 0.09);
+	--overlay-tint-medium: rgba(255, 255, 255, 0.16);
+	--overlay-tint-strong: rgba(255, 255, 255, 0.34);
+
+	--tail-size: 2vw;
+	--tail-height: 2vw;
+
+	--glass-border-radius: var(--panel-radius);
+	--glass-blur: blur(12px);
+	--glass-shadow: var(--panel-shadow);
+}
+
+[data-theme="dark"] {
+	/* ── Colour: Surfaces ── */
+	--color-bg: #0e0e10; /* page background */
+	--color-surface: #18181c; /* cards, panels, nav */
+	--color-elevated: #18181cd9; /* elevated panels (popups, headers) */
+
+	/* ── Surfaces: Glass ── */
+	--glass-bg-color: rgba(255, 255, 255, 0.05);
+	--glass-border: 2px solid rgba(255, 255, 255, 0.1);
+	--glass-border-color: rgba(255, 255, 255, 0.1);
+
+	/* ── Colour: Text ── */
+	--colorText: #e8e8ec; /* primary text */
+    --colorTextInverted: #1a1a1e;
+	--colorTextSecondary: #e8e8ec70; /* subtly muted / secondary */
+	--colorTextTertiary: #e8e8ec40; /* subtly muted / secondary */
+	--colorTextMuted: #3a3a42; /* very dim — counts, urls, placeholders */
+
+	/* ── Colour: Accent ── */
+	--colorAccent: #c8ff57; /* lime green — primary accent */
+	--colorAccentFade: #c8ff5733;
+	--colorAccentGlow: #c8ff5766;
+	--colorAccentDim: #95ac65;
+}
+
+[data-theme="light"] {
+	/* ── Colour: Surfaces ── */
+	--color-bg: #d8d8dc; /* page background */
+	--color-surface: #e6e6ea; /* cards, panels, nav — lighter than bg, like dark mode */
+	--color-elevated: #e6e6eadd; /* elevated panels — same base as surface, w/ alpha */
+
+	/* ── Surfaces: Glass ── */
+	--glass-bg-color: rgba(0, 0, 0, 0.05);
+	--glass-border: 2px solid rgba(0, 0, 0, 0.1);
+	--glass-border-color: rgba(0, 0, 0, 0.1);
+
+	/* ── Colour: Text ── */
+	--colorText: #1a1a1e; /* primary text — near-black, mirrors dark's near-white */
+    --colorTextInverted: #e8e8ec; /* primary text */
+	--colorTextSecondary: #75757e; /* mid gray, same distance from bg as dark's secondary */
+	--colorTextMuted: #b6b6bf; /* light gray close to bg — mirrors dark's dim-near-surface muted */
+
+	/* ── Colour: Accent ── */
+	--colorAccent: #8f59ff;
+	--colorAccentFade: #8f59ff33;
+	--colorAccentGlow: #8f59ff66;
+	--colorAccentDim: #7f68af;
 }

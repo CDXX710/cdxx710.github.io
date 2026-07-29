@@ -6,10 +6,8 @@
 	position: absolute;
 	bottom: var(--space-8);
 	right: var(--space-6);
-	z-index: var(--z-map-overlay);
-	min-width: var(--legend-min-width);
-	max-width: var(--legend-max-width);
 	padding: var(--space-3) 0.4rem;
+	cursor: initial;
 }
 
 .map-legend.is-collapsed .__header {
@@ -26,17 +24,16 @@
 	background: none;
 	border: none;
 	cursor: pointer;
-	color: var(--color-text-secondary);
-	padding: 0.1rem 0.2rem;
+	color: var(--colorTextSecondary);
 	border-radius: var(--radius-sm);
 	display: flex;
 	align-items: center;
-	transition: color var(--duration-slow);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .collapse-btn:hover,
 .leaflet-popup-close-button:hover {
-	color: var(--color-accent) !important;
+	color: var(--colorAccent) !important;
 }
 
 /*
@@ -54,6 +51,7 @@
 	margin: 0 var(--space-3) 0;
 	overflow: hidden;
 	opacity: 1;
+	max-height: 85%;
 }
 
 .map-legend.is-collapsed .legend__body {
@@ -67,7 +65,7 @@
 	font-size: 0.8rem;
 	letter-spacing: var(--letter-spacing-wider);
 	text-transform: uppercase;
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	font-weight: var(--font-weight-medium);
 	margin-bottom: 0.65rem;
 }
@@ -111,10 +109,10 @@
 .legend__item-label {
 	font-size: 0.95rem;
 	font-weight: var(--font-weight-normal);
-	color: var(--color-text-secondary);
+	color: var(--colorTextSecondary);
 	cursor: pointer;
 	letter-spacing: 0.03em;
-	transition: color var(--duration-slow), opacity var(--duration-slow);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .legend__item:last-of-type {
@@ -122,7 +120,7 @@
 }
 
 .legend__item:hover .legend__item-label {
-	color: var(--color-text);
+	color: var(--colorText);
 }
 
 .legend__item.is-off .legend__item-label {
@@ -132,7 +130,7 @@
 /*
  *  SVG shape colour driven by --shape-color on the row.
  *  Filled shapes use fill + stroke; ring shapes use stroke only.
- *  When the row is toggled off, both collapse to --color-text-muted.
+ *  When the row is toggled off, both collapse to --colorTextMuted.
  */
 .legend__item .shape-fill {
 	fill: var(--shape-color);
@@ -145,8 +143,8 @@
 }
 
 .legend__item.is-off .shape-fill {
-	fill: var(--color-text-muted);
-	stroke: var(--color-text-muted);
+	fill: var(--colorTextMuted);
+	stroke: var(--colorTextMuted);
 }
 
 .legend__item.is-off .shape-fill--ring {
@@ -164,6 +162,21 @@
 	align-items: center;
 	justify-content: space-around;
 	margin: var(--space-3) var(--space-3);
+}
+
+.legend__actions button {
+	text-transform: uppercase;
+	font-family: var(--font-sans);
+	font-size: var(--font-size-sm);
+	color: var(--colorText);
+	opacity: 0.6;
+	cursor: pointer;
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+}
+
+.legend__actions button:hover {
+	color: var(--colorAccent);
+	opacity: 1;
 }
 
 .legend__body[hidden] {

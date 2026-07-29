@@ -1,0 +1,178 @@
+/* ─────────────────────────────────────────
+    RESULTS PANEL
+───────────────────────────────────────── */
+
+.results-panel {
+	position: absolute;
+	z-index: var(--z-map-overlay);
+	top: var(--space-6);
+	right: var(--space-6);
+	width: var(--space-18);
+	max-height: 88%;
+	display: flex;
+	flex-direction: column;
+	transition: max-height var(--duration-normal) var(--ease-standard), opacity var(--duration-normal);
+	cursor: initial;
+}
+
+.results-panel__header {
+	display: flex;
+	justify-content: space-between;
+	padding: var(--space-5) var(--space-6) var(--space-4);
+	border-bottom: 0.0625rem solid var(--color-border);
+	flex-shrink: 0;
+	gap: var(--space-5);
+}
+
+.results-panel.is-collapsed .results-panel__header {
+	border-bottom: none;
+}
+
+.results-panel__title {
+	width: var(--space-15);
+	margin: var(--space-3);
+	padding: var(--space-3); /* or any values you prefer */
+	white-space: nowrap;
+	border: var(--glass-border);
+	border-radius: var(--glass-border-radius);
+	font-family: var(--font-mono);
+	letter-spacing: var(--letter-spacing-medium);
+	text-transform: uppercase;
+	color: var(--colorText);
+	cursor: pointer;
+}
+
+.results-panel__actions {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	width: max-content;
+	row-gap: var(--space-4);
+}
+
+.results-panel__actions-btns {
+	display: flex;
+	gap: var(--space-3);
+	flex-direction: row-reverse;
+	width: max-content;
+	word-spacing: 0;
+}
+
+/*  
+ *  .collapse-btn (shared with the legend's collapse button, see §8)
+ *  already supplies the icon-button reset + hover; this adds only
+ *  what the text "Clear" button needs on top of it.
+ */
+.results-panel__actions-btn {
+	cursor: pointer;
+	color: var(--colorTextSecondary);
+	font-family: var(--font-mono);
+	font-size: var(--font-size-2xs);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+}
+
+.results-panel__actions-btn:hover {
+	color: var(--colorAccent);
+}
+
+#selectAllBtn {
+	word-spacing: -0.5em; /* tighten space between words */
+}
+
+/* Base rotated state + transition lives in surfaces.css alongside the legend's equivalent */
+.results-panel.is-collapsed .results-panel__collapse-btn svg {
+	transform: rotate(0deg);
+}
+
+.results-panel__list {
+	overflow-y: auto;
+	padding: var(--space-4) var(--space-5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	max-height: 100%;
+	opacity: 1;
+	transition: opacity 0.44s var(--ease-standard);
+}
+
+.results-panel.is-collapsed .results-panel__list {
+	max-height: 0 !important;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.result-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.55rem 0.75rem;
+	/* LIQUID GLASS */
+	background: var(--glass-bg-color) !important;
+	border-radius: var(--glass-border-radius) !important;
+	border: var(--glass-border) !important;
+
+	cursor: pointer;
+	transition: border-color var(--duration-fast), transform var(--duration-fast);
+}
+
+.result-row:hover {
+	border-color: var(--color-border-strong);
+	transform: translateY(-1px);
+}
+
+.result-row__left {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	min-width: 0;
+	flex: 1;
+}
+
+.result-row__dot {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+}
+
+.result-row__name {
+	font-size: var(--font-size-sm);
+	color: var(--colorText);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.result-row__body {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	flex-shrink: 0;
+	text-align: right;
+	gap: 2px;
+}
+
+.result-row__year {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	color: var(--colorText);
+}
+
+.result-row__meta {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-xs);
+	color: var(--colorText);
+	opacity: 0.8;
+	white-space: nowrap;
+}
+
+#resultsCount {
+	color: var(--colorAccent);
+	font-size: var(--font-size-lg);
+}

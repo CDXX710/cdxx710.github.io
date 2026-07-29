@@ -1,0 +1,201 @@
+/* ─────────────────────────────────────────
+    SELECTION TOOLS
+───────────────────────────────────────── */
+
+#map-select-toolbar {
+	position: absolute;
+	bottom: var(--space-8);
+	left: var(--space-6);
+	z-index: var(--z-map-overlay);
+
+	--select-btn-w: 3.4rem;
+
+	width: max-content;
+	cursor: initial;
+}
+
+.select-toolbar {
+	background: transparent !important;
+	overflow: visible;
+}
+
+.select-toolbar__row {
+	display: flex;
+	width: max-content;
+
+	/* LIQUID GLASS */
+	background: var(--glass-bg-color) !important;
+	backdrop-filter: var(--glass-blur) !important;
+	border: var(--glass-border) !important;
+}
+
+.select-toolbar__btn {
+	width: var(--select-btn-w);
+	height: 3rem;
+
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	border: none;
+	background: transparent !important;
+	color: var(--colorTextSecondary);
+	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	cursor: pointer;
+}
+
+.select-toolbar__btn.is-active:hover,
+.select-toolbar__btn:hover {
+	background: var(--color-surface) !important;
+}
+.select-toolbar__btn:hover svg {
+	color: var(--colorAccent);
+}
+
+.select-toolbar__btn.is-active {
+	color: var(--colorText);
+	background: var(--colorAccentDim) !important;
+}
+
+.select-toolbar__btn svg {
+	width: 50%;
+	height: 50%;
+	pointer-events: none;
+}
+
+/* Select mode bar hidden when unarmed */
+
+.select-toolbar__modes {
+	max-height: 0;
+	overflow: hidden;
+}
+
+.select-toolbar.is-armed .select-toolbar__modes {
+	max-height: 3rem;
+}
+
+.select-toolbar.is-armed {
+	border-bottom: none !important;
+}
+
+/*  Object mode buttons hidden when OBJECT unarmed */
+
+.select-toolbar__objectmode-btn {
+	width: 0;
+	overflow: hidden;
+}
+
+.select-toolbar.is-object .select-toolbar__objectmode-btn {
+	width: var(--select-btn-w);
+}
+
+/* Live in-progress drawing shape on the map */
+.select-draw-shape {
+	position: absolute;
+	z-index: var(--z-map-overlay);
+	pointer-events: none;
+	border: 0.125rem dashed var(--colorAccent);
+	background: var(--colorAccentFade);
+	box-sizing: border-box;
+}
+
+.select-draw-shape--ellipse {
+	border-radius: 50%;
+}
+
+.select-draw-svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: var(--z-map-overlay);
+	pointer-events: none;
+}
+
+.select-draw-svg path {
+	fill: var(--colorAccentDim);
+	stroke: var(--colorAccent);
+	stroke-width: 2;
+	stroke-dasharray: 5 4;
+}
+
+.is-selected-marker {
+	filter: drop-shadow(0 0 0.4rem var(--colorAccent)) brightness(1.25); /* Selected markers get a glowing ring */
+}
+
+/* 
+ *   Toolbar state dynamic borders radius
+ */
+
+.select-toolbar__tools {
+	width: max-content;
+	border-bottom-left-radius: var(--panel-radius);
+}
+.select-toolbar__tools .select-toolbar__row {
+	border-radius: var(--panel-radius);
+	transition: ease var(--ease-standard);
+	box-shadow: var(--glass-shadow) !important;
+}
+
+.select-toolbar.is-armed .select-toolbar__tools .select-toolbar__row {
+	border-top-left-radius: 0;
+	transition: ease;
+}
+
+.select-toolbar__modes .select-toolbar__row {
+	border-top-left-radius: var(--panel-radius);
+	border-top-right-radius: var(--panel-radius);
+	transition: ease var(--ease-standard);
+}
+.select-toolbar__tools .select-toolbar__btn:first-of-type {
+	border-top-left-radius: var(--panel-radius);
+	border-bottom-left-radius: var(--panel-radius);
+}
+
+.select-toolbar__tools .select-toolbar__btn:last-of-type,
+.select-toolbar__btn#object {
+	border-top-right-radius: var(--panel-radius);
+	border-bottom-right-radius: var(--panel-radius);
+}
+
+.select-toolbar.is-armed.is-object .select-toolbar__btn#object {
+	border-radius: 0;
+}
+
+.select-toolbar.is-armed .select-toolbar__tools .select-toolbar__btn:first-of-type {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: var(--panel-radius);
+}
+
+.select-toolbar__modes .select-toolbar__btn:first-of-type {
+	border-top-left-radius: var(--panel-radius);
+}
+
+.select-toolbar__modes .select-toolbar__btn:last-of-type {
+	border-top-right-radius: var(--panel-radius);
+}
+
+.is-armed .leaflet-interactive,
+.is-armed.is-object .leaflet-marker-icon,
+.is-armed.is-object .leaflet-marker-pane {
+	pointer-events: none !important; /* Prevent marker interaction when drawing */
+}
+
+.is-armed.is-object .leaflet-interactive {
+	pointer-events: auto !important; /* But allow object select */
+}
+
+/* Prevent panels text selection when drawing */
+.is-drawing-select .visualizer,
+.is-drawing-select .searchbar,
+.is-drawing-select .select-toolbar__row,
+.is-drawing-select .selection-results,
+.is-drawing-select .map-zoom-container,
+.is-drawing-select .basemap-panel,
+.is-drawing-select .map-legend,
+.is-drawing-select .analytics-panel,
+.is-drawing-select .marker-popup {
+	user-select: none;
+	-webkit-user-select: none;
+}

@@ -54,7 +54,9 @@ const Basemaps = (() => {
 		}
 		nextLayer.addTo(MapCore.map)
 		currentBaseId = id
-		EventBus.emit("basemap:baseChanged", id)
+
+		document.documentElement.dataset.theme = def.theme
+		EventBus.emit("basemap:baseChanged", def)
 	}
 
 	function setOverlay(id) {
@@ -73,11 +75,11 @@ const Basemaps = (() => {
 	}
 
 	function buildBaseControl(container) {
-		const row = Utils.el("div", {className: "map-basemap-control__row", role: "radiogroup", "aria-label": "Choose base map"})
+		const row = Utils.el("div", {className: "basemap-panel__row", role: "radiogroup", "aria-label": "Choose base map"})
 		const buttons = Config.baseLayers.map(def => {
 			const btn = Utils.el("button", {
 				type: "button",
-				className: "map-basemap-control__btn" + (def.id === currentBaseId ? " is-active" : ""),
+				className: "basemap-panel__btn" + (def.id === currentBaseId ? " is-active" : ""),
 				"data-basemap": def.id,
 				"aria-pressed": String(def.id === currentBaseId),
 				text: def.label
@@ -87,9 +89,9 @@ const Basemaps = (() => {
 		})
 		buttons.forEach(btn => row.appendChild(btn))
 		container.appendChild(row)
-		EventBus.on("basemap:baseChanged", activeId => {
+		EventBus.on("basemap:baseChanged", layer => {
 			buttons.forEach(btn => {
-				const isActive = btn.dataset.basemap === activeId
+				const isActive = btn.dataset.basemap === layer.id
 				btn.classList.toggle("is-active", isActive)
 				btn.setAttribute("aria-pressed", String(isActive))
 			})
@@ -97,11 +99,11 @@ const Basemaps = (() => {
 	}
 
 	function buildOverlayControl(container) {
-		const row = Utils.el("div", {className: "map-basemap-control__row map-basemap-control__row--overlay", role: "group", "aria-label": "Toggle historical map overlay"})
+		const row = Utils.el("div", {className: "basemap-panel__row basemap-panel__row--overlay", role: "group", "aria-label": "Toggle historical map overlay"})
 		const buttons = Config.overlayLayers.map(def => {
 			const btn = Utils.el("button", {
 				type: "button",
-				className: "map-basemap-control__btn map-basemap-control__btn--overlay",
+				className: "basemap-panel__btn basemap-panel__btn--overlay",
 				"data-overlay": def.id,
 				"aria-pressed": "false",
 				title: `Toggle ${def.label} overlay on top of the base map`,
@@ -122,7 +124,7 @@ const Basemaps = (() => {
 	}
 
 	function buildControl() {
-		const control = Utils.el("div", {className: "map-basemap-control", "aria-label": "Basemap selector"})
+		const control = Utils.el("div", {className: "basemap-panel", "aria-label": "Basemap selector"})
 		buildBaseControl(control)
 		buildOverlayControl(control)
 		document.getElementById("map").appendChild(control)

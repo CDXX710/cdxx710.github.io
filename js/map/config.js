@@ -11,6 +11,7 @@ const Config = {
 		{
 			id: "light",
 			label: "Light",
+			theme: "light",
 			tileUrl: "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
 			tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			tileSubdomains: "abcd"
@@ -18,6 +19,7 @@ const Config = {
 		{
 			id: "dark",
 			label: "Dark",
+			theme: "dark",
 			tileUrl: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
 			tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			tileSubdomains: "abcd"

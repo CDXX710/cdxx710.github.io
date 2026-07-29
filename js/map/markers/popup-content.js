@@ -19,7 +19,7 @@ const PopupContent = (() => {
 	function authorTypePill(authorType) {
 		if (!authorType) return ""
 		const color = Theme.creoleColor(authorType)
-		return Utils.html`<span class="pill pill--creole-type" style="background:${color}22; color:${color}; border-color:${color}44"> ${Utils.capitalize(authorType)} </span>`
+		return Utils.html`<span class="pill pill--creole-type"> ${Utils.capitalize(authorType)} </span>`
 	}
 	function creoleRolePill(creole) {
 		const label = creole === "using" ? "Written in creole" : creole === "about" ? "About creoles" : ""
@@ -39,24 +39,24 @@ const PopupContent = (() => {
 	function build(props) {
 		const {time, category, creole, authorType, urlIMG, urlText, resume} = props
 		const categoryPill = Utils.html`<span class="pill pill--category">${category}</span>`
+        const yearPill = Utils.html`<span class="pill pill--year">${time}</span>`
 		return Utils.html`
                         <div class="popup__panels">
 		                <div class="popup__left">
 		                	<div class="popup__image-wrap">
 		                		${imageBlock(urlIMG, category)}
-		                		<span class="popup__year-badge">${time}</span>
 		                	</div>
-		                	<div class="popup__pills">${categoryPill} ${authorTypePill(authorType)} ${creoleRolePill(creole)}</div>
+		                	<div class="popup__pills">${yearPill} ${categoryPill} ${authorTypePill(authorType)} ${creoleRolePill(creole)}</div>
 		                </div>
 	                	<div class="popup__right">
 	                		<div style="height:100%; display:flex; flex-direction:column; justify-content:center">${
 							resume
 								? `❝ ${resume} ❞`
 								: `
-                                        <div style="font-size:var(--font-size-xl); color:var(--color-text)">
+                                        <div style="font-size:var(--font-size-xl); color:var(--colorText)">
                                             We're sorry,
                                         </div>
-                                        <div style="text-align:right; color:var(--color-text-secondary)">
+                                        <div style="text-align:right; color:var(--colorTextSecondary)">
                                             No resumés are available at the moment..
                                         </div>
                                     `

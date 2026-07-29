@@ -1,6 +1,7 @@
 import Theme from "../state/theme.js"
 import Shapes from "./shapes.js"
 import PopupContent from "./popup-content.js"
+import MarkerPopup from "./marker-popup.js"
 import Config from "../config.js"
 import FilterState from "../state/filter-state.js"
 import MapCore from "../map/map-core.js"
@@ -26,7 +27,11 @@ const Markers = (() => {
 			iconAnchor: [10, 10]
 		})
 		const marker = L.marker([lat, lng], {icon})
-		marker.bindPopup(PopupContent.build(feature.properties), {maxWidth: Config.popup.maxWidth})
+		marker.on("click", () => {
+			MarkerPopup.open(marker.getLatLng(), PopupContent.build(feature.properties), {
+				maxWidth: Config.popup.maxWidth
+			})
+		})
 		marker.feature = feature
 		indexByMarker.set(marker, index)
 		return marker
@@ -44,6 +49,7 @@ const Markers = (() => {
 			return marker
 		})
 		EventBus.on("filters:changed", applyVisibility)
+		MapCore.map.on("click", () => MarkerPopup.close())
 		return markers
 	}
 	function all() {

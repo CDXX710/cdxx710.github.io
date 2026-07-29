@@ -52,6 +52,37 @@ const SelectionToolbar = (() => {
 	let drawStart = null
 	let lastPointerDownTime = 0
 
+	// Arming a shape tool calls MapCore.map.dragging.disable(), which turns
+	// off Leaflet's native panning entirely (left-drag is repurposed for
+	// drawing). Middle-click panning should still work while armed, so it's
+	// driven manually here rather than through Leaflet's dragging handler.
+	// Similarly to native drag, it just slides the map pane's CSS transform directly
+	// and only reconciles Leaflet's real state once, at drag end.
+	let isMiddlePanning = false
+	let middlePanLast = null
+	let middlePanAccum = null
+	let middlePanRaf = null
+	let middlePanOrigTransform = null
+	let middlePanOrigPos = null
+
+	function getPanePos() {
+		// map._getMapPanePos() is a private Leaflet method but is the
+		// standard way plugins read the pane's current pixel offset.
+		if (typeof MapCore.map._getMapPanePos === "function") return MapCore.map._getMapPanePos()
+		const match = /translate3d\(\s*(-?\d+(?:\.\d+)?)px,\s*(-?\d+(?:\.\d+)?)px/.exec(mapPane.style.transform || "")
+		return match ? {x: parseFloat(match[1]), y: parseFloat(match[2])} : {x: 0, y: 0}
+	}
+
+	function applyPaneOffset(dx, dy) {
+		mapPane.style.transform = `translate3d(${middlePanOrigPos.x + dx}px, ${middlePanOrigPos.y + dy}px, 0)`
+	}
+
+	function flushMiddlePan() {
+		middlePanRaf = null
+		if (!isMiddlePanning || !middlePanAccum) return
+		applyPaneOffset(middlePanAccum.x, middlePanAccum.y)
+	}
+
 	function containerPoint(marker) {
 		return MapCore.map.latLngToContainerPoint(marker.getLatLng())
 	}
@@ -69,31 +100,16 @@ const SelectionToolbar = (() => {
 		return armedShape === "object"
 	}
 
-	/*
-	 * Stops a Leaflet event from reaching parent layers/map handlers.
-	 * Call this from the actual polygon/marker layer click handler,
-	 * not from the map container handler below.
-	 */
-	function stopObjectSelectPropagation(evt) {
-		if (!isObjectSelectActive()) return false
-		if (evt) {
-			if (typeof L !== "undefined" && L.DomEvent) L.DomEvent.stopPropagation(evt)
-			if (evt.originalEvent) {
-				evt.originalEvent.preventDefault?.()
-				evt.originalEvent.stopPropagation?.()
-			} else {
-				evt.preventDefault?.()
-				evt.stopPropagation?.()
-			}
-		}
-		return true
-	}
+	const map = MapCore.map
+	const mapPane = map.getPanes().mapPane
 
 	function arm(shape) {
 		armedShape = shape
 		shapeButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.shape === shape))
 		toolbarEl.classList.add("is-armed")
 		toolbarEl.classList.toggle("is-object", shape === "object")
+		mapPane.classList.add("is-armed")
+		mapPane.classList.toggle("is-object", shape === "object")
 		MapCore.getContainer().classList.add("is-drawing-select")
 		MapCore.map.dragging.disable()
 		MapCore.map.doubleClickZoom.disable()
@@ -104,6 +120,7 @@ const SelectionToolbar = (() => {
 		armedShape = null
 		shapeButtons.forEach(btn => btn.classList.remove("is-active"))
 		toolbarEl.classList.remove("is-armed", "is-object")
+		mapPane.classList.remove("is-armed", "is-object")
 		MapCore.getContainer().classList.remove("is-drawing-select")
 		MapCore.map.dragging.enable()
 		MapCore.map.doubleClickZoom.enable()
@@ -115,6 +132,16 @@ const SelectionToolbar = (() => {
 		isDrawing = false
 		drawPoints = []
 		drawStart = null
+		if (isMiddlePanning && middlePanOrigTransform != null) mapPane.style.transform = middlePanOrigTransform
+		isMiddlePanning = false
+		middlePanLast = null
+		middlePanAccum = null
+		middlePanOrigTransform = null
+		middlePanOrigPos = null
+		if (middlePanRaf != null) {
+			cancelAnimationFrame(middlePanRaf)
+			middlePanRaf = null
+		}
 		DrawOverlay.clear()
 	}
 
@@ -130,27 +157,30 @@ const SelectionToolbar = (() => {
 		cancelDraw()
 	}
 
-	// Any floating UI (toolbar, both legend-style panels, the selection
-	// list, the searchbar) sits on top of the map but lives inside the
-	// same container element the draw handlers listen on. None of these
-	// should ever be treated as "drawing on the map", regardless of
-	// which tool is armed — arming a tool must only affect the map
-	// surface itself (markers/tiles/boundaries), never this chrome.
+	// Arming a tool must only affect the map surface itself (markers/tiles/boundaries), never this chrome.
 	function isOutsideDrawSurface(evt) {
-		return !!evt.target.closest("#map-select-toolbar, .selection-results, .map-legend, #map-searchbar, .map-basemap-control")
+		return !!evt.target.closest(".visualizer-dialog, .export-overlay, .searchbar-panel, .select-toolbar__row, .results-panel, .zoom-panel, .basemap-panel, .map-legend, .analytics-panel, .marker-popup")
 	}
 
 	// Unified pointer handling: mouse, touch, and pen all funnel through
-	// these three, replacing what used to be six near-duplicate mouse/
-	// touch handlers. Polygon points are placed on each pointerdown;
-	// two pointerdowns within Config.polygonCloseTapMs close the shape —
-	// this covers a mouse double-click and a touch double-tap alike.
+	// these three.
 	// Object select never draws anything itself (it reacts to
 	// EventBus "boundary:objectClick" instead), so it's excluded here
 	// rather than falling through into the rectangle/ellipse/lasso
 	// draw-state by accident.
 	function onPointerDown(evt) {
+		if (evt.button === 1 && armedShape && armedShape !== "object" && !isOutsideDrawSurface(evt)) {
+			isMiddlePanning = true
+			middlePanLast = {x: evt.clientX, y: evt.clientY}
+			middlePanAccum = {x: 0, y: 0}
+			middlePanOrigTransform = mapPane.style.transform
+			middlePanOrigPos = getPanePos()
+			evt.preventDefault()
+			return
+		}
+
 		if (!armedShape || armedShape === "object" || isOutsideDrawSurface(evt)) return
+		if (evt.button != null && evt.button !== 0) return
 		if (evt.pointerType !== "mouse") evt.preventDefault()
 
 		const point = relativePoint(evt)
@@ -181,6 +211,17 @@ const SelectionToolbar = (() => {
 	}
 
 	function onPointerMove(evt) {
+		if (isMiddlePanning) {
+			evt.preventDefault()
+			const dx = evt.clientX - middlePanLast.x
+			const dy = evt.clientY - middlePanLast.y
+			middlePanLast = {x: evt.clientX, y: evt.clientY}
+			middlePanAccum.x += dx
+			middlePanAccum.y += dy
+			if (middlePanRaf == null) middlePanRaf = requestAnimationFrame(flushMiddlePan)
+			return
+		}
+
 		if (!isDrawing || !armedShape || armedShape === "object") return
 		if (evt.pointerType !== "mouse") evt.preventDefault()
 
@@ -201,6 +242,25 @@ const SelectionToolbar = (() => {
 	}
 
 	function onPointerUp(evt) {
+		if (evt.button === 1 && isMiddlePanning) {
+			if (middlePanRaf != null) {
+				cancelAnimationFrame(middlePanRaf)
+				middlePanRaf = null
+			}
+			const {x, y} = middlePanAccum
+			// Undo the hand-rolled transform first so panBy starts from the
+			// pane position Leaflet actually thinks it's at, then let Leaflet
+			// commit the real offset in one shot (fires move/moveend once).
+			mapPane.style.transform = middlePanOrigTransform
+			isMiddlePanning = false
+			middlePanLast = null
+			middlePanAccum = null
+			middlePanOrigTransform = null
+			middlePanOrigPos = null
+			if (x || y) MapCore.map.panBy([-x, -y], {animate: false, duration: 0})
+			return
+		}
+
 		if (!isDrawing || !armedShape || armedShape === "polygon" || armedShape === "object") return
 		if (evt.pointerType !== "mouse") evt.preventDefault()
 		finishDraw()
@@ -244,6 +304,12 @@ const SelectionToolbar = (() => {
 			EventBus.emit("selection:toolUsed")
 		})
 
+		MapCore.map.on("click", () => {
+			if (!isObjectSelectActive()) return
+			SelectionState.applyHits([])
+			EventBus.emit("selection:toolUsed")
+		})
+
 		const container = MapCore.getContainer()
 		container.addEventListener("pointerdown", onPointerDown, {passive: false})
 		container.addEventListener("pointermove", onPointerMove, {passive: false})
@@ -252,7 +318,7 @@ const SelectionToolbar = (() => {
 		document.addEventListener("keydown", onKeyDown)
 	}
 
-	return {init, isObjectSelectActive, stopObjectSelectPropagation}
+	return {init, isObjectSelectActive}
 })()
 
 export default SelectionToolbar

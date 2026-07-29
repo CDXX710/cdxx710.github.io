@@ -26,6 +26,7 @@ const AnalyticsPanel = (() => {
 	for (let d = decadeOf(dataMinYear); d <= decadeOf(dataMaxYear); d += 10) decades.push(d)
 
 	let bodyEl, recordsEl, islandsEl, timelineEl, categoriesEl, collapsible
+	let recordsInView = 0
 
 	function inViewIndices() {
 		const bounds = MapCore.map.getBounds()
@@ -85,6 +86,7 @@ const AnalyticsPanel = (() => {
 
 	function renderRecordsInView(scope) {
 		const total = ArchiveData.features.length
+		recordsInView = scope.length
 		recordsEl.innerHTML = Utils.html`
 			<div class="analytics-section__title">Records in view</div>
 			<div class="analytics-hero">
@@ -92,6 +94,7 @@ const AnalyticsPanel = (() => {
 				<span class="analytics-hero__total">/ ${total}</span>
 			</div>
             `
+		EventBus.emit("analytics:recordsInViewChanged", recordsInView)
 	}
 
 	function renderIslands(scope) {
@@ -152,7 +155,7 @@ const AnalyticsPanel = (() => {
 		timelineEl.innerHTML = Utils.html`
 			<div class="analytics-section__title-row">
 				<div class="analytics-section__title">Timeline</div>
-				<button type="button" class="selection-results__clear analytics-timeline__clear" id="timelineClearBtn" aria-label="Clear timeline filter">Clear</button>
+				<button type="button" class="analytics-timeline__clear" id="timelineClearBtn" aria-label="Clear timeline filter">Clear</button>
 			</div>
 			<svg class="analytics-timeline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-label="Records per decade, click or drag to filter by year">${bars}</svg>
 			<div class="analytics-timeline__range"><span>${decades[0]}s</span><span>${decades[decades.length - 1]}s</span></div>
@@ -258,7 +261,10 @@ const AnalyticsPanel = (() => {
 
 		render()
 	}
-	return {init}
+	function recordsInViewCount() {
+		return recordsInView
+	}
+	return {init, recordsInViewCount}
 })()
 
 export default AnalyticsPanel

@@ -58,11 +58,10 @@
 						<p>Phasellus elementum tellus erat, ut varius risus viverra a. Sed mi diam, vehicula sit amet fringilla sit amet, lacinia eu neque. Duis scelerisque maximus nunc, et euismod augue bibendum eget. Etiam molestie cursus magna, in semper nunc gravida a. Donec sollicitudin ut ante sit amet suscipit. Suspendisse potenti. Quisque turpis turpis, maximus nec pretium non, efficitur ut justo. Vestibulum ullamcorper ante nunc, sed viverra dui finibus id. Nam gravida sed leo sit amet rutrum. Nulla facilisi. Fusce quis nibh dignissim, euismod ante id, consequat diam. In pellentesque mauris eu odio auctor feugiat. In nec lacus interdum, scelerisque mi a, facilisis nibh. Nulla facilisi. Phasellus ut dui metus. Sed hendrerit commodo interdum.</p>
 					</div>
 				</article>
-				<button type="button" class="visualizer-close" aria-label="Close document viewer" onclick="toggleWindowPopup()"><span aria-hidden="true">✕</span></button>
 			</section>
 
 			<!-- Searchbar -->
-			<div class="searchbar" id="map-searchbar" role="search">
+			<div class="searchbar-panel" id="map-searchbar" role="search">
 				<div class="searchbar__focus-ring" aria-hidden="true"></div>
 				<button type="button" id="trigger" class="searchbar__trigger" aria-label="Toggle search" aria-expanded="false">
 					<svg class="searchbar__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -89,18 +88,26 @@
 							</button>
 							<button type="button" class="select-toolbar__btn" data-mode="add" title="Add to selection" aria-label="Add to selection">
 								<svg viewBox="0 0 24 24" aria-hidden="true">
-									<circle cx="9.5" cy="13.5" r="6.3" fill="currentColor" opacity="0.55" />
-									<circle cx="15" cy="9" r="6.3" fill="currentColor" opacity="0.55" />
+									<circle cx="9.5" cy="13.5" r="6.5" fill="currentColor" />
+									<circle cx="15" cy="9" r="5" fill="currentColor" />
 								</svg>
 							</button>
 							<button type="button" class="select-toolbar__btn" data-mode="subtract" title="Subtract from selection" aria-label="Subtract from selection">
 								<svg viewBox="0 0 24 24" aria-hidden="true">
-									<circle cx="9.5" cy="13.5" r="6.5" fill="currentColor" />
-									<circle cx="15" cy="9" r="5.4" fill="var(--color-overlay)" stroke="currentColor" stroke-width="1.2" />
+									<mask id="subtract-mask-1">
+										<circle cx="9.5" cy="13.5" r="6.5" fill="white" />
+										<circle cx="15" cy="9" r="5.4" fill="black" />
+									</mask>
+									<circle cx="9.5" cy="13.5" r="6.5" fill="currentColor" mask="url(#subtract-mask-1)" />
+									<circle cx="15" cy="9" r="5.4" fill="none" stroke="currentColor" />
 								</svg>
 							</button>
 							<button type="button" class="select-toolbar__btn" data-mode="intersect" title="Intersect with selection" aria-label="Intersect with selection">
 								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<mask id="intersect-mask-1">
+										<circle cx="15" cy="9" r="6.3" fill="white" />
+									</mask>
+									<circle cx="9.5" cy="13.5" r="6.3" fill="currentColor" mask="url(#intersect-mask-1)" />
 									<circle cx="9.5" cy="13.5" r="6.3" fill="none" stroke="currentColor" stroke-width="1.4" />
 									<circle cx="15" cy="9" r="6.3" fill="none" stroke="currentColor" stroke-width="1.4" />
 								</svg>
@@ -152,40 +159,43 @@
 				</div>
 			</div>
 
-			<!-- Dedicated panel for selection results, separate from feature popups -->
-			<aside class="selection-results is-collapsed" id="selectionResults" aria-label="Selection results">
-				<header class="selection-results__header">
-					<span class="selection-results__title">
-						Selected:
-						<span id="selectionCount" aria-live="polite">0</span>
-						<span aria-hidden="true" style="display: inline-block; width: 0.5rem"></span>
-					</span>
-					<div class="selection-results__actions">
-						<button type="button" class="collapse-btn selection__collapse-btn" id="selectionCollapseBtn" aria-label="Close selection panel">
-							<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<polyline points="12,5 7,10 2,5" />
-							</svg>
-						</button>
-						<button type="button" class="selection-results__clear" id="selectionClearBtn" aria-label="Clear selection">Clear</button>
-						<div class="custom-select">
-							<button type="button" class="collapse-btn custom-select__trigger" aria-haspopup="listbox" aria-expanded="false">
-								<span class="custom-select__value">Name</span>
+			<!-- Dedicated panel for results, separate from feature popups -->
+			<div class="results-panel is-collapsed" id="resultsPanel" aria-label="Results panel">
+				<div class="results-panel__header">
+					<button class="results-panel__title" type="button">
+						<span id="resultsTitleLabel"></span>
+						<span id="resultsCount"></span>
+					</button>
+					<div class="results-panel__actions">
+						<div class="results-panel__actions-btns">
+							<button type="button" class="collapse-btn results-panel__collapse-btn" id="resultsCollapseBtn" aria-label="Close results panel">
+								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<polyline points="12,5 7,10 2,5" />
+								</svg>
+							</button>
+							<button type="button" class="results-panel__actions-btn" id="selectionClearBtn" aria-label="Clear selection">Clear</button>
+							<button type="button" class="results-panel__actions-btn" id="selectAllBtn" aria-label="Select all">Select all</button>
+							<button type="button" class="results-panel__actions-btn" id="selectionExportBtn" aria-label="Export selection">Export</button>
+						</div>
+						<div class="results-panel__actions-dropdown" data-dropdown-root>
+							<button type="button" class="collapse-btn results-panel__actions-dropdown__trigger" data-dropdown-trigger aria-haspopup="listbox" aria-expanded="false">
+								<span class="results-panel__actions-dropdown__value" data-dropdown-value>Name</span>
 								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 									<polyline points="2,9 7,4 12,9" />
 								</svg>
 							</button>
-							<ul class="custom-select__menu" role="listbox" aria-label="Sort selection by">
-								<li class="custom-select__option is-selected" data-value="name" role="option" aria-selected="true">Name</li>
-								<li class="custom-select__option" data-value="date" role="option" aria-selected="false">Date</li>
-								<li class="custom-select__option" data-value="authorType" role="option" aria-selected="false">Author type</li>
-								<li class="custom-select__option" data-value="documentType" role="option" aria-selected="false">Document type</li>
+							<ul class="results-panel__actions-dropdown__menu" data-dropdown-menu role="listbox" aria-label="Sort results by">
+								<li class="results-panel__actions-dropdown__option is-selected" data-dropdown-option data-value="name" role="option" aria-selected="true">Name</li>
+								<li class="results-panel__actions-dropdown__option" data-dropdown-option data-value="date" role="option" aria-selected="false">Date</li>
+								<li class="results-panel__actions-dropdown__option" data-dropdown-option data-value="authorType" role="option" aria-selected="false">Author type</li>
+								<li class="results-panel__actions-dropdown__option" data-dropdown-option data-value="documentType" role="option" aria-selected="false">Document type</li>
 							</ul>
-							<input type="hidden" id="selectionSortValue" name="selectionSortValue" value="index" />
+							<input type="hidden" id="resultsSortValue" name="resultsSortValue" value="name" />
 						</div>
 					</div>
-				</header>
-				<div class="selection-results__list" id="selectionList"></div>
-			</aside>
+				</div>
+				<div class="results-panel__list" id="resultsList"></div>
+			</div>
 			<!-- Legend is injected here by JS (needs CSS-var colours to be resolved first) -->
 		</main>
 

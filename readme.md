@@ -1,18 +1,4 @@
--   [ ] **Result & Legend panel**
-
 -   [ ] **Popup centering**
-
--   [ ] **Shadow direction for zoom buttons**
-
--   [ ] **Add export options**
-
-    Let users export:
-
-    > Filtered datasets
-    >
-    > Map screenshots
-    >
-    > Metadata summaries
 
 -   [ ] **Enable comparisons**
 

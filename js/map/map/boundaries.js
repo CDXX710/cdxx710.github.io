@@ -4,7 +4,6 @@ import MapCore from "./map-core.js"
 import EventBus from "../event-bus.js"
 import BoundaryData from "../data/boundary-data.js"
 import Utils from "../utils.js"
-import SelectionToolbar from "../ui/selection-toolbar.js"
 
 // ─────────────────────────────────────────────────────────────
 // Boundaries — renders the boundary polygons (BoundaryData) on the
@@ -17,6 +16,12 @@ const Boundaries = (() => {
 	let islandsLayer = null
 	let watersLayer = null
 	let flagsLayer = null
+	// Mirrors SelectionToolbar's armed state locally, kept in sync via
+	// EventBus rather than importing/calling SelectionToolbar directly.
+	let objectSelectActive = false
+	EventBus.on("selection:toolArmed", ({shape}) => {
+		objectSelectActive = shape === "object"
+	})
 	// Water and island features in the TopoJSON share a GID_0. Use that
 	// shared identifier to pair each water feature with its corresponding
 	// island feature and reuse the island/flag anchor for the water tooltip.
@@ -46,7 +51,13 @@ const Boundaries = (() => {
 	function flagLatLng(geometry) {
 		const poly = GeoMath.largestPolygon(geometry)
 		const outer = poly?.[0]
-		if (!outer || !outer.length) return null
+		if (!outer || !outer.length) {
+			// Degenerate/empty outer ring: fall back to the geometry's overall
+			// bbox centre so hover feedback (tooltip) is never silently lost.
+			const [minX, minY, maxX, maxY] = GeoMath.geometryBBox(geometry)
+			if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) return null
+			return [(minY + maxY) / 2, (minX + maxX) / 2]
+		}
 		const [cx, cy] = GeoMath.ringCentroid(outer)
 		if (GeoMath.pointInPolygonRings(cx, cy, poly)) return [cy, cx]
 		let nearest = outer[0],
@@ -102,7 +113,7 @@ const Boundaries = (() => {
 				// Object Select owns boundary clicks while armed. Stop the
 				// Leaflet event from bubbling to the map or other handlers,
 				// while still sending the feature to SelectionToolbar.
-				if (SelectionToolbar.isObjectSelectActive()) {
+				if (objectSelectActive) {
 					L.DomEvent.stopPropagation(evt)
 					EventBus.emit("boundary:objectClick", feature)
 				}

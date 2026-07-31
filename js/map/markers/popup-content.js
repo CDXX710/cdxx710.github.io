@@ -1,5 +1,4 @@
 import Utils from "../utils.js"
-import Theme from "../state/theme.js"
 
 // ─────────────────────────────────────────────────────────────
 // PopupContent — marker popup HTML generation. Pure rendering, no state.
@@ -18,7 +17,6 @@ const PopupContent = (() => {
 	}
 	function authorTypePill(authorType) {
 		if (!authorType) return ""
-		const color = Theme.creoleColor(authorType)
 		return Utils.html`<span class="pill pill--creole-type"> ${Utils.capitalize(authorType)} </span>`
 	}
 	function creoleRolePill(creole) {
@@ -49,14 +47,14 @@ const PopupContent = (() => {
 		                	<div class="popup__pills">${yearPill} ${categoryPill} ${authorTypePill(authorType)} ${creoleRolePill(creole)}</div>
 		                </div>
 	                	<div class="popup__right">
-	                		<div style="height:100%; display:flex; flex-direction:column; justify-content:center">${
+	                		<div class="popup__resume">${
 							resume
 								? `❝ ${resume} ❞`
 								: `
-                                        <div style="font-size:var(--font-size-xl); color:var(--colorText)">
+                                        <div class="popup__resume-empty-title">
                                             We're sorry,
                                         </div>
-                                        <div style="text-align:right; color:var(--colorTextSecondary)">
+                                        <div class="popup__resume-empty-subtitle">
                                             No resumés are available at the moment..
                                         </div>
                                     `

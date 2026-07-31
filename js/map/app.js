@@ -11,6 +11,7 @@ import Searchbar from "./ui/searchbar.js"
 import AnalyticsPanel from "./ui/analytics-panel.js"
 import CustomDropdown from "./ui/custom-dropdown.js"
 import mapTheme from "./map/map-theme.js"
+import EventBus from "./event-bus.js"
 // ─────────────────────────────────────────────────────────────
 // App — bootstraps every module, in dependency order.
 // ─────────────────────────────────────────────────────────────
@@ -28,7 +29,7 @@ function bootstrap() {
 	Searchbar.init()
 	AnalyticsPanel.init()
 	document.querySelectorAll("[data-dropdown-root]").forEach(rootEl => {
-		CustomDropdown.init(rootEl, {onSelect: () => SelectionResults.refresh()})
+		CustomDropdown.init(rootEl, {onSelect: value => EventBus.emit("sort:changed", value)})
 	})
 }
 

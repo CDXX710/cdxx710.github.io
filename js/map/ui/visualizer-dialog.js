@@ -1,5 +1,5 @@
 import Utils from "../utils.js"
-import Panels from "./panels.js"
+import visualizerPlaceholderContent from "../data/visualizer-content.js"
 
 // ─────────────────────────────────────────────────────────────
 // VisualizerModal — the document-viewer overlay, toggled by
@@ -8,6 +8,11 @@ import Panels from "./panels.js"
 const VisualizerModal = (() => {
 	let visualizerEl = null
 	let contentNodes = []
+
+	function isolateFromMap(el) {
+		L.DomEvent.disableScrollPropagation(el)
+		L.DomEvent.disableClickPropagation(el)
+	}
 
 	function handleVisualizerKeydown(event) {
 		if (event.key === "Escape") hide()
@@ -31,7 +36,7 @@ const VisualizerModal = (() => {
 	function show() {
 		if (visualizerEl) return
 		visualizerEl = buildVisualizer()
-		Panels.isolateFromMap(visualizerEl)
+		isolateFromMap(visualizerEl)
 		document.addEventListener("keydown", handleVisualizerKeydown)
 		document.getElementById("map").appendChild(visualizerEl)
 	}
@@ -49,9 +54,8 @@ const VisualizerModal = (() => {
 		else show()
 	}
 	function init() {
-		const placeholder = document.getElementById("visualizer")
-		contentNodes = placeholder ? Array.from(placeholder.childNodes) : []
-		placeholder?.remove()
+		const parsed = Utils.el("div", {html: visualizerPlaceholderContent})
+		contentNodes = Array.from(parsed.childNodes)
 		window.toggleWindowPopup = toggle
 	}
 	return {init}

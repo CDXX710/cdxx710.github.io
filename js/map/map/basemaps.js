@@ -2,7 +2,11 @@ import Config from "../config.js"
 import EventBus from "../event-bus.js"
 import MapCore from "./map-core.js"
 import Utils from "../utils.js"
-import Panels from "../ui/panels.js"
+
+function isolateFromMap(el) {
+	L.DomEvent.disableScrollPropagation(el)
+	L.DomEvent.disableClickPropagation(el)
+}
 
 // ─────────────────────────────────────────────────────────────
 // Basemaps — base layer (radio) + historical overlay (optional, at
@@ -128,7 +132,7 @@ const Basemaps = (() => {
 		buildBaseControl(control)
 		buildOverlayControl(control)
 		document.getElementById("map").appendChild(control)
-		Panels.isolateFromMap(control)
+		isolateFromMap(control)
 	}
 
 	function init() {

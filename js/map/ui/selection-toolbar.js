@@ -5,7 +5,6 @@ import DrawOverlay from "../map/draw-overlay.js"
 import SelectionState from "../state/selection-state.js"
 import EventBus from "../event-bus.js"
 import Config from "../config.js"
-import Panels from "./panels.js"
 
 // ─────────────────────────────────────────────────────────────
 // SelectionToolbar — shape/object selection tools and the drag-to-
@@ -14,6 +13,10 @@ import Panels from "./panels.js"
 // rather than parallel mouse/touch handler pairs.
 // ─────────────────────────────────────────────────────────────
 const SelectionToolbar = (() => {
+	function isolateFromMap(el) {
+		L.DomEvent.disableScrollPropagation(el)
+		L.DomEvent.disableClickPropagation(el)
+	}
 	const hitTesters = {
 		rectangle: (start, end) => Markers.visible().filter(marker => GeoMath.inRectangle(containerPoint(marker), start, end)),
 		ellipse: (start, end) => Markers.visible().filter(marker => GeoMath.inEllipse(containerPoint(marker), start, end)),
@@ -114,6 +117,7 @@ const SelectionToolbar = (() => {
 		MapCore.map.dragging.disable()
 		MapCore.map.doubleClickZoom.disable()
 		if (MapCore.map.tap) MapCore.map.tap.disable()
+		EventBus.emit("selection:toolArmed", {shape: armedShape})
 	}
 
 	function disarm() {
@@ -126,6 +130,7 @@ const SelectionToolbar = (() => {
 		MapCore.map.doubleClickZoom.enable()
 		if (MapCore.map.tap) MapCore.map.tap.enable()
 		cancelDraw()
+		EventBus.emit("selection:toolArmed", {shape: armedShape})
 	}
 
 	function cancelDraw() {
@@ -159,7 +164,7 @@ const SelectionToolbar = (() => {
 
 	// Arming a tool must only affect the map surface itself (markers/tiles/boundaries), never this chrome.
 	function isOutsideDrawSurface(evt) {
-		return !!evt.target.closest(".visualizer-dialog, .export-overlay, .searchbar-panel, .select-toolbar__row, .results-panel, .zoom-panel, .basemap-panel, .map-legend, .analytics-panel, .marker-popup")
+		return !!evt.target.closest(".visualizer-dialog, .export-dialog, .searchbar-panel, .select-toolbar__row, .results-panel, .zoom-panel, .basemap-panel, .legend-panel, .analytics-panel, .marker-popup")
 	}
 
 	// Unified pointer handling: mouse, touch, and pen all funnel through
@@ -271,12 +276,12 @@ const SelectionToolbar = (() => {
 	}
 
 	function init() {
-		toolbarEl = document.getElementById("selectToolbar")
+		toolbarEl = document.getElementById("select-toolbar")
 		shapeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-shape]"))
 		modeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-mode]"))
 		objectModeButtons = Array.from(document.querySelectorAll(".select-toolbar__btn[data-object-mode]"))
 
-		Panels.isolateFromMap(document.getElementById("map-select-toolbar"))
+		isolateFromMap(document.getElementById("select-toolbar-panel"))
 
 		shapeButtons.forEach(btn => {
 			btn.addEventListener("click", () => (armedShape === btn.dataset.shape ? disarm() : arm(btn.dataset.shape)))

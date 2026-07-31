@@ -1,13 +1,12 @@
 import ArchiveData from "../data/archive-data.js"
 import MapCore from "../map/map-core.js"
-import Markers from "../markers/markers.js"
 import SelectionState from "../state/selection-state.js"
 import FilterState from "../state/filter-state.js"
+import ViewportQuery from "../state/viewport-query.js"
 import GeoIndex from "../data/geo-index.js"
 import Theme from "../state/theme.js"
 import Utils from "../utils.js"
 import TimeSlider from "./time-slider.js"
-import Panels from "./panels.js"
 import EventBus from "../event-bus.js"
 
 // ─────────────────────────────────────────────────────────────
@@ -28,13 +27,61 @@ const AnalyticsPanel = (() => {
 	let bodyEl, recordsEl, islandsEl, timelineEl, categoriesEl, collapsible
 	let recordsInView = 0
 
-	function inViewIndices() {
-		const bounds = MapCore.map.getBounds()
-		const indices = []
-		Markers.all().forEach((marker, index) => {
-			if (MapCore.map.hasLayer(marker) && bounds.contains(marker.getLatLng())) indices.push(index)
+	function isolateFromMap(el) {
+		L.DomEvent.disableScrollPropagation(el)
+		L.DomEvent.disableClickPropagation(el)
+	}
+
+	const collapseChevronSvg = Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,9 7,4 12,9" /></svg>`
+
+	// Builds a "<title> ...... <collapse button>" header row.
+	function buildHeader({title, collapseLabel}) {
+		const headerEl = Utils.el("div", {className: "analytics-panel__header"})
+		if (title) headerEl.appendChild(Utils.el("span", {className: "analytics-panel__title", text: title}))
+		const collapseBtn = Utils.el("button", {
+			className: "collapse-btn analytics-panel__collapse-btn",
+			"aria-label": collapseLabel,
+			"aria-expanded": "false",
+			html: collapseChevronSvg
 		})
-		return indices
+		headerEl.appendChild(collapseBtn)
+		return {headerEl, collapseBtn}
+	}
+
+	// Collapse/expand for the panel body. The expand/collapse height
+	// transition itself is handled entirely in CSS off the `data-collapsed`
+	// attribute on `bodyEl` (see ADD_TO_YOUR_CSS.css) — this only ever
+	// toggles that attribute plus the associated aria state, never
+	// measures or writes an element's height from JS.
+	function createCollapsible({panelEl, headerEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
+		let dividerEl = null
+		function ensureDivider() {
+			if (!dividerEl && headerEl) {
+				dividerEl = Utils.el("div", {className: "analytics-panel__divider", role: "separator"})
+				headerEl.insertAdjacentElement("afterend", dividerEl)
+			}
+			return dividerEl
+		}
+		function setCollapsed(collapsed) {
+			panelEl.classList.toggle(collapsedClass, collapsed)
+			bodyEl.dataset.collapsed = String(collapsed)
+			collapseBtn.setAttribute("aria-expanded", String(!collapsed))
+			collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
+			if (!collapsed) {
+				const divider = ensureDivider()
+				if (divider) divider.hidden = false
+			} else if (dividerEl) {
+				dividerEl.hidden = true
+			}
+		}
+		function isCollapsed() {
+			return panelEl.classList.contains(collapsedClass)
+		}
+		return {setCollapsed, isCollapsed}
+	}
+
+	function inViewIndices() {
+		return ViewportQuery.featuresInView({respectFilters: "active"})
 	}
 	function currentScopeIndices() {
 		return SelectionState.size() > 0 ? SelectionState.indices() : inViewIndices()
@@ -47,14 +94,7 @@ const AnalyticsPanel = (() => {
 	// still narrows to an explicit selection when one exists.
 	function timelineScopeIndices() {
 		if (SelectionState.size() > 0) return SelectionState.indices()
-		const bounds = MapCore.map.getBounds()
-		const indices = []
-		ArchiveData.features.forEach((feature, index) => {
-			if (!FilterState.isFeatureVisibleIgnoringYear(feature.properties)) return
-			const [lng, lat] = feature.geometry.coordinates
-			if (bounds.contains(L.latLng(lat, lng))) indices.push(index)
-		})
-		return indices
+		return ViewportQuery.featuresInView({respectFilters: "ignoreYear"})
 	}
 
 	function topEntries(counts, total) {
@@ -217,7 +257,6 @@ const AnalyticsPanel = (() => {
 		renderIslands(scope)
 		renderTimeline(timelineScopeIndices())
 		renderCategories(scope)
-		if (bodyEl && collapsible && !collapsible.isCollapsed()) bodyEl.style.maxHeight = `${bodyEl.scrollHeight}px`
 	}
 
 	function init() {
@@ -226,11 +265,20 @@ const AnalyticsPanel = (() => {
 		const panel = Utils.el("div", {className: "analytics-panel", "aria-label": "Analytics summary"})
 		document.getElementById("map").appendChild(panel)
 
-		const {headerEl, collapseBtn} = Panels.buildHeader({title: "Research Summary", collapseLabel: "Expand research summary"})
+		const {headerEl, collapseBtn} = buildHeader({title: "Research Summary", collapseLabel: "Expand research summary"})
 		panel.appendChild(headerEl)
 
+		// Starts expanded (see the comment above), so data-collapsed starts
+		// false to match — the CSS collapse transition in ADD_TO_YOUR_CSS.css
+		// keys off this attribute. This wrapper exists purely to give the
+		// CSS grid collapse trick a single grid item to animate — `bodyEl`
+		// below (which holds the actual section content) sits inside it
+		// unchanged.
+		const collapseWrap = Utils.el("div", {className: "analytics-panel__collapse", "data-collapsed": "false"})
+		panel.appendChild(collapseWrap)
+
 		bodyEl = Utils.el("div", {className: "analytics-panel__body"})
-		panel.appendChild(bodyEl)
+		collapseWrap.appendChild(bodyEl)
 		recordsEl = Utils.el("div", {className: "analytics-section"})
 		islandsEl = Utils.el("div", {className: "analytics-section"})
 		timelineEl = Utils.el("div", {className: "analytics-section"})
@@ -241,14 +289,14 @@ const AnalyticsPanel = (() => {
 		const analyticsSections = bodyEl.querySelectorAll(".analytics-section")
 		analyticsSections.forEach((section, index) => {
 			if (index !== analyticsSections.length - 1) {
-				section.insertAdjacentHTML("afterend", '<div class="__divider" role="separator"></div>')
+				section.insertAdjacentHTML("afterend", '<div class="analytics-panel__divider" role="separator"></div>')
 			}
 		})
 
-		collapsible = Panels.createCollapsible({panelEl: panel, headerEl, collapseBtn, bodyEl, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
+		collapsible = createCollapsible({panelEl: panel, headerEl, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
 		collapsible.setCollapsed(false)
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
-		Panels.isolateFromMap(panel)
+		isolateFromMap(panel)
 
 		// Filter/selection changes are infrequent and cheap to react to
 		// immediately. Map pans fire moveend repeatedly during a drag/zoom

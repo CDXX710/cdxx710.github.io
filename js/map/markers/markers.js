@@ -14,22 +14,40 @@ import EventBus from "../event-bus.js"
 const Markers = (() => {
 	let markers = []
 	const indexByMarker = new Map()
+	let visibleCache = null
+
+	function invalidateVisibleCache() {
+		visibleCache = null
+	}
 
 	function createMarker(feature, index) {
 		const {category, creole, authorType} = feature.properties
 		const [lng, lat] = feature.geometry.coordinates
 		const fillColor = Theme.categoryColor(category)
-		const ringColor = Theme.creoleColor(authorType) ?? fillColor
+		const ringColor = Theme.authorTypeColor(authorType) ?? fillColor
 		const icon = L.divIcon({
-			className: "",
+			className: "marker-icon",
 			html: Shapes.markerSvg(creole, fillColor, ringColor),
 			iconSize: [20, 20],
 			iconAnchor: [10, 10]
 		})
-		const marker = L.marker([lat, lng], {icon})
-		marker.on("click", () => {
+		const marker = L.marker([lat, lng], {icon, keyboard: true, alt: feature.properties.name})
+		const openPopup = () => {
 			MarkerPopup.open(marker.getLatLng(), PopupContent.build(feature.properties), {
 				maxWidth: Config.popup.maxWidth
+			})
+		}
+		marker.on("click", openPopup)
+		marker.on("add", () => {
+			const el = marker.getElement()
+			if (!el) return
+			el.setAttribute("role", "button")
+			el.setAttribute("tabindex", "0")
+			el.addEventListener("keydown", event => {
+				if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+					event.preventDefault()
+					openPopup()
+				}
 			})
 		})
 		marker.feature = feature
@@ -41,6 +59,7 @@ const Markers = (() => {
 			const visible = FilterState.isFeatureVisible(marker.feature.properties)
 			visible ? marker.addTo(MapCore.map) : MapCore.map.removeLayer(marker)
 		})
+		invalidateVisibleCache()
 	}
 	function init(features) {
 		markers = features.map((feature, index) => {
@@ -49,6 +68,7 @@ const Markers = (() => {
 			return marker
 		})
 		EventBus.on("filters:changed", applyVisibility)
+		EventBus.on("selection:changed", invalidateVisibleCache)
 		MapCore.map.on("click", () => MarkerPopup.close())
 		return markers
 	}
@@ -56,7 +76,8 @@ const Markers = (() => {
 		return markers
 	}
 	function visible() {
-		return markers.filter(marker => MapCore.map.hasLayer(marker))
+		if (!visibleCache) visibleCache = markers.filter(marker => MapCore.map.hasLayer(marker))
+		return visibleCache
 	}
 	function featureIndex(marker) {
 		return indexByMarker.get(marker)

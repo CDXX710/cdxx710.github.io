@@ -3,8 +3,6 @@ import Shapes from "../markers/shapes.js"
 import Theme from "../state/theme.js"
 import FilterState from "../state/filter-state.js"
 import Boundaries from "../map/boundaries.js"
-import Panels from "./panels.js"
-import Markers from "../markers/markers.js"
 import EventBus from "../event-bus.js"
 
 // ─────────────────────────────────────────────────────────────
@@ -12,7 +10,70 @@ import EventBus from "../event-bus.js"
 // every toggle reads/writes through FilterState or Boundaries.
 // ─────────────────────────────────────────────────────────────
 const Legend = (() => {
-	function toggleRow({id, label, shapeKind, initialColor, checked = true, onChange}) {
+	// Registered by each built row; called on `filters:changed` to sync
+	// checked/is-off state without tearing down and rebuilding the panel.
+	let syncFns = []
+
+	function isolateFromMap(el) {
+		L.DomEvent.disableScrollPropagation(el)
+		L.DomEvent.disableClickPropagation(el)
+	}
+
+	const collapseChevronSvg = Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,9 7,4 12,9" /></svg>`
+
+	// Builds a "<title> ...... <collapse button>" header row.
+	function buildHeader({title, collapseLabel}) {
+		const headerEl = Utils.el("div", {className: "legend-panel__header"})
+		if (title) headerEl.appendChild(Utils.el("span", {className: "legend-panel__title", text: title}))
+		const collapseBtn = Utils.el("button", {
+			className: "collapse-btn legend-panel__collapse-btn",
+			"aria-label": collapseLabel,
+			"aria-expanded": "false",
+			html: collapseChevronSvg
+		})
+		headerEl.appendChild(collapseBtn)
+		return {headerEl, collapseBtn}
+	}
+
+	// Collapse/expand for the legend body. The expand/collapse height
+	// transition itself is handled entirely in CSS off the `data-collapsed`
+	// attribute on `bodyEl` (see ADD_TO_YOUR_CSS.css) — this only ever
+	// toggles that attribute plus the associated aria state, never
+	// measures or writes an element's height from JS.
+	function createCollapsible({panelEl, headerEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel, extraDividers = []}) {
+		let dividerEl = null
+		function ensureDivider() {
+			if (!dividerEl && headerEl) {
+				dividerEl = Utils.el("div", {className: "legend-panel__divider", role: "separator"})
+				headerEl.insertAdjacentElement("afterend", dividerEl)
+			}
+			return dividerEl
+		}
+		function setCollapsed(collapsed) {
+			panelEl.classList.toggle(collapsedClass, collapsed)
+			bodyEl.dataset.collapsed = String(collapsed)
+			collapseBtn.setAttribute("aria-expanded", String(!collapsed))
+			collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
+			if (!collapsed) {
+				const divider = ensureDivider()
+				if (divider) divider.hidden = false
+				extraDividers.forEach(el => {
+					el.hidden = false
+				})
+			} else {
+				if (dividerEl) dividerEl.hidden = true
+				extraDividers.forEach(el => {
+					el.hidden = true
+				})
+			}
+		}
+		function isCollapsed() {
+			return panelEl.classList.contains(collapsedClass)
+		}
+		return {setCollapsed, isCollapsed}
+	}
+
+	function toggleRow({id, label, shapeKind, initialColor, checked = true, onChange, getChecked}) {
 		const checkboxId = `cb-${id}`
 		const row = Utils.el("div", {className: "legend__item"})
 		row.style.setProperty("--shape-color", initialColor)
@@ -31,6 +92,14 @@ const Legend = (() => {
 			iconToggle.classList.toggle("is-off", !isOn)
 			onChange(isOn)
 		})
+		if (getChecked) {
+			syncFns.push(() => {
+				const isOn = getChecked()
+				if (checkbox.checked !== isOn) checkbox.checked = isOn
+				row.classList.toggle("is-off", !isOn)
+				iconToggle.classList.toggle("is-off", !isOn)
+			})
+		}
 		return row
 	}
 	function groupTitle(text) {
@@ -60,7 +129,8 @@ const Legend = (() => {
 					shapeKind,
 					initialColor: "white",
 					checked: FilterState.isCreoleRoleActive(key),
-					onChange: isOn => FilterState.setCreoleRoleActive(key, isOn)
+					onChange: isOn => FilterState.setCreoleRoleActive(key, isOn),
+					getChecked: () => FilterState.isCreoleRoleActive(key)
 				})
 			)
 		})
@@ -78,7 +148,8 @@ const Legend = (() => {
 					shapeKind: "ring",
 					initialColor: color,
 					checked: FilterState.isAuthorTypeActive(typeKey),
-					onChange: isOn => FilterState.setAuthorTypeActive(typeKey, isOn)
+					onChange: isOn => FilterState.setAuthorTypeActive(typeKey, isOn),
+					getChecked: () => FilterState.isAuthorTypeActive(typeKey)
 				})
 			)
 		})
@@ -96,7 +167,8 @@ const Legend = (() => {
 					shapeKind: "unknown",
 					initialColor: color,
 					checked: FilterState.isCategoryActive(catKey),
-					onChange: isOn => FilterState.setCategoryActive(catKey, isOn)
+					onChange: isOn => FilterState.setCategoryActive(catKey, isOn),
+					getChecked: () => FilterState.isCategoryActive(catKey)
 				})
 			)
 		})
@@ -114,13 +186,15 @@ const Legend = (() => {
 					shapeKind,
 					initialColor: color,
 					checked: Boundaries.isVisible(key),
-					onChange: isOn => Boundaries.setVisible(key, isOn)
+					onChange: isOn => Boundaries.setVisible(key, isOn),
+					getChecked: () => Boundaries.isVisible(key)
 				})
 			)
 		})
 		return true
 	}
 	function buildPanel(body) {
+		syncFns = []
 		body.innerHTML = ""
 		const groupBuilders = [b => layersGroup(b), b => creoleRoleGroup(b, null), b => authorTypeGroup(b, null), b => categoryGroup(b, null)]
 		groupBuilders.forEach(build => {
@@ -129,52 +203,62 @@ const Legend = (() => {
 			if (added && before > 0) body.insertBefore(divider(), body.children[before])
 		})
 	}
+	function syncCheckedState() {
+		syncFns.forEach(fn => fn())
+	}
 
 	function init() {
-		const legend = Utils.el("div", {className: "map-legend is-collapsed", "aria-label": "Map legend"})
+		const legend = Utils.el("div", {className: "legend-panel is-collapsed", "aria-label": "Map legend"})
 		document.getElementById("map").appendChild(legend)
 
-		const {headerEl, collapseBtn} = Panels.buildHeader({
+		const {headerEl, collapseBtn} = buildHeader({
 			title: "Legend",
 			collapseLabel: "Expand legend"
 		})
 
 		legend.appendChild(headerEl)
 
-		const bodyWrap = Utils.el("div", {className: "legend__body"})
-		legend.appendChild(bodyWrap)
+		// Starts collapsed (matches the "is-collapsed" class set on `legend`
+		// above); kept in sync so the CSS collapse transition in
+		// ADD_TO_YOUR_CSS.css has a correct starting point. This wrapper
+		// exists purely to give the CSS grid collapse trick a single grid
+		// item to animate — `bodyWrap` below (which holds the actual
+		// content: actions row, divider, groups) sits inside it unchanged.
+		const collapseWrap = Utils.el("div", {className: "legend-panel__collapse", "data-collapsed": "true"})
+		legend.appendChild(collapseWrap)
+
+		const bodyWrap = Utils.el("div", {className: "legend-panel__body"})
+		collapseWrap.appendChild(bodyWrap)
 
 		const actionsRow = Utils.el("div", {className: "legend__actions"})
-		const defaultBtn = Utils.el("button", {type: "button", className: "selection-results__clear legend__action-btn", "aria-label": "Show all features", text: "Default"})
-		const noneBtn = Utils.el("button", {type: "button", className: "selection-results__clear legend__action-btn", "aria-label": "Hide all features", text: "Clear"})
+		const defaultBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Show all features", text: "Default"})
+		const noneBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Hide all features", text: "Clear"})
 		defaultBtn.addEventListener("click", () => FilterState.setAllVisible(true))
 		noneBtn.addEventListener("click", () => FilterState.setAllVisible(false))
 		actionsRow.append(defaultBtn, noneBtn)
 		bodyWrap.appendChild(actionsRow)
 
-		const actionsDivider = Utils.el("div", {className: "__divider", role: "separator"})
+		const actionsDivider = Utils.el("div", {className: "legend-panel__divider", role: "separator"})
 		bodyWrap.appendChild(actionsDivider)
 
-		const panel = Utils.el("div", {className: "legend__body", id: "legend-panel"})
+		const panel = Utils.el("div", {className: "legend-panel__content", id: "legend-panel__groups"})
 		bodyWrap.append(panel)
 
-		const collapsible = Panels.createCollapsible({panelEl: legend, headerEl, collapseBtn, bodyEl: bodyWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend", extraDividers: [actionsDivider]})
+		const collapsible = createCollapsible({panelEl: legend, headerEl, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend", extraDividers: [actionsDivider]})
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 
-		function resizeIfExpanded() {
-			if (!collapsible.isCollapsed()) bodyWrap.style.maxHeight = `${bodyWrap.scrollHeight}px`
-		}
-		function renderPanel() {
-			buildPanel(panel)
-			resizeIfExpanded()
-		}
-
-		renderPanel()
+		buildPanel(panel)
 		// Keep the panel honest as filters/time-range change which markers are
-		// actually rendered.
-		EventBus.on("filters:changed", renderPanel)
+		// actually rendered — this only toggles checked/is-off state on the
+		// existing rows; it never tears down and rebuilds the panel (the row
+		// set itself is static, defined by Theme/Boundaries config). Because
+		// the expand/collapse height transition is CSS-driven off
+		// `collapseWrap`'s `data-collapsed` attribute rather than a
+		// JS-measured max-height, this sync never needs to recompute or
+		// write height.
+		EventBus.on("filters:changed", syncCheckedState)
 
-		Panels.isolateFromMap(legend)
+		isolateFromMap(legend)
 	}
 	return {init}
 })()

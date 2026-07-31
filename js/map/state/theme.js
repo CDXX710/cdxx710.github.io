@@ -26,10 +26,10 @@ const Theme = (() => {
 	function categoryColor(category) {
 		return categoryColors[category] ?? fallbackColor
 	}
-	function creoleColor(authorType) {
+	function authorTypeColor(authorType) {
 		return authorType ? authorTypeColors[authorType] : null
 	}
-	return {categoryColors, authorTypeColors, categoryColor, creoleColor}
+	return {categoryColors, authorTypeColors, categoryColor, authorTypeColor}
 })()
 
 export default Theme

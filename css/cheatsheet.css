@@ -43,7 +43,7 @@ body {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .color-card:hover .label {
@@ -83,7 +83,7 @@ body {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .font-card:hover .label {

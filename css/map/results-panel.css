@@ -72,14 +72,14 @@
 	text-transform: uppercase;
 	display: flex;
 	align-items: center;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .results-panel__actions-btn:hover {
 	color: var(--colorAccent);
 }
 
-#selectAllBtn {
+#results-panel__select-all-btn {
 	word-spacing: -0.5em; /* tighten space between words */
 }
 
@@ -172,7 +172,7 @@
 	white-space: nowrap;
 }
 
-#resultsCount {
+#results-panel__count {
 	color: var(--colorAccent);
 	font-size: var(--font-size-lg);
 }

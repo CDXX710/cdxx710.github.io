@@ -78,7 +78,7 @@ body {
 	text-decoration: none;
 	white-space: nowrap;
 	flex-shrink: 0;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .site-header__back:hover {

@@ -50,7 +50,7 @@
 		border-radius: var(--panel-radius) var(--panel-radius) 0 0;
 	}
 
-	.visualizer .lorem_main {
+	.visualizer-dialog__body .lorem_main {
 		width: 92dvw;
 		height: 95%;
 	}

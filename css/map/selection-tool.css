@@ -2,7 +2,7 @@
     SELECTION TOOLS
 ───────────────────────────────────────── */
 
-#map-select-toolbar {
+#select-toolbar-panel {
 	position: absolute;
 	bottom: var(--space-8);
 	left: var(--space-6);
@@ -41,7 +41,7 @@
 	border: none;
 	background: transparent !important;
 	color: var(--colorTextSecondary);
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 	cursor: pointer;
 }
 
@@ -106,15 +106,15 @@
 
 .select-draw-svg {
 	position: absolute;
+	z-index: var(--z-map-overlay);
+	pointer-events: none;
 	inset: 0;
 	width: 100%;
 	height: 100%;
-	z-index: var(--z-map-overlay);
-	pointer-events: none;
 }
 
 .select-draw-svg path {
-	fill: var(--colorAccentDim);
+	fill: var(--colorAccentFade);
 	stroke: var(--colorAccent);
 	stroke-width: 2;
 	stroke-dasharray: 5 4;
@@ -154,12 +154,12 @@
 }
 
 .select-toolbar__tools .select-toolbar__btn:last-of-type,
-.select-toolbar__btn#object {
+.select-toolbar__btn#select-toolbar__object-btn {
 	border-top-right-radius: var(--panel-radius);
 	border-bottom-right-radius: var(--panel-radius);
 }
 
-.select-toolbar.is-armed.is-object .select-toolbar__btn#object {
+.select-toolbar.is-armed.is-object .select-toolbar__btn#select-toolbar__object-btn {
 	border-radius: 0;
 }
 
@@ -187,13 +187,13 @@
 }
 
 /* Prevent panels text selection when drawing */
-.is-drawing-select .visualizer,
+.is-drawing-select .visualizer-dialog-placeholder,
 .is-drawing-select .searchbar,
 .is-drawing-select .select-toolbar__row,
 .is-drawing-select .selection-results,
 .is-drawing-select .map-zoom-container,
 .is-drawing-select .basemap-panel,
-.is-drawing-select .map-legend,
+.is-drawing-select .legend-panel,
 .is-drawing-select .analytics-panel,
 .is-drawing-select .marker-popup {
 	user-select: none;

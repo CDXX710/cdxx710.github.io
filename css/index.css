@@ -45,7 +45,7 @@ body {
 	font-size: var(--font-size-card-title);
 	font-weight: var(--font-weight-bold);
 	color: var(--colorText);
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .link-card:hover .link-title {
@@ -67,7 +67,7 @@ body {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .link-card:hover .link-url {

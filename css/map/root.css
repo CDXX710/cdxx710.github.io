@@ -13,7 +13,7 @@
 
 @import url("./analytics-panel.css");
 @import url("./basemap-panel.css");
-@import url("./export-panel.css");
+@import url("./export-dialog.css");
 @import url("./layout.css");
 @import url("./legend-panel.css");
 @import url("./marker-popup.css");
@@ -21,11 +21,11 @@
 @import url("./responsive.css");
 @import url("./results-sorting-dropdown.css");
 @import url("./results-panel.css");
-@import url("./searchbar.css");
+@import url("./searchbar-panel.css");
 @import url("./selection-tool.css");
 @import url("./surfaces.css");
 @import url("./time-slider.css");
-@import url("./visualizer-panel.css");
+@import url("./visualizer-dialog.css");
 @import url("./zoom-panel.css");
 
 /* ─────────────────────────────────────────

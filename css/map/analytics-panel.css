@@ -16,16 +16,16 @@
 	cursor: pointer;
 }
 
-.analytics-panel.is-collapsed .__header {
+.analytics-panel.is-collapsed .analytics-panel__header {
 	padding: var(--space-3);
 	margin: 0;
 }
 
-.analytics-panel.is-collapsed .__collapse-btn svg {
+.analytics-panel.is-collapsed .analytics-panel__collapse-btn svg {
 	transform: rotate(180deg);
 }
 
-.analytics-panel .__collapse-btn svg {
+.analytics-panel .analytics-panel__collapse-btn svg {
 	transform: rotate(0deg);
 }
 
@@ -79,7 +79,7 @@
 	flex-shrink: 0;
 	align-items: center;
 	color: var(--colorTextSecondary);
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 	text-transform: uppercase;
 	font-family: var(--font-mono);
 	font-size: var(--font-size-2xs);
@@ -119,6 +119,7 @@
 	align-items: center;
 	gap: 0.5rem;
 	font-size: 0.72rem;
+	cursor: pointer;
 }
 
 .analytics-bar-row__dot {
@@ -129,20 +130,27 @@
 }
 
 .analytics-bar-row__label {
-	flex: 0 0 5rem;
+	width: 50%;
 	color: var(--colorText);
+	opacity: 0.8;
 	white-space: nowrap;
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
-.analytics-bar-row__label:hover {
+.analytics-bar-row:hover .analytics-bar-row__label,
+.analytics-bar-row:hover .analytics-bar-row__value {
 	color: var(--colorAccent);
-	cursor: pointer;
+	opacity: 1;
+}
+
+.analytics-bar-row:hover .analytics-bar-row__fill {
+	background: var(--colorAccent);
 }
 
 .analytics-bar-row__track {
-	flex: 1;
+	width: 40%;
 	height: 0.4rem;
-	border-radius: 999px;
+	border-radius: var();
 	background: var(--overlay-tint-soft);
 }
 
@@ -152,13 +160,15 @@
 	border-radius: 999px;
 	transition: width 0.3s ease;
 	background: var(--colorAccentGlow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .analytics-bar-row__value {
 	flex: 0 0 2.4rem;
 	text-align: right;
-	color: var(--colorAccent);
 	font-family: var(--font-mono);
+	color: var(--colorAccentDim);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .analytics-timeline {
@@ -172,7 +182,7 @@
 
 .analytics-timeline__bar {
 	fill: var(--overlay-tint-medium);
-	transition: fill 0.15s ease;
+	transition: fill var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .analytics-timeline__bar.is-active {
@@ -184,7 +194,7 @@
 }
 
 .analytics-timeline__bar:hover {
-	fill: var(--overlay-tint-strong);
+	fill: var(--colorAccent);
 }
 
 .analytics-timeline__range {

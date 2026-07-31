@@ -257,7 +257,7 @@ nav a {
 	display: flex;
 	align-items: center;
 	gap: var(--space-4);
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 	justify-content: space-between;
 }
 

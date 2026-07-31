@@ -1,0 +1,167 @@
+/* ─────────────────────────────────────────
+    SEARCH BAR
+
+    An animated pill that morphs from a magnifying-glass icon into a
+    full text field. The glass outline and handle are drawn as an SVG
+    path/line (not baked-in artwork), redrawn every frame by
+    js/map/ui/searchbar.js as the bar's real pixel size changes, so it
+    still tracks the panel height / viewport width like the rest of
+    the toolbar. Colour comes from the shared design tokens
+    (currentColor + var(--color-*)) so it follows the active theme.
+───────────────────────────────────────── */
+
+.searchbar-panel {
+	position: absolute;
+
+	--searchbar-height: var(--top-left-panels-height);
+	--searchbar-width: calc(0.9 * (var(--top-left-panels-height)));
+	--searchbar-field-width: clamp(10rem, 20vw, 18rem);
+	height: var(--searchbar-height);
+	width: var(--searchbar-width);
+
+	top: var(--space-5);
+	left: calc(3 * var(--space-6) + 2.5rem + var(--toolbar-width)); /* (Thrice zoom-panel left alignement + its width) + basemap-panel width */
+
+	display: flex;
+	align-items: center;
+	overflow: visible;
+	cursor: pointer;
+	transition: width var(--duration-normal) var(--ease-standard);
+	z-index: var(--z-map-overlay);
+}
+
+.searchbar-panel.is-open {
+	width: calc(var(--searchbar-height) + var(--searchbar-field-width));
+	cursor: text;
+}
+
+.searchbar__shell {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	border: none;
+	background: transparent;
+	padding: 0;
+	margin: 0;
+	cursor: inherit;
+	display: flex;
+	align-items: center;
+}
+
+.searchbar__shell:focus {
+	outline: none;
+}
+
+.searchbar__vector {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	overflow: visible;
+	z-index: 1;
+}
+
+.searchbar__outline,
+.searchbar__handle {
+	stroke: var(--colorTextSecondary);
+	stroke-width: 2;
+	fill: none;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: stroke var(--duration-fast);
+}
+
+.searchbar-panel:hover .searchbar__outline,
+.searchbar-panel:hover .searchbar__handle,
+.searchbar-panel.is-open .searchbar__outline,
+.searchbar-panel.is-open .searchbar__handle {
+	stroke: var(--colorAccent);
+}
+
+/*
+ *  Handle: rotates/slides from the diagonal "magnifier grip" into a
+ *  vertical text caret as the bar opens, then blinks like a real
+ *  cursor once the morph settles (blink is only turned on once the
+ *  field actually has focus, so it doesn't flicker mid-animation).
+ */
+.searchbar__handle.is-blinking {
+	animation: search-caret-blink 1s step-end infinite;
+}
+
+@keyframes search-caret-blink {
+	0%,
+	45% {
+		opacity: 1;
+	}
+	55%,
+	100% {
+		opacity: 0;
+	}
+}
+
+#searchbar-panel__field {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	border: none;
+	background: transparent;
+	outline: none;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-lg);
+	font-kerning: none;
+	font-variant-ligatures: none;
+	letter-spacing: normal;
+	color: var(--colorText);
+	padding: 0 4rem 0 2rem;
+	opacity: 0;
+	pointer-events: none;
+	caret-color: transparent;
+	z-index: 2;
+	transition: opacity var(--duration-fast) ease;
+}
+
+.searchbar-panel.is-open #searchbar-panel__field {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+#searchbar-panel__field::placeholder {
+	color: var(--colorTextSecondary);
+}
+
+.searchbar__clear {
+	position: absolute;
+	right: var(--space-8);
+	top: 50%;
+	transform: translateY(-50%);
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--colorTextSecondary);
+	font-size: var(--font-size-xs);
+	line-height: 1;
+	padding: 0.2rem;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--duration-fast), color var(--duration-fast);
+	z-index: 3;
+}
+
+.searchbar__clear.is-visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.searchbar__clear:hover {
+	color: var(--colorAccent);
+}
+
+.searchbar__measure {
+	position: absolute;
+	white-space: pre;
+	visibility: hidden;
+	pointer-events: none;
+}

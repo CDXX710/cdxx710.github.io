@@ -119,7 +119,7 @@ a.popup__source-link {
 	color: var(--colorAccent);
 	text-decoration: none;
 	cursor: pointer;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 	color: var(--colorAccent);
 }
 
@@ -156,4 +156,38 @@ PILLS (time / category / author / creoleRole)
 	font-weight: var(--font-weight-medium);
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
+}
+
+.popup__resume {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.popup__resume-empty-title {
+	font-size: var(--font-size-xl);
+	color: var(--colorText);
+}
+
+.popup__resume-empty-subtitle {
+	text-align: right;
+	color: var(--colorTextSecondary);
+}
+
+.popup__resume {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.popup__resume-empty-title {
+	font-size: var(--font-size-xl);
+	color: var(--colorText);
+}
+
+.popup__resume-empty-subtitle {
+	text-align: right;
+	color: var(--colorTextSecondary);
 }

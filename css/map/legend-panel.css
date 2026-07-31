@@ -2,15 +2,16 @@
     MAP LEGEND
 ───────────────────────────────────────── */
 
-.map-legend {
+.legend-panel {
 	position: absolute;
 	bottom: var(--space-8);
 	right: var(--space-6);
 	padding: var(--space-3) 0.4rem;
+	width: var(--space-18);
 	cursor: initial;
 }
 
-.map-legend.is-collapsed .__header {
+.legend-panel.is-collapsed .legend-panel__header {
 	padding: var(--space-3);
 	margin-bottom: 0;
 }
@@ -28,7 +29,7 @@
 	border-radius: var(--radius-sm);
 	display: flex;
 	align-items: center;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .collapse-btn:hover,
@@ -43,18 +44,25 @@
  *  markup. Declared once for both selectors there; this file only
  *  keeps the legend-specific state trigger.
  */
-.map-legend.is-collapsed .__collapse-btn svg {
+.legend-panel.is-collapsed .legend-panel__collapse-btn svg {
 	transform: rotate(0deg);
 }
 
-.legend__body {
+/*
+ *  Outer collapse-content wrapper (holds the actions row, divider,
+ *  and the group list). Not shared with `.legend-panel__content`
+ *  (the inner group-list container) any more — the two used to be
+ *  the same `.legend__body` class applied to both elements; split so
+ *  each has its own name (see CHANGELOG_naming-normalization.md).
+ */
+.legend-panel__body {
 	margin: 0 var(--space-3) 0;
 	overflow: hidden;
 	opacity: 1;
-	max-height: 85%;
+	max-height: 100%;
 }
 
-.map-legend.is-collapsed .legend__body {
+.legend-panel.is-collapsed .legend-panel__body {
 	max-height: 0 !important;
 	opacity: 0;
 	pointer-events: none;
@@ -112,7 +120,7 @@
 	color: var(--colorTextSecondary);
 	cursor: pointer;
 	letter-spacing: 0.03em;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .legend__item:last-of-type {
@@ -154,7 +162,7 @@
 /* 
  *  Legend tabs — added for the "On map" / "Filter" split. Kept minimal and
  *  scoped so it layers on top of whatever map.css already defines for
- *  .map-legend / .legend__* rather than fighting it. 
+ *  .legend-panel / .legend__* rather than fighting it. 
  */
 
 .legend__actions {
@@ -171,7 +179,7 @@
 	color: var(--colorText);
 	opacity: 0.6;
 	cursor: pointer;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .legend__actions button:hover {
@@ -179,7 +187,7 @@
 	opacity: 1;
 }
 
-.legend__body[hidden] {
+.legend-panel__body[hidden] {
 	display: none;
 }
 .legend__item--static {
@@ -190,4 +198,34 @@
 	align-items: center;
 	justify-content: center;
 	cursor: default;
+}
+
+.legend-panel__collapse,
+.analytics-panel__collapse {
+	display: grid;
+	grid-template-rows: 1fr;
+	transition: grid-template-rows 200ms ease;
+}
+
+.legend-panel__collapse > *,
+.analytics-panel__collapse > * {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.legend-panel__collapse[data-collapsed="true"],
+.analytics-panel__collapse[data-collapsed="true"] {
+	grid-template-rows: 0fr;
+}
+
+/*
+ * If your global CSS already defines `@media (prefers-reduced-motion:
+ * reduce)` handling elsewhere, fold this in there instead of adding a
+ * second reduced-motion block.
+ */
+@media (prefers-reduced-motion: reduce) {
+	.legend-panel__collapse,
+	.analytics-panel__collapse {
+		transition: none;
+	}
 }

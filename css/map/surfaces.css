@@ -14,7 +14,7 @@
 /* MAP */
 
 #map {
-	flex: 1;
+    flex: 1;
 	width: 100%;
 	position: relative;
 	min-height: 0;
@@ -38,20 +38,20 @@ a.leaflet-popup-close-button {
  *  transition; only the "collapsed" end-state differs per panel and
  *  stays with each panel's own file).
  */
-.__collapse-btn svg,
-.selection__collapse-btn svg {
+.collapse-btn svg {
+    color: var(--colorTextSecondary);
 	transform: rotate(180deg);
 	transition: transform var(--duration-slow) var(--ease-standard);
 }
 
 /* PANEL PRIMITIVE */
 
-.export-overlay,
+.export-dialog,
 .zoom-panel,
 .marker-popup,
 .analytics-panel,
 .results-panel,
-.map-legend,
+.legend-panel,
 .searchbar-panel,
 .leaflet-popup-content-wrapper,
 .basemap-panel {
@@ -68,7 +68,8 @@ a.leaflet-popup-close-button {
 
 /* PANELS HEADERS AND SHARED ATTRIBUTES */
 
-.__header {
+.legend-panel__header,
+.analytics-panel__header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -81,7 +82,8 @@ a.leaflet-popup-close-button {
 	font-weight: var(--font-weight-medium);
 }
 
-.__divider {
+.legend-panel__divider,
+.analytics-panel__divider {
 	height: 1px;
 	border: none;
 	margin: 0 5%;
@@ -109,7 +111,7 @@ a.leaflet-popup-close-button {
 	color: var(--colorTextSecondary);
 	font-size: var(--font-size-xl);
 	cursor: pointer;
-	transition: color var(--duration-normal), background var(--duration-normal), opacity var(--duration-slow);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
 .panel-close:hover {

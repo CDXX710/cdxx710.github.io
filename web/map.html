@@ -33,52 +33,21 @@
 		</header>
 
 		<main id="map" aria-label="Archive map">
-			<!-- Document viewer overlay, toggled by "Read source text" links -->
-			<section class="visualizer" id="visualizer" role="dialog" aria-modal="true" aria-label="Document viewer" onclick="if(event.target===this) toggleWindowPopup()">
-				<article class="lorem_main" id="lorem">
-					<header class="lorem_header__">
-						<h2 class="lorem_header__h1">Lorem Ipsum</h2>
-						<p class="lorem_header__h2">Illustrative data only</p>
-					</header>
-
-					<div class="lorem_header__sub">
-						<p class="lorem_header__h3">"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."</p>
-						<p class="lorem_header__h4">"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."</p>
-					</div>
-
-					<div class="lorem_boxed">
-						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla luctus ac lorem et vulputate. In tempus, metus vitae varius mattis, nisl justo imperdiet ligula, interdum placerat justo purus laoreet nisl. Quisque vulputate mauris vel velit rutrum malesuada. Mauris ultricies ligula sit amet odio laoreet consectetur. Sed vitae augue ut odio pharetra ultrices. In hac habitasse platea dictumst. In eget mauris sit amet nibh lobortis elementum ac ut mauris. Donec risus dui, varius eu condimentum condimentum, blandit eu sem. Donec viverra quam eget eros suscipit finibus. Donec eleifend id eros in vehicula. Nulla eleifend fringilla vulputate. Etiam sagittis odio dolor, finibus euismod ante pharetra id.</p>
-
-						<p>Etiam vitae erat sed lorem eleifend tempor at in sapien. Fusce nec neque non nunc tincidunt porttitor et quis erat. Fusce iaculis tempus nibh sit amet bibendum. Nunc volutpat, sapien a tincidunt varius, turpis purus viverra est, a hendrerit urna massa eget libero. Proin vehicula urna a dolor elementum feugiat. Donec risus massa, iaculis sed facilisis a, faucibus sit amet arcu. Mauris imperdiet a lacus et viverra.</p>
-
-						<p>Pellentesque eget nisi varius, vestibulum nisi id, eleifend turpis. Aenean vestibulum turpis ut massa ullamcorper viverra. Morbi nec lobortis neque, a interdum odio. Nam ut est cursus, feugiat orci at, vestibulum urna. Phasellus ut elementum mi, vel elementum lacus. Donec rutrum, enim vel lobortis molestie, magna metus luctus turpis, et fringilla ante lacus sed ante. In mollis libero vitae velit lacinia, eu vestibulum enim placerat. Quisque euismod sagittis justo. Duis ultricies at sapien vel luctus. Donec ut felis ut nulla pretium mollis. Donec ultricies lorem mi, ac iaculis mauris blandit in. Etiam semper dolor a arcu ultricies maximus. Fusce at scelerisque libero. Proin consectetur odio quis lectus volutpat rutrum. Vivamus et tellus lobortis, accumsan mauris sit amet, auctor est. Sed ut ante at tellus iaculis faucibus.</p>
-
-						<p>Sed eget mi in arcu fermentum elementum. Ut vitae metus sagittis, placerat neque suscipit, pharetra turpis. Etiam sed vulputate ipsum, sed ullamcorper velit. Cras tristique feugiat ultricies. Integer finibus rhoncus mollis. Nam vehicula vitae tortor eget tempus. Phasellus malesuada finibus vestibulum. Curabitur in ante efficitur, efficitur dui sed, ultricies ex. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam commodo maximus cursus.</p>
-
-						<p>Phasellus elementum tellus erat, ut varius risus viverra a. Sed mi diam, vehicula sit amet fringilla sit amet, lacinia eu neque. Duis scelerisque maximus nunc, et euismod augue bibendum eget. Etiam molestie cursus magna, in semper nunc gravida a. Donec sollicitudin ut ante sit amet suscipit. Suspendisse potenti. Quisque turpis turpis, maximus nec pretium non, efficitur ut justo. Vestibulum ullamcorper ante nunc, sed viverra dui finibus id. Nam gravida sed leo sit amet rutrum. Nulla facilisi. Fusce quis nibh dignissim, euismod ante id, consequat diam. In pellentesque mauris eu odio auctor feugiat. In nec lacus interdum, scelerisque mi a, facilisis nibh. Nulla facilisi. Phasellus ut dui metus. Sed hendrerit commodo interdum.</p>
-					</div>
-				</article>
-			</section>
-
-			<!-- Searchbar -->
-			<div class="searchbar-panel" id="map-searchbar" role="search">
-				<div class="searchbar__focus-ring" aria-hidden="true"></div>
-				<button type="button" id="trigger" class="searchbar__trigger" aria-label="Toggle search" aria-expanded="false">
-					<svg class="searchbar__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<circle class="searchbar__icon-lens" cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" />
-						<line class="searchbar__icon-handle" x1="20" y1="20" x2="15.2" y2="15.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+			<div class="searchbar-panel" id="searchbar-panel" role="search">
+				<button type="button" id="searchbar-panel__trigger" class="searchbar__shell" aria-label="Open search" aria-expanded="false">
+					<svg class="searchbar__vector" id="searchbar-panel__vector" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<path class="searchbar__outline" id="searchbar-panel__outline" vector-effect="non-scaling-stroke"></path>
+						<line class="searchbar__handle" id="searchbar-panel__handle" vector-effect="non-scaling-stroke"></line>
 					</svg>
+					<input type="text" id="searchbar-panel__field" name="field-box" placeholder="   Search..." aria-label="Search archive" autocomplete="off" />
 				</button>
-				<div id="field-box">
-					<input type="text" id="field" name="field-box" placeholder="Search..." aria-label="Search archive" autocomplete="off" />
-					<button type="button" id="searchClearBtn" class="searchbar__clear" aria-label="Clear search" tabindex="-1">✕</button>
-				</div>
+				<button type="button" id="searchbar-panel__clear-btn" class="searchbar__clear" aria-label="Clear search" tabindex="-1">✕</button>
+				<div class="searchbar__measure" id="searchbar-panel__measure" aria-hidden="true"></div>
 			</div>
 
-			<!-- Selection toolbar: shape row + (on arm) boolean-mode row -->
-			<div id="map-select-toolbar" aria-label="Selection tools">
-				<div class="select-toolbar" id="selectToolbar">
-					<div class="select-toolbar__modes" id="selectToolbarModes">
+			<div id="select-toolbar-panel" aria-label="Selection tools">
+				<div class="select-toolbar" id="select-toolbar">
+					<div class="select-toolbar__modes" id="select-toolbar__modes">
 						<div class="select-toolbar__row" role="radiogroup" aria-label="Selection combine mode">
 							<button type="button" class="select-toolbar__btn is-active" data-mode="new" title="New selection" aria-label="New selection">
 								<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -137,13 +106,12 @@
 									<path d="M5 9.5 7.8 5l3 3 3.7-3.6 3.8 4.6-2.7 2.8 1.8 2.8-3.6 1-1 3-2.7-2-2.8 1.8-1-3.6-3-1z" />
 								</svg>
 							</button>
-							<button type="button" class="select-toolbar__btn" id="object" data-shape="object" title="Object select (click an island or water boundary)" aria-label="Object select">
+							<button type="button" class="select-toolbar__btn" id="select-toolbar__object-btn" data-shape="object" title="Object select (click an island or water boundary)" aria-label="Object select">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
 									<path d="M4 14c0-5 3-9 8-9s8 4 8 9-3 6-8 6-8-1-8-6z" />
 									<circle cx="12" cy="13" r="1.6" fill="currentColor" stroke="none" />
 								</svg>
 							</button>
-
 							<button type="button" class="select-toolbar__btn select-toolbar__objectmode-btn" data-object-mode="boundaries" title="Using the object's exact boundary" aria-label="Object boundaries">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
 									<path d="M4 14c0-5 3-9 8-9s8 4 8 9-3 6-8 6-8-1-8-6z" stroke-dasharray="2.2 2" />
@@ -159,23 +127,22 @@
 				</div>
 			</div>
 
-			<!-- Dedicated panel for results, separate from feature popups -->
-			<div class="results-panel is-collapsed" id="resultsPanel" aria-label="Results panel">
+			<div class="results-panel is-collapsed" id="results-panel" aria-label="Results panel">
 				<div class="results-panel__header">
 					<button class="results-panel__title" type="button">
-						<span id="resultsTitleLabel"></span>
-						<span id="resultsCount"></span>
+						<span id="results-panel__title-label"></span>
+						<span id="results-panel__count"></span>
 					</button>
 					<div class="results-panel__actions">
 						<div class="results-panel__actions-btns">
-							<button type="button" class="collapse-btn results-panel__collapse-btn" id="resultsCollapseBtn" aria-label="Close results panel">
+							<button type="button" class="collapse-btn results-panel__collapse-btn" id="results-panel__collapse-btn" aria-label="Close results panel">
 								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 									<polyline points="12,5 7,10 2,5" />
 								</svg>
 							</button>
-							<button type="button" class="results-panel__actions-btn" id="selectionClearBtn" aria-label="Clear selection">Clear</button>
-							<button type="button" class="results-panel__actions-btn" id="selectAllBtn" aria-label="Select all">Select all</button>
-							<button type="button" class="results-panel__actions-btn" id="selectionExportBtn" aria-label="Export selection">Export</button>
+							<button type="button" class="results-panel__actions-btn" id="results-panel__clear-btn" aria-label="Clear selection">Clear</button>
+							<button type="button" class="results-panel__actions-btn" id="results-panel__select-all-btn" aria-label="Select all">Select all</button>
+							<button type="button" class="results-panel__actions-btn" id="results-panel__export-btn" aria-label="Export selection">Export</button>
 						</div>
 						<div class="results-panel__actions-dropdown" data-dropdown-root>
 							<button type="button" class="collapse-btn results-panel__actions-dropdown__trigger" data-dropdown-trigger aria-haspopup="listbox" aria-expanded="false">
@@ -190,13 +157,12 @@
 								<li class="results-panel__actions-dropdown__option" data-dropdown-option data-value="authorType" role="option" aria-selected="false">Author type</li>
 								<li class="results-panel__actions-dropdown__option" data-dropdown-option data-value="documentType" role="option" aria-selected="false">Document type</li>
 							</ul>
-							<input type="hidden" id="resultsSortValue" name="resultsSortValue" value="name" />
+							<input type="hidden" id="results-panel__sort-value" name="resultsSortValue" value="name" />
 						</div>
 					</div>
 				</div>
-				<div class="results-panel__list" id="resultsList"></div>
+				<div class="results-panel__list" id="results-panel__list"></div>
 			</div>
-			<!-- Legend is injected here by JS (needs CSS-var colours to be resolved first) -->
 		</main>
 
 		<footer class="slider-footer">
@@ -208,7 +174,7 @@
 		</footer>
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-		<script src="../js/data/boundaries-topo.js"></script>
+		<script src="../js/map/data/boundaries-topo.js"></script>
 		<script type="module" src="../js/map/app.js"></script>
 	</body>
 </html>

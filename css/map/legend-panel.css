@@ -7,7 +7,20 @@
 	bottom: var(--space-8);
 	right: var(--space-6);
 	padding: var(--space-3) 0.4rem;
-	width: var(--space-18);
+	width: var(--floating-panel-width);
+	/*
+	 *  Previously had no height limit at all: with only `bottom` set
+	 *  and no `top`/`max-height`, the group list could grow past the
+	 *  top of the viewport on anything shorter than the 1440px-tall
+	 *  reference screen (laptops, landscape tablets) with no way to
+	 *  reach the clipped-off content. Cap it to the space actually
+	 *  available above the panel's bottom anchor, and let the list
+	 *  scroll internally instead.
+	 */
+	max-height: calc(100dvh - var(--space-8) - var(--space-5));
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 	cursor: initial;
 }
 
@@ -57,9 +70,10 @@
  */
 .legend-panel__body {
 	margin: 0 var(--space-3) 0;
-	overflow: hidden;
+	overflow-y: auto;
 	opacity: 1;
-	max-height: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
 }
 
 .legend-panel.is-collapsed .legend-panel__body {

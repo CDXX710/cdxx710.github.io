@@ -5,9 +5,9 @@
 .results-panel {
 	position: absolute;
 	z-index: var(--z-map-overlay);
-	top: var(--space-6);
+	top: var(--space-5);
 	right: var(--space-6);
-	width: var(--space-18);
+	width: var(--floating-panel-width);
 	max-height: 88%;
 	display: flex;
 	flex-direction: column;
@@ -19,7 +19,6 @@
 	display: flex;
 	justify-content: space-between;
 	padding: var(--space-5) var(--space-6) var(--space-4);
-	border-bottom: 0.0625rem solid var(--color-border);
 	flex-shrink: 0;
 	gap: var(--space-5);
 }

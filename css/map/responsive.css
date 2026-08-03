@@ -8,6 +8,42 @@
     sheet once there's no room for a floating card beside the map.
 ───────────────────────────────────────── */
 
+/*
+ *  The zoom / basemap / search cluster is laid out as three siblings
+ *  positioned by an additive left-offset formula (each panel's left
+ *  = sum of the previous panels' width + gaps). That math assumes a
+ *  fixed --toolbar-width (11rem) and a fully desktop-width map, so
+ *  on phones the row runs off the right edge of the viewport — worst
+ *  case once the searchbar opens. Below 40rem we drop the row and
+ *  stack the three panels vertically instead, each pinned to the
+ *  same left edge; the analytics panel (which sits below this
+ *  cluster) is pushed down to match the new stacked height.
+ */
+@media (max-width: 40rem) {
+	.zoom-panel,
+	.basemap-panel,
+	.searchbar-panel {
+		left: var(--space-6);
+	}
+
+	.basemap-panel {
+		top: calc(var(--space-5) + var(--top-left-panels-height) + var(--space-3));
+	}
+
+	.searchbar-panel {
+		top: calc(var(--space-5) + 2 * (var(--top-left-panels-height) + var(--space-3)));
+		width: var(--searchbar-height);
+	}
+
+	.searchbar-panel.is-open {
+		width: min(80dvw, calc(var(--searchbar-height) + var(--searchbar-field-width)));
+	}
+
+	.analytics-panel {
+		top: calc(var(--space-5) + 3 * var(--top-left-panels-height) + 2 * var(--space-3) + var(--space-5));
+	}
+}
+
 @media (max-width: 48rem) {
 	.site-header {
 		gap: var(--space-3);
@@ -40,14 +76,220 @@
 		height: 2.25rem;
 	}
 
-	.selection-results {
+	.zoom-button {
+		--select-btn-w: 3.4rem;
+		width: var(--select-btn-w) !important;
+	}
+
+	/*
+	 *  Toolbar goes vertical on narrow screens. Same rows/buttons,
+	 *  just re-oriented: .select-toolbar__tools and
+	 *  .select-toolbar__modes sit side-by-side (row) instead of
+	 *  stacked (column), and each row's own buttons stack vertically
+	 *  instead of running horizontally.
+	 *
+	 *  Button order is flipped so "Object select" ends up on top and
+	 *  "Rectangle select" on the bottom — column-reverse is enough
+	 *  since the DOM order (rectangle first, object last) is what
+	 *  currently puts rectangle on the left / object on the right.
+	 *
+	 *  The two sliding reveals change axis to match:
+	 *  - select-toolbar__modes slides open to the right (max-width)
+	 *    instead of downward (max-height).
+	 *  - select-toolbar__objectmode-btn slides open upward (height)
+	 *    instead of sideways (width), and is reordered to the top.
+	 */
+
+	#select-toolbar-panel {
+		bottom: 40% !important;
+	}
+	.select-toolbar {
+		display: flex;
+		align-items: flex-end;
+	}
+
+	.select-toolbar__tools {
+		order: 0;
+		flex-shrink: 0;
+	}
+
+	.select-toolbar__modes {
+		order: 1;
+		flex-shrink: 0;
+	}
+
+	.select-toolbar__row {
+		flex-direction: column;
+	}
+
+	.select-toolbar__tools .select-toolbar__row {
+		flex-direction: column-reverse;
+	}
+
+	.select-toolbar.is-armed .select-toolbar__modes {
+		max-height: none !important;
+	}
+
+	.select-toolbar__objectmode-btn {
+		width: var(--select-btn-w);
+		height: 0 !important;
+		order: 999;
+	}
+
+	.select-toolbar.is-object .select-toolbar__objectmode-btn {
+		height: var(--select-btn-w) !important;
+	}
+
+	.select-toolbar__row,
+	.select-toolbar__btn {
+		border-radius: 0 !important;
+	}
+
+	/* 
+    *   Toolbar state dynamic borders radius
+    */
+
+	/* -- Tools row -- */
+	.select-toolbar .select-toolbar__tools .select-toolbar__row {
+		border-radius: var(--panel-radius) !important;
+	}
+	.select-toolbar.is-armed .select-toolbar__tools .select-toolbar__row {
+		border-bottom-right-radius: 0 !important;
+	}
+
+	.select-toolbar .select-toolbar__tools .select-toolbar__row .select-toolbar__btn:first-of-type {
+		border-bottom-left-radius: var(--panel-radius) !important;
+		border-bottom-right-radius: var(--panel-radius) !important;
+	}
+	.select-toolbar.is-armed .select-toolbar__tools .select-toolbar__row .select-toolbar__btn:first-of-type {
+		border-bottom-right-radius: 0 !important;
+	}
+
+	.select-toolbar .select-toolbar__tools .select-toolbar__row .select-toolbar__btn:last-of-type {
+		border-top-left-radius: var(--panel-radius) !important;
+		border-top-right-radius: var(--panel-radius) !important;
+	}
+	.select-toolbar .select-toolbar__tools .select-toolbar__row .select-toolbar__btn#select-toolbar__object-btn {
+		border-top-left-radius: var(--panel-radius) !important;
+		border-top-right-radius: var(--panel-radius) !important;
+	}
+	.select-toolbar.is-armed.is-object .select-toolbar__tools .select-toolbar__row .select-toolbar__btn#select-toolbar__object-btn {
+		border-radius: 0 !important;
+	}
+
+	/* -- Modes row -- */
+	.select-toolbar .select-toolbar__modes .select-toolbar__row {
+		border-left: none !important;
+		border-top-right-radius: var(--panel-radius) !important;
+		border-bottom-right-radius: var(--panel-radius) !important;
+	}
+	.select-toolbar .select-toolbar__modes .select-toolbar__row .select-toolbar__btn:first-of-type {
+		border-top-right-radius: var(--panel-radius) !important;
+	}
+	.select-toolbar .select-toolbar__modes .select-toolbar__row .select-toolbar__btn:last-of-type {
+		border-bottom-right-radius: var(--panel-radius) !important;
+	}
+
+	/*
+	 *  Mobile redesign for the persistent corner panels (legend,
+	 *  analytics, results). At this width there's no room for four
+	 *  independent floating corners at their desktop sizes — that's
+	 *  what was clashing/oversized/clipping.
+	 *
+	 *  Default (collapsed) state: shrink each panel down to just its
+	 *  header pill (width: max-content) so the four corners stay
+	 *  small and out of each other's way — this is the state visible
+	 *  most of the time.
+	 *
+	 *  Expanded state: instead of growing a corner card past the
+	 *  edge of a 320–430px screen, each panel becomes a full-width
+	 *  bottom sheet (the intended treatment already written for this
+	 *  panel under its old name `.selection-results`, which no
+	 *  longer matches any element now that the component is
+	 *  `.analytics-panel` — extended here to the legend and results
+	 *  panels too, since they have the same problem).
+	 */
+
+	.searchbar-panel {
+		--select-btn-w: 3.4rem;
+		left: 25% !important;
+	}
+
+	.searchbar-panel.is-open {
+		z-index: var(--z-tooltip);
+	}
+
+	.basemap-panel {
+		left: unset;
+		right: var(--space-6);
+		top: var(--space-5);
+	}
+
+	.legend-panel:not(.is-collapsed),
+	.analytics-panel:not(.is-collapsed),
+	.results-panel:not(.is-collapsed) {
 		top: auto;
 		right: 0;
 		bottom: 0;
 		left: 0;
 		width: 100%;
+		max-width: none;
 		max-height: 60dvh;
 		border-radius: var(--panel-radius) var(--panel-radius) 0 0;
+		z-index: var(--z-modal);
+		overflow-y: auto;
+	}
+
+	.legend-panel.is-collapsed,
+	.analytics-panel.is-collapsed,
+	.results-panel.is-collapsed {
+		top: unset;
+		bottom: var(--space-5);
+		width: 30%;
+		height: 7%;
+		justify-content: center;
+	}
+
+	.analytics-panel.is-collapsed .collapse-btn svg {
+		transform: rotate(0deg);
+	}
+
+	.analytics-panel .collapse-btn svg {
+		transform: rotate(180deg);
+	}
+
+	.results-panel.is-collapsed .collapse-btn svg {
+		transform: rotate(180deg) !important;
+	}
+
+	.results-panel .collapse-btn svg {
+		transform: rotate(0deg) !important;
+	}
+
+	.results-panel.is-collapsed {
+		left: 35%;
+	}
+
+	.results-panel.is-collapsed .results-panel__header {
+		gap: 0;
+		padding: var(--space-3);
+		align-items: center;
+	}
+
+	.results-panel.is-collapsed .results-panel__title {
+		color: var(--colorTextSecondary);
+		white-space: unset;
+		margin: 0;
+		padding: 0;
+		border: none;
+		pointer-events: none;
+	}
+
+	.results-panel.is-collapsed #results-panel__export-btn,
+	.results-panel.is-collapsed #results-panel__select-all-btn,
+	.results-panel.is-collapsed #results-panel__clear-btn,
+	.results-panel.is-collapsed .results-panel__actions-dropdown {
+		display: none;
 	}
 
 	.visualizer-dialog__body .lorem_main {
@@ -65,5 +307,39 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 1.25rem 1rem;
+	}
+
+	.export-dialog {
+		overflow-y: auto;
+		align-items: unset;
+	}
+
+	.export-dialog__subtitle {
+		padding-bottom: var(--space-7);
+	}
+
+	.export-dialog__formats {
+		flex-direction: column;
+		gap: var(--space-8);
+	}
+
+	.export-dialog__category .export-dialog__category-options {
+		grid-template-columns: 1fr;
+	}
+
+	.export-dialog__category:not(:last-of-type)::after {
+		width: 88%;
+		height: 1px;
+		right: auto;
+		bottom: calc((var(--space-8) / 2) * -1);
+		top: auto;
+		left: 6%;
+	}
+
+	/* Basemap buttons: same padding/font-size as desktop was too wide
+	   for a row that also has to share the top-left corner. */
+	.basemap-panel__btn {
+		padding: 0.4rem 0.5rem;
+		font-size: 0.72rem;
 	}
 }

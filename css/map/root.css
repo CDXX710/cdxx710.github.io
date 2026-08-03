@@ -67,6 +67,14 @@
 	--analytics-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
 	--top-left-panels-height: 5rem;
 
+	/*
+	 *   Floating-panel width shared by legend + results panels.
+	 *   Was a hardcoded var(--space-18) (25rem) — correct at
+	 *   2560x1440, but wider than the entire viewport on phones.
+	 *   Clamped so it never exceeds available width.
+	 */
+	--floating-panel-width: clamp(12rem, 46vw, var(--space-18));
+
 	/*  
      *   Shared "glass panel" treatment — one definition, reused by
 	 *   every floating surface (popup, legend, toolbar, results,

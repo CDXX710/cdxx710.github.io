@@ -6,7 +6,7 @@ import ViewportQuery from "../state/viewport-query.js"
 import GeoIndex from "../data/geo-index.js"
 import Theme from "../state/theme.js"
 import Utils from "../utils.js"
-import TimeSlider from "./time-slider.js"
+import TimeSlider from "./time-slider-footer.js"
 import EventBus from "../event-bus.js"
 
 // ─────────────────────────────────────────────────────────────
@@ -48,31 +48,15 @@ const AnalyticsPanel = (() => {
 		return {headerEl, collapseBtn}
 	}
 
-	// Collapse/expand for the panel body. The expand/collapse height
-	// transition itself is handled entirely in CSS off the `data-collapsed`
-	// attribute on `bodyEl` (see ADD_TO_YOUR_CSS.css) — this only ever
-	// toggles that attribute plus the associated aria state, never
-	// measures or writes an element's height from JS.
-	function createCollapsible({panelEl, headerEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
-		let dividerEl = null
-		function ensureDivider() {
-			if (!dividerEl && headerEl) {
-				dividerEl = Utils.el("div", {className: "analytics-panel__divider", role: "separator"})
-				headerEl.insertAdjacentElement("afterend", dividerEl)
-			}
-			return dividerEl
-		}
+	// Collapse/expand only toggles classes + aria state; the header divider
+	// lives statically inside `collapseWrap` (see init()) and is hidden for
+	// free when the CSS collapse transition shrinks the wrapper to nothing.
+	function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
 		function setCollapsed(collapsed) {
 			panelEl.classList.toggle(collapsedClass, collapsed)
 			bodyEl.dataset.collapsed = String(collapsed)
 			collapseBtn.setAttribute("aria-expanded", String(!collapsed))
 			collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
-			if (!collapsed) {
-				const divider = ensureDivider()
-				if (divider) divider.hidden = false
-			} else if (dividerEl) {
-				dividerEl.hidden = true
-			}
 		}
 		function isCollapsed() {
 			return panelEl.classList.contains(collapsedClass)
@@ -260,41 +244,43 @@ const AnalyticsPanel = (() => {
 	}
 
 	function init() {
-		// Starts expanded (no is-collapsed class) so the research summary
-		// is visible as soon as the page loads.
-		const panel = Utils.el("div", {className: "analytics-panel", "aria-label": "Analytics summary"})
+		const startCollapsed = window.matchMedia("(max-width: 30rem)").matches
+
+		// Starts expanded on wider viewports (no is-collapsed class) so the
+		// research summary is visible as soon as the page loads; starts
+		// collapsed by default on narrow/mobile viewports instead.
+		const panel = Utils.el("div", {className: `analytics-panel${startCollapsed ? " is-collapsed" : ""}`, "aria-label": "Analytics summary"})
 		document.getElementById("map").appendChild(panel)
 
 		const {headerEl, collapseBtn} = buildHeader({title: "Research Summary", collapseLabel: "Expand research summary"})
 		panel.appendChild(headerEl)
 
-		// Starts expanded (see the comment above), so data-collapsed starts
-		// false to match — the CSS collapse transition in ADD_TO_YOUR_CSS.css
-		// keys off this attribute. This wrapper exists purely to give the
-		// CSS grid collapse trick a single grid item to animate — `bodyEl`
-		// below (which holds the actual section content) sits inside it
-		// unchanged.
-		const collapseWrap = Utils.el("div", {className: "analytics-panel__collapse", "data-collapsed": "false"})
+		// data-collapsed starts in sync with `startCollapsed` above — the CSS
+		// collapse transition in ADD_TO_YOUR_CSS.css keys off this attribute.
+		// This wrapper exists purely to give the CSS grid collapse trick a
+		// single grid item to animate — `bodyEl` below (which holds the
+		// actual section content) sits inside it unchanged.
+		const collapseWrap = Utils.el("div", {className: "analytics-panel__collapse", "data-collapsed": String(startCollapsed)})
 		panel.appendChild(collapseWrap)
 
 		bodyEl = Utils.el("div", {className: "analytics-panel__body"})
 		collapseWrap.appendChild(bodyEl)
+		bodyEl.appendChild(Utils.el("div", {className: "divider", role: "separator"}))
+
 		recordsEl = Utils.el("div", {className: "analytics-section"})
 		islandsEl = Utils.el("div", {className: "analytics-section"})
 		timelineEl = Utils.el("div", {className: "analytics-section"})
 		categoriesEl = Utils.el("div", {className: "analytics-section"})
-		bodyEl.append(recordsEl, islandsEl, timelineEl, categoriesEl)
 
-		// Add dividers between analytics sections (but not after the last)
-		const analyticsSections = bodyEl.querySelectorAll(".analytics-section")
-		analyticsSections.forEach((section, index) => {
-			if (index !== analyticsSections.length - 1) {
-				section.insertAdjacentHTML("afterend", '<div class="analytics-panel__divider" role="separator"></div>')
-			}
+		// Sections joined by a divider, none trailing the last one.
+		const sections = [recordsEl, islandsEl, timelineEl, categoriesEl]
+		sections.forEach((section, index) => {
+			if (index > 0) bodyEl.appendChild(Utils.el("div", {className: "divider", role: "separator"}))
+			bodyEl.appendChild(section)
 		})
 
-		collapsible = createCollapsible({panelEl: panel, headerEl, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
-		collapsible.setCollapsed(false)
+		collapsible = createCollapsible({panelEl: panel, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
+		collapsible.setCollapsed(startCollapsed)
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 		isolateFromMap(panel)
 

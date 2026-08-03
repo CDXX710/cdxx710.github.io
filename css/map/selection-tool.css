@@ -45,10 +45,6 @@
 	cursor: pointer;
 }
 
-.select-toolbar__btn.is-active:hover,
-.select-toolbar__btn:hover {
-	background: var(--color-surface) !important;
-}
 .select-toolbar__btn:hover svg {
 	color: var(--colorAccent);
 }

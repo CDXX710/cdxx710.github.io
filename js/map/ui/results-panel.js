@@ -104,6 +104,11 @@ const SelectionResults = (() => {
 		sortInputEl = document.getElementById("results-panel__sort-value")
 		listEl = document.getElementById("results-panel__list")
 
+		const dividerEl = document.createElement("div")
+		dividerEl.className = "divider"
+		dividerEl.setAttribute("role", "separator")
+		listEl.parentNode.insertBefore(dividerEl, listEl)
+
 		isolateFromMap(panelEl)
 		collapsible = createCollapsible({panelEl, collapseBtn, expandLabel: "Expand selection panel", collapseLabel: "Collapse selection panel"})
 
@@ -112,7 +117,9 @@ const SelectionResults = (() => {
 		document.getElementById("results-panel__export-btn").addEventListener("click", ExportDialog.open)
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 		titleBtn.addEventListener("click", toggleMode)
-		collapsible.setCollapsed(false)
+		// Starts expanded on wider viewports; starts collapsed by default on
+		// narrow/mobile viewports instead.
+		collapsible.setCollapsed(window.matchMedia("(max-width: 30rem)").matches)
 
 		let previousCount = 0
 		EventBus.on("selection:changed", () => {

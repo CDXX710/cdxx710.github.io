@@ -9,6 +9,17 @@
 	min-width: var(--legend-min-width);
 	max-width: var(--analytics-max-width);
 	padding: var(--space-3) 0.4rem;
+	/*
+	 *  No lower bound previously: with only `top` set, the analytics
+	 *  body (hero stat + bar rows + timeline) could run past the
+	 *  bottom of the viewport with no way to scroll to it on shorter
+	 *  screens. Cap to the space between the panel's top anchor and
+	 *  the bottom of the viewport, and scroll the body internally.
+	 */
+	max-height: calc(100dvh - (2 * var(--space-5) + var(--top-left-panels-height)) - var(--space-6));
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 	cursor: initial;
 }
 
@@ -35,12 +46,14 @@
 }
 
 .analytics-panel__body {
-	margin: var(--space-4) var(--space-5) var(--space-3);
+    margin: 0 var(--space-3) 0;
 	opacity: 1;
 	display: flex;
 	flex-direction: column;
 	gap: 1.1rem;
-	min-width: 15rem;
+	min-width: 0;
+	overflow-y: auto;
+	min-height: 0;
 	transition: opacity 0.2s var(--ease-in-out);
 }
 

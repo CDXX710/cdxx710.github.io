@@ -14,14 +14,14 @@
 /* MAP */
 
 #map {
-    flex: 1;
+	flex: 1;
 	width: 100%;
 	position: relative;
 	min-height: 0;
 	margin: 0 !important;
 	padding: 0 !important;
 	max-width: none !important;
-    background-color: var(--color-bg);
+	background-color: var(--color-bg);
 }
 
 .leaflet-container.is-drawing-select {
@@ -39,14 +39,14 @@ a.leaflet-popup-close-button {
  *  stays with each panel's own file).
  */
 .collapse-btn svg {
-    color: var(--colorTextSecondary);
+	color: var(--colorTextSecondary);
 	transform: rotate(180deg);
 	transition: transform var(--duration-slow) var(--ease-standard);
 }
 
 /* PANEL PRIMITIVE */
 
-.export-dialog,
+.export-dialog__panel,
 .zoom-panel,
 .marker-popup,
 .analytics-panel,
@@ -73,6 +73,7 @@ a.leaflet-popup-close-button {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	flex-shrink: 0;
 	color: var(--colorTextSecondary);
 	text-transform: uppercase;
 	font-family: var(--font-mono);
@@ -82,8 +83,7 @@ a.leaflet-popup-close-button {
 	font-weight: var(--font-weight-medium);
 }
 
-.legend-panel__divider,
-.analytics-panel__divider {
+.divider {
 	height: 1px;
 	border: none;
 	margin: 0 5%;

@@ -1,4 +1,6 @@
 .export-dialog {
+	z-index: var(--z-tooltip);
+	backdrop-filter: var(--glass-blur) !important;
 	position: fixed;
 	inset: 0;
 	display: flex;
@@ -10,7 +12,12 @@
 .export-dialog__panel {
 	display: flex;
 	flex-direction: column;
-	width: 40%;
+	/* Was a fixed 40% — fine at QHD, but crushed the two-column
+	   format grid on tablet/mobile widths. Clamped to a sensible
+	   reading width that still shrinks to fit small viewports. */
+	width: clamp(20rem, 40vw, 34rem);
+	height: fit-content;
+	max-width: calc(100dvw - var(--space-6) * 2);
 	border: var(--glass-border);
 	border-radius: var(--glass-border-radius);
 	box-shadow: var(--glass-shadow);

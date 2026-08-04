@@ -33,6 +33,9 @@
 ───────────────────────────────────────── */
 
 :root {
+    color-scheme: light dark;
+    forced-color-adjust: none;
+
 	/* Category colours — orange (warm) to purple (cool), diverging */
 	--color-cat-bible: #d95f5f; /* #d95f02*/
 	--color-cat-letter: #e89e4f; /* #f0a838*/

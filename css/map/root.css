@@ -103,7 +103,6 @@
 	--tail-height: 2vw;
 
 	--glass-border-radius: var(--panel-radius);
-	--glass-blur: blur(12px);
 	--glass-shadow: var(--panel-shadow);
 }
 
@@ -116,6 +115,7 @@
 	/* ── Surfaces: Glass ── */
 	--glass-bg-color: rgba(255, 255, 255, 0.05);
 	--glass-border: 2px solid rgba(255, 255, 255, 0.1);
+    --glass-blur: blur(8px);
 	--glass-border-color: rgba(255, 255, 255, 0.1);
 
 	/* ── Colour: Text ── */
@@ -141,6 +141,7 @@
 	/* ── Surfaces: Glass ── */
 	--glass-bg-color: rgba(0, 0, 0, 0.05);
 	--glass-border: 2px solid rgba(0, 0, 0, 0.1);
+    --glass-blur: blur(4px);
 	--glass-border-color: rgba(0, 0, 0, 0.1);
 
 	/* ── Colour: Text ── */

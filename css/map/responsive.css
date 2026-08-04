@@ -69,6 +69,8 @@
 	:root {
 		--select-btn-w: 3.4rem;
 	}
+
+	/* ── Select toolbar ── */
 	.select-toolbar__btn {
 		width: 2.4rem;
 		height: 2.25rem;
@@ -81,6 +83,7 @@
 	#select-toolbar-panel {
 		bottom: 15% !important;
 	}
+
 	.select-toolbar {
 		display: flex;
 		align-items: flex-end;
@@ -123,9 +126,9 @@
 		border-radius: 0 !important;
 	}
 
-	/* 
-    *   Toolbar state dynamic borders radius
-    */
+	/*
+	 *   Toolbar state dynamic border radius
+	 */
 
 	/* -- Tools row -- */
 	.select-toolbar .select-toolbar__tools .select-toolbar__row {
@@ -168,6 +171,7 @@
 		border-bottom-right-radius: var(--panel-radius) !important;
 	}
 
+	/* ── Zoom / basemap / searchbar cluster ── */
 	.searchbar-panel {
 		--select-btn-w: 3.4rem;
 		left: 25% !important;
@@ -185,6 +189,12 @@
 		top: var(--space-5);
 	}
 
+	.basemap-panel__btn {
+		padding: 0.4rem 0.5rem;
+		font-size: 0.72rem;
+	}
+
+	/* ── Legend / analytics / results panels → bottom sheets ── */
 	.legend-panel:not(.is-collapsed),
 	.analytics-panel:not(.is-collapsed),
 	.results-panel:not(.is-collapsed) {
@@ -223,7 +233,6 @@
 	.analytics-panel.is-collapsed .collapse-btn svg {
 		transform: rotate(0deg);
 	}
-
 	.analytics-panel .collapse-btn svg {
 		transform: rotate(180deg);
 	}
@@ -237,7 +246,6 @@
 	.results-panel.is-collapsed .collapse-btn svg {
 		transform: rotate(180deg) !important;
 	}
-
 	.results-panel .collapse-btn svg {
 		transform: rotate(0deg) !important;
 	}
@@ -263,6 +271,7 @@
 	.results-panel.is-collapsed .results-panel__actions-dropdown {
 		display: none;
 	}
+
 	.legend-panel.is-collapsed {
 		z-index: calc(var(--z-map-overlay) + 3);
 		left: 66.666%;
@@ -273,6 +282,7 @@
 		top: 3%;
 	}
 
+	/* ── Export dialog ── */
 	.export-dialog {
 		overflow-y: auto;
 		align-items: unset;
@@ -298,11 +308,6 @@
 		bottom: calc((var(--space-8) / 2) * -1);
 		top: auto;
 		left: 6%;
-	}
-
-	.basemap-panel__btn {
-		padding: 0.4rem 0.5rem;
-		font-size: 0.72rem;
 	}
 
 	/*
@@ -348,10 +353,32 @@
 		max-width: none;
 		border-radius: var(--panel-radius) var(--panel-radius) 0 0;
 		border-bottom: none;
+		timeline-scope: --body-scroll;
 	}
 
+	.visualizer-dialog__body {
+		scroll-timeline-name: --body-scroll;
+		scroll-timeline-axis: block;
+	}
+
+	.visualizer-dialog__header {
+		animation: fade-in-shadow linear 1s;
+		animation-timeline: --body-scroll;
+		animation-range: 0% 33%;
+		animation-fill-mode: both;
+	}
+
+	@keyframes fade-in-shadow {
+		from {
+			box-shadow: none;
+		}
+		to {
+			box-shadow: var(--glass-shadow);
+		}
+	}
+
+	/* ── Misc header ── */
 	.lorem_header__ {
-		gap: 0.5rem;
 		padding: 1rem 0 !important;
 		gap: 0.4rem !important;
 	}

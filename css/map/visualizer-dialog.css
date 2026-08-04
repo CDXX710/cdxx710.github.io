@@ -40,7 +40,7 @@
 	align-items: center;
 	justify-content: space-between;
 	flex: none;
-	padding: 1rem;
+	padding: var(--space-3);
 }
 
 .visualizer-dialog__title {
@@ -51,27 +51,36 @@
 
 .visualizer-dialog__body {
 	flex: 1;
-	padding: 0 1rem 1rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	overflow: hidden auto;
 }
 
 .lorem_main {
 	width: min(100%, 1200px);
+	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	line-height: 1.6;
 }
 
+/* Owns the outer spacing for a boxed section; children (header/sub) no
+   longer add their own padding on top of this, so the whitespace doesn't
+   stack. */
 .lorem_boxed {
 	width: 90%;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
-	margin: 0 0 2rem;
-	padding: 1rem;
+	justify-content: space-evenly;
+	gap: var(--space-3);
+	margin: 0 0 var(--space-4);
+	padding: var(--space-3);
 	line-height: 1.6;
 
+	border: var(--glass-border);
 	border-radius: var(--glass-border-radius);
 	box-shadow: var(--glass-shadow);
 }
@@ -82,8 +91,7 @@
 	flex-wrap: wrap;
 	justify-content: center;
 	align-items: baseline;
-	gap: 2rem;
-	padding: 2rem;
+	gap: var(--space-3);
 }
 
 .lorem_header__h1 {
@@ -103,18 +111,16 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	margin: 1rem 0 2rem;
-	padding: 1rem;
 	text-align: center;
 }
 
 .lorem_header__h3 {
 	font-size: 1.4rem;
-	margin: 0 0 0.5rem;
+	margin: var(--space-5) 0 var(--space-1);
 }
 
 .lorem_header__h4 {
 	font-size: 1.1rem;
 	font-weight: normal;
-	margin: 0;
+	margin: 0 0 var(--space-6);
 }

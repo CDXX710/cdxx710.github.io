@@ -24,7 +24,7 @@
 	background-color: var(--color-bg);
 }
 
-.leaflet-container.is-drawing-select {
+.leaflet-container.is-drawing {
 	cursor: crosshair !important;
 }
 

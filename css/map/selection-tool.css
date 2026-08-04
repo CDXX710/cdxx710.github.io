@@ -172,26 +172,22 @@
 	border-top-right-radius: var(--panel-radius);
 }
 
-.is-armed .leaflet-interactive,
-.is-armed.is-object .leaflet-marker-icon,
-.is-armed.is-object .leaflet-marker-pane {
-	pointer-events: none !important; /* Prevent marker interaction when drawing */
+.is-armed .leaflet-interactive {
+	pointer-events: none !important; /* Prevent marker/polygons interaction when drawing */
 }
 
-.is-armed.is-object .leaflet-interactive {
-	pointer-events: auto !important; /* But allow object select */
+.is-armed.is-object .leaflet-pane.leaflet-overlay-pane .leaflet-interactive {
+	pointer-events: auto !important; /* But allow object select to work */
 }
 
 /* Prevent panels text selection when drawing */
-.is-drawing-select .visualizer-dialog-placeholder,
-.is-drawing-select .searchbar,
-.is-drawing-select .select-toolbar__row,
-.is-drawing-select .selection-results,
-.is-drawing-select .map-zoom-container,
-.is-drawing-select .basemap-panel,
-.is-drawing-select .legend-panel,
-.is-drawing-select .analytics-panel,
-.is-drawing-select .marker-popup {
+.is-drawing .searchbar-panel,
+.is-drawing .results-panel,
+.is-drawing .zoom-panel,
+.is-drawing .basemap-panel,
+.is-drawing .legend-panel,
+.is-drawing .analytics-panel,
+.is-drawing .marker-popup {
 	user-select: none;
 	-webkit-user-select: none;
 }

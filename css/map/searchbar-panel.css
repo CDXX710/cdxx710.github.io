@@ -33,6 +33,7 @@
 .searchbar-panel.is-open {
 	width: calc(var(--searchbar-height) + var(--searchbar-field-width));
 	cursor: text;
+	z-index: var(--z-tooltip);
 }
 
 .searchbar__shell {

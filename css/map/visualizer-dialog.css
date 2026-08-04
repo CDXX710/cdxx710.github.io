@@ -8,7 +8,7 @@
 .visualizer-dialog {
 	position: absolute;
 	inset: 0;
-	z-index: var(--z-tooltip);
+	z-index: var(--z-modal);
 	margin: 0;
 	padding: 0;
 	border: 0;

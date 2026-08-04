@@ -37,6 +37,10 @@ const SelectionResults = (() => {
 		return {setCollapsed, isCollapsed}
 	}
 
+	function isNarrowViewport() {
+		return window.matchMedia("(max-width: 30rem)").matches
+	}
+
 	function currentSortKey() {
 		return sortInputEl.value
 	}
@@ -92,7 +96,7 @@ const SelectionResults = (() => {
 		const showAllInBbox = ResultsViewState.toggleShowAllInBbox()
 		render()
 		if (showAllInBbox) collapsible.setCollapsed(false)
-		else if (SelectionState.size() === 0) collapsible.setCollapsed(true)
+		else if (SelectionState.size() === 0 && !isNarrowViewport()) collapsible.setCollapsed(true)
 	}
 
 	function init() {
@@ -119,7 +123,7 @@ const SelectionResults = (() => {
 		titleBtn.addEventListener("click", toggleMode)
 		// Starts expanded on wider viewports; starts collapsed by default on
 		// narrow/mobile viewports instead.
-		collapsible.setCollapsed(window.matchMedia("(max-width: 30rem)").matches)
+		collapsible.setCollapsed(isNarrowViewport())
 
 		let previousCount = 0
 		EventBus.on("selection:changed", () => {
@@ -127,8 +131,10 @@ const SelectionResults = (() => {
 			if (ResultsViewState.isShowingAllInBbox()) return
 			render()
 			const count = SelectionState.size()
-			if (count === 0) collapsible.setCollapsed(true)
-			else if (previousCount === 0) collapsible.setCollapsed(false)
+			if (!isNarrowViewport()) {
+				if (count === 0) collapsible.setCollapsed(true)
+				else if (previousCount === 0) collapsible.setCollapsed(false)
+			}
 			previousCount = count
 		})
 		EventBus.on("selection:toolUsed", () => {
@@ -136,7 +142,7 @@ const SelectionResults = (() => {
 				ResultsViewState.setShowAllInBbox(false)
 				render()
 			}
-			if (SelectionState.size() > 0) collapsible.setCollapsed(false)
+			if (SelectionState.size() > 0 && !isNarrowViewport()) collapsible.setCollapsed(false)
 		})
 		EventBus.on("search:queryChanged", hasQuery => {
 			if (hasQuery) {
@@ -147,7 +153,7 @@ const SelectionResults = (() => {
 			} else if (!ResultsViewState.isShowingAllInBbox()) {
 				ResultsViewState.setShowAllInBbox(true)
 				render()
-				collapsible.setCollapsed(false)
+				if (!isNarrowViewport()) collapsible.setCollapsed(false)
 			}
 		})
 		EventBus.on("sort:changed", render)

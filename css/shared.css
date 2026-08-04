@@ -105,8 +105,8 @@
 
 	/* ── Z-index scale ── */
 	--z-map-overlay: 1000;
-	--z-modal: 1100;
-	--z-tooltip: 1200;
+	--z-tooltip: 1100;
+	--z-modal: 1200;
 
 	/* ── Motion ── */
 	--duration-fast: 0.15s;

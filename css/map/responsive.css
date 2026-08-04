@@ -63,45 +63,23 @@
 		border-right: none;
 		border-bottom: 0.0625rem solid var(--color-border-subtle);
 	}
-
-	.popup__image-wrap {
-		aspect-ratio: 4 / 3;
-		flex: none;
-	}
 }
 
 @media (max-width: 30rem) {
+	:root {
+		--select-btn-w: 3.4rem;
+	}
 	.select-toolbar__btn {
 		width: 2.4rem;
 		height: 2.25rem;
 	}
 
 	.zoom-button {
-		--select-btn-w: 3.4rem;
 		width: var(--select-btn-w) !important;
 	}
 
-	/*
-	 *  Toolbar goes vertical on narrow screens. Same rows/buttons,
-	 *  just re-oriented: .select-toolbar__tools and
-	 *  .select-toolbar__modes sit side-by-side (row) instead of
-	 *  stacked (column), and each row's own buttons stack vertically
-	 *  instead of running horizontally.
-	 *
-	 *  Button order is flipped so "Object select" ends up on top and
-	 *  "Rectangle select" on the bottom — column-reverse is enough
-	 *  since the DOM order (rectangle first, object last) is what
-	 *  currently puts rectangle on the left / object on the right.
-	 *
-	 *  The two sliding reveals change axis to match:
-	 *  - select-toolbar__modes slides open to the right (max-width)
-	 *    instead of downward (max-height).
-	 *  - select-toolbar__objectmode-btn slides open upward (height)
-	 *    instead of sideways (width), and is reordered to the top.
-	 */
-
 	#select-toolbar-panel {
-		bottom: 40% !important;
+		bottom: 15% !important;
 	}
 	.select-toolbar {
 		display: flex;
@@ -190,33 +168,15 @@
 		border-bottom-right-radius: var(--panel-radius) !important;
 	}
 
-	/*
-	 *  Mobile redesign for the persistent corner panels (legend,
-	 *  analytics, results). At this width there's no room for four
-	 *  independent floating corners at their desktop sizes — that's
-	 *  what was clashing/oversized/clipping.
-	 *
-	 *  Default (collapsed) state: shrink each panel down to just its
-	 *  header pill (width: max-content) so the four corners stay
-	 *  small and out of each other's way — this is the state visible
-	 *  most of the time.
-	 *
-	 *  Expanded state: instead of growing a corner card past the
-	 *  edge of a 320–430px screen, each panel becomes a full-width
-	 *  bottom sheet (the intended treatment already written for this
-	 *  panel under its old name `.selection-results`, which no
-	 *  longer matches any element now that the component is
-	 *  `.analytics-panel` — extended here to the legend and results
-	 *  panels too, since they have the same problem).
-	 */
-
 	.searchbar-panel {
 		--select-btn-w: 3.4rem;
 		left: 25% !important;
 	}
 
 	.searchbar-panel.is-open {
-		z-index: var(--z-tooltip);
+		top: 0;
+		left: 0 !important;
+		width: 100% !important;
 	}
 
 	.basemap-panel {
@@ -234,22 +194,32 @@
 		left: 0;
 		width: 100%;
 		max-width: none;
-		max-height: 60dvh;
+		max-height: 60%;
 		border-radius: var(--panel-radius) var(--panel-radius) 0 0;
 		z-index: var(--z-modal);
 		overflow-y: auto;
+		border-bottom-left-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
 	}
 
 	.legend-panel.is-collapsed,
 	.analytics-panel.is-collapsed,
 	.results-panel.is-collapsed {
 		top: unset;
-		bottom: var(--space-5);
-		width: 30%;
-		height: 7%;
+		bottom: 0;
+		width: 33.333%;
+		height: 8%;
 		justify-content: center;
+		border-radius: 0 !important;
+		border-bottom: none !important;
+		border-left: none !important;
+		border-right: none !important;
 	}
 
+	.analytics-panel.is-collapsed {
+		z-index: calc(var(--z-map-overlay) + 1);
+		left: 0;
+	}
 	.analytics-panel.is-collapsed .collapse-btn svg {
 		transform: rotate(0deg);
 	}
@@ -258,16 +228,18 @@
 		transform: rotate(180deg);
 	}
 
+	.results-panel.is-collapsed {
+		z-index: calc(var(--z-map-overlay) + 2);
+		left: 33.333%;
+		border-left: var(--glass-border) !important;
+		border-right: var(--glass-border) !important;
+	}
 	.results-panel.is-collapsed .collapse-btn svg {
 		transform: rotate(180deg) !important;
 	}
 
 	.results-panel .collapse-btn svg {
 		transform: rotate(0deg) !important;
-	}
-
-	.results-panel.is-collapsed {
-		left: 35%;
 	}
 
 	.results-panel.is-collapsed .results-panel__header {
@@ -280,7 +252,7 @@
 		color: var(--colorTextSecondary);
 		white-space: unset;
 		margin: 0;
-		padding: 0;
+		padding: var(--space-3) 0.4rem;
 		border: none;
 		pointer-events: none;
 	}
@@ -291,22 +263,14 @@
 	.results-panel.is-collapsed .results-panel__actions-dropdown {
 		display: none;
 	}
-
-	.visualizer-dialog__body .lorem_main {
-		width: 92dvw;
-		height: 95%;
+	.legend-panel.is-collapsed {
+		z-index: calc(var(--z-map-overlay) + 3);
+		left: 66.666%;
 	}
 
 	.panel-close {
 		right: 5%;
 		top: 3%;
-	}
-
-	.lorem_header__ {
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 1.25rem 1rem;
 	}
 
 	.export-dialog {
@@ -336,10 +300,63 @@
 		left: 6%;
 	}
 
-	/* Basemap buttons: same padding/font-size as desktop was too wide
-	   for a row that also has to share the top-left corner. */
 	.basemap-panel__btn {
 		padding: 0.4rem 0.5rem;
 		font-size: 0.72rem;
+	}
+
+	/*
+	 * marker-popup & visualizer-dialog become bottom sheets, same
+	 * treatment as legend/analytics/results-panel above: JS keeps
+	 * driving position/left/top for desktop, so mobile wins with
+	 * !important rather than the JS needing to know about viewport size.
+	 */
+	.marker-popup {
+		position: fixed !important;
+		left: 0 !important;
+		right: 0;
+		top: var(--header-height) !important;
+		bottom: auto;
+		transform: none;
+		width: 100%;
+		max-width: none !important;
+		max-height: 60%;
+		overflow-y: auto;
+		z-index: calc(var(--z-tooltip) + 1) !important;
+	}
+
+	.marker-popup__tail-mask {
+		display: none;
+	}
+
+	.popup__panels {
+		flex-wrap: wrap;
+		flex-direction: row !important;
+	}
+
+	.popup__left {
+		justify-content: space-between;
+	}
+
+	.visualizer-dialog {
+		align-items: flex-end;
+		justify-content: stretch;
+	}
+
+	.visualizer-dialog__panel {
+		width: 92% !important;
+		max-width: none;
+		border-radius: var(--panel-radius) var(--panel-radius) 0 0;
+		border-bottom: none;
+	}
+
+	.lorem_header__ {
+		gap: 0.5rem;
+		padding: 1rem 0 !important;
+		gap: 0.4rem !important;
+	}
+
+	.lorem_header__sub {
+		padding: 0 !important;
 	}
 }

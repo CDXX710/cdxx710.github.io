@@ -113,7 +113,14 @@ const SelectionToolbar = (() => {
 		toolbarEl.classList.toggle("is-object", shape === "object")
 		mapPane.classList.add("is-armed")
 		mapPane.classList.toggle("is-object", shape === "object")
-		MapCore.getContainer().classList.add("is-drawing-select")
+		MapCore.getContainer().classList.add("is-drawing")
+		// Belt-and-braces alongside the CSS class: touch-action is resolved by
+		// the browser before pointer events are dispatched, so if the class-based
+		// rule loses a specificity battle (or applies a tick too late on some
+		// browsers), a drag can still get claimed as a native scroll/pan and the
+		// very first pointermove arrives as a pointercancel instead. Setting it
+		// inline here guarantees it's in effect the instant the tool is armed.
+		MapCore.getContainer().style.touchAction = "none"
 		MapCore.map.dragging.disable()
 		MapCore.map.doubleClickZoom.disable()
 		if (MapCore.map.tap) MapCore.map.tap.disable()
@@ -125,7 +132,8 @@ const SelectionToolbar = (() => {
 		shapeButtons.forEach(btn => btn.classList.remove("is-active"))
 		toolbarEl.classList.remove("is-armed", "is-object")
 		mapPane.classList.remove("is-armed", "is-object")
-		MapCore.getContainer().classList.remove("is-drawing-select")
+		MapCore.getContainer().classList.remove("is-drawing")
+		MapCore.getContainer().style.touchAction = ""
 		MapCore.map.dragging.enable()
 		MapCore.map.doubleClickZoom.enable()
 		if (MapCore.map.tap) MapCore.map.tap.enable()

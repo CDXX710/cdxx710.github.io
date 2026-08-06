@@ -11,3 +11,5 @@
 -   [x] **Store an explicit `island` property on each archive record.** Rather than deriving the island at runtime through `GeoIndex` point-in-polygon lookups, historians should author records with an explicit `"island"` field. `GeoIndex` can then serve as a fallback and validation layer (e.g. flagging records whose stored island disagrees with the computed geometry) instead of being the sole source of truth. This removes an unnecessary runtime dependency on boundary data and makes island-based comparisons and Story `highlightedRegions` straightforward to implement.
 
 -   [x] **Introduce scalable marker rendering when needed.** Not a day-one requirement, but once datasets reach roughly **5,000–10,000 markers**, replace one `L.marker` per record with `Leaflet.markercluster` or Canvas-based rendering (`preferCanvas: true`) in both single-map and dual-map modes to maintain performance.
+
+-   [ ] **Clicking a category in RESEARCH SUMMARY toggle all others of same type off**

@@ -276,6 +276,9 @@
 		z-index: calc(var(--z-map-overlay) + 3);
 		left: 66.666%;
 	}
+	.legend-panel.is-collapsed .legend-panel__hidden.is-visible {
+		display: none;
+	}
 
 	.panel-close {
 		right: 5%;

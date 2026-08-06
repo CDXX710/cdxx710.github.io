@@ -193,6 +193,13 @@
 	touch-action: none;
 }
 
+.analytics-timeline__hidden{
+	font-style: italic;
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--letter-spacing-thin);
+    color: var(--colorTextTertiary);
+}
+
 .analytics-timeline__bar {
 	fill: var(--overlay-tint-medium);
 	transition: fill var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);

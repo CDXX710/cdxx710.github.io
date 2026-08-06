@@ -155,7 +155,7 @@ const AnalyticsPanel = (() => {
 		})
 	}
 
-	function renderTimeline(scope) {
+	function renderTimeline(scope, hiddenCount) {
 		const counts = {}
 		decades.forEach(d => (counts[d] = 0))
 		scope.forEach(index => {
@@ -176,6 +176,7 @@ const AnalyticsPanel = (() => {
 				return Utils.html`<rect class="analytics-timeline__bar${isActive ? " is-active" : ""}" data-decade="${d}" x="${x}" y="${y}" width="${Math.max(1, barWidth)}" height="${h}"><title>${d}s: ${counts[d]} record${counts[d] === 1 ? "" : "s"}</title></rect>`
 			})
 			.join("")
+		const hiddenNotice = hiddenCount > 0 ? Utils.html`<div class="analytics-timeline__hidden">${hiddenCount} record${hiddenCount === 1 ? "" : "s"} hidden by the timeline filter</div>` : ""
 		timelineEl.innerHTML = Utils.html`
 			<div class="analytics-section__title-row">
 				<div class="analytics-section__title">Timeline</div>
@@ -183,6 +184,7 @@ const AnalyticsPanel = (() => {
 			</div>
 			<svg class="analytics-timeline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-label="Records per decade, click or drag to filter by year">${bars}</svg>
 			<div class="analytics-timeline__range"><span>${decades[0]}s</span><span>${decades[decades.length - 1]}s</span></div>
+			${hiddenNotice}
 			<div class="analytics-timeline__hint">Click a decade, or drag to select a range</div>`
 		wireTimelineInteraction(timelineEl.querySelector("svg"))
 		timelineEl.querySelector("#timelineClearBtn").addEventListener("click", () => {
@@ -237,9 +239,13 @@ const AnalyticsPanel = (() => {
 
 	function render() {
 		const scope = currentScopeIndices()
+		const timelineScope = timelineScopeIndices()
+		// When a selection is active, both scopes are the selection itself
+		// (filters are bypassed), so nothing reads as "hidden by timeline".
+		const hiddenByTimeline = Math.max(0, timelineScope.length - scope.length)
 		renderRecordsInView(scope)
 		renderIslands(scope)
-		renderTimeline(timelineScopeIndices())
+		renderTimeline(timelineScope, hiddenByTimeline)
 		renderCategories(scope)
 	}
 

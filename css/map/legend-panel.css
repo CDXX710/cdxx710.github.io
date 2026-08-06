@@ -84,16 +84,33 @@
 }
 
 .legend__group-title {
+	display: flex;
+	justify-content: space-between;
 	font-size: 0.8rem;
 	letter-spacing: var(--letter-spacing-wider);
-	text-transform: uppercase;
 	color: var(--colorTextSecondary);
 	font-weight: var(--font-weight-medium);
 	margin-bottom: 0.65rem;
 }
 
+.legend__group-title span:first-child {
+	text-transform: uppercase;
+}
+.legend-panel__header span:last-of-type {
+    text-transform: lowercase;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-style: italic;
+	font-size: var(--font-size-sm);
+	letter-spacing: var(--letter-spacing-thin);
+	color: var(--colorTextTertiary);
+}
+
 .legend__group-title:first-of-type {
 	margin-top: var(--space-6);
+}
+
+.legend__group-hidden.is-visible {
+	color: var(--colorTextTertiary);
 }
 
 .legend__item {

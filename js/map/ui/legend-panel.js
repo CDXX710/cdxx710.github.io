@@ -4,6 +4,8 @@ import Theme from "../state/theme.js"
 import FilterState from "../state/filter-state.js"
 import Boundaries from "../map/boundaries.js"
 import EventBus from "../event-bus.js"
+import ViewportQuery from "../state/viewport-query.js"
+import MapCore from "../map/map-core.js"
 
 // ─────────────────────────────────────────────────────────────
 // Legend — the "On map / Filters" legend panel. Presentation only;
@@ -13,6 +15,7 @@ const Legend = (() => {
 	// Registered by each built row; called on `filters:changed` to sync
 	// checked/is-off state without tearing down and rebuilding the panel.
 	let syncFns = []
+	let updateHeaderHidden = () => {}
 
 	function isolateFromMap(el) {
 		L.DomEvent.disableScrollPropagation(el)
@@ -21,10 +24,24 @@ const Legend = (() => {
 
 	const collapseChevronSvg = Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,9 7,4 12,9" /></svg>`
 
-	// Builds a "<title> ...... <collapse button>" header row.
-	function buildHeader({title, collapseLabel}) {
+	// Builds a "<title> ...... <collapse button>" header row. When
+	// `hiddenCountFn` is given, an inline notice sits right after the
+	// title; the returned `updateHidden` should be re-invoked whenever
+	// filters or the viewport change (see init()/syncCheckedState()).
+	function buildHeader({title, collapseLabel, hiddenCountFn}) {
 		const headerEl = Utils.el("div", {className: "legend-panel__header"})
 		if (title) headerEl.appendChild(Utils.el("span", {className: "legend-panel__title", text: title}))
+		let updateHidden = () => {}
+		if (hiddenCountFn) {
+			const hiddenEl = Utils.el("span", {className: "legend-panel__hidden"})
+			headerEl.appendChild(hiddenEl)
+			updateHidden = () => {
+				const count = hiddenCountFn()
+				hiddenEl.textContent = count > 0 ? `${count} hidden by filters` : ""
+				hiddenEl.classList.toggle("is-visible", count > 0)
+			}
+			updateHidden()
+		}
 		const collapseBtn = Utils.el("button", {
 			className: "collapse-btn legend-panel__collapse-btn",
 			"aria-label": collapseLabel,
@@ -32,7 +49,7 @@ const Legend = (() => {
 			html: collapseChevronSvg
 		})
 		headerEl.appendChild(collapseBtn)
-		return {headerEl, collapseBtn}
+		return {headerEl, collapseBtn, updateHidden}
 	}
 
 	// Collapse/expand only toggles classes + aria state; the dividers live
@@ -85,6 +102,19 @@ const Legend = (() => {
 	}
 	function divider(className = "legend__divider") {
 		return Utils.el("div", {className, role: "separator"})
+	}
+
+	// Total records currently hidden by the legend's own filters (creole
+	// role, author type, category — Layers isn't a FilterState predicate
+	// so it isn't part of this). Compared against "ignoreYear" rather than
+	// "active": "active" respects the year range too, which would double
+	// -count records already surfaced by AnalyticsPanel's timeline notice.
+	// "none" and "ignoreYear" are real ViewportQuery predicates, so this
+	// stays a viewport-wide diff rather than a per-group breakdown.
+	function totalHiddenByFilters() {
+		const unfiltered = ViewportQuery.featuresInView({respectFilters: "none"})
+		const withoutYearFilter = ViewportQuery.featuresInView({respectFilters: "ignoreYear"})
+		return Math.max(0, unfiltered.length - withoutYearFilter.length)
 	}
 
 	const creoleRoleEntries = [
@@ -181,16 +211,19 @@ const Legend = (() => {
 	}
 	function syncCheckedState() {
 		syncFns.forEach(fn => fn())
+		updateHeaderHidden()
 	}
 
 	function init() {
 		const legend = Utils.el("div", {className: "legend-panel is-collapsed", "aria-label": "Map legend"})
 		document.getElementById("map").appendChild(legend)
 
-		const {headerEl, collapseBtn} = buildHeader({
+		const {headerEl, collapseBtn, updateHidden} = buildHeader({
 			title: "Legend",
-			collapseLabel: "Expand legend"
+			collapseLabel: "Expand legend",
+			hiddenCountFn: totalHiddenByFilters
 		})
+		updateHeaderHidden = updateHidden
 
 		legend.appendChild(headerEl)
 
@@ -232,6 +265,12 @@ const Legend = (() => {
 		// JS-measured max-height, this sync never needs to recompute or
 		// write height.
 		EventBus.on("filters:changed", syncCheckedState)
+		// Hidden counts are viewport-dependent (not just filter-dependent),
+		// so they also need refreshing as the map pans/zooms. Debounced for
+		// the same reason AnalyticsPanel debounces its moveend handler:
+		// moveend/zoomend fire repeatedly during a drag/zoom gesture.
+		const debouncedSync = Utils.debounce(syncCheckedState, 150)
+		MapCore.map.on("moveend zoomend", debouncedSync)
 
 		isolateFromMap(legend)
 	}

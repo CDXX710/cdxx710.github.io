@@ -19,8 +19,8 @@ const Searchbar = (() => {
 		L.DomEvent.disableClickPropagation(el)
 	}
 	function matchesQuery(feature, query) {
-		const {name, time, category, creole, authorType} = feature.properties
-		const haystack = [name, time, category, creole, authorType].filter(Boolean).join(" ").toLowerCase()
+		const {name, time, category, creole, authorType, location} = feature.properties
+		const haystack = [name, time, category, creole, authorType, location].filter(Boolean).join(" ").toLowerCase()
 		const escaped = query.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 		const regex = new RegExp(`\\b${escaped}`, "i")
 		return regex.test(haystack)

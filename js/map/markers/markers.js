@@ -4,6 +4,7 @@ import PopupContent from "./popup-content.js"
 import MarkerPopup from "./marker-popup.js"
 import Config from "../config.js"
 import FilterState from "../state/filter-state.js"
+import SelectionState from "../state/selection-state.js"
 import MapCore from "../map/map-core.js"
 import EventBus from "../event-bus.js"
 
@@ -15,6 +16,11 @@ const Markers = (() => {
 	let markers = []
 	const indexByMarker = new Map()
 	let visibleCache = null
+	// While a search query is active, only its matching (selected) markers
+	// should be shown on the map; every other panel that drives SelectionState
+	// (lasso/box select, results panel, …) keeps highlighting selected markers
+	// in place rather than hiding the rest, so this stays search-only.
+	let searchActive = false
 
 	function invalidateVisibleCache() {
 		visibleCache = null
@@ -28,8 +34,8 @@ const Markers = (() => {
 		const icon = L.divIcon({
 			className: "marker-icon",
 			html: Shapes.markerSvg(creole, fillColor, ringColor),
-			iconSize: [20, 20],
-			iconAnchor: [10, 10]
+			iconSize: [24, 24],
+			iconAnchor: [12, 12]
 		})
 		const marker = L.marker([lat, lng], {icon, keyboard: true, alt: feature.properties.name})
 		const openPopup = () => {
@@ -56,7 +62,7 @@ const Markers = (() => {
 	}
 	function applyVisibility() {
 		markers.forEach(marker => {
-			const visible = FilterState.isFeatureVisible(marker.feature.properties)
+			const visible = FilterState.isFeatureVisible(marker.feature.properties) && (!searchActive || SelectionState.has(indexByMarker.get(marker)))
 			visible ? marker.addTo(MapCore.map) : MapCore.map.removeLayer(marker)
 		})
 		invalidateVisibleCache()
@@ -68,7 +74,11 @@ const Markers = (() => {
 			return marker
 		})
 		EventBus.on("filters:changed", applyVisibility)
-		EventBus.on("selection:changed", invalidateVisibleCache)
+		EventBus.on("selection:changed", applyVisibility)
+		EventBus.on("search:queryChanged", isActive => {
+			searchActive = isActive
+			applyVisibility()
+		})
 		MapCore.map.on("click", () => MarkerPopup.close())
 		return markers
 	}

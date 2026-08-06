@@ -55,6 +55,19 @@ const SelectionToolbar = (() => {
 	let drawStart = null
 	let lastPointerDownTime = 0
 
+	// Holding Shift/Alt/Ctrl temporarily switches the boolean selection mode
+	// (Add/Subtract/Intersect); releasing it restores whatever mode was
+	// active before the key went down. Only one override is tracked at a
+	// time — holding a second modifier while the first is still down has no
+	// effect, mirroring how the mode buttons themselves are single-select.
+	const KEY_MODE_MAP = {Shift: "add", Alt: "subtract", Control: "intersect"}
+	let modeOverrideKey = null
+	let modeBeforeOverride = null
+
+	function isEditableTarget(el) {
+		return !!el?.closest?.("input, textarea, select, [contenteditable='true']")
+	}
+
 	// Arming a shape tool calls MapCore.map.dragging.disable(), which turns
 	// off Leaflet's native panning entirely (left-drag is repurposed for
 	// drawing). Middle-click panning should still work while armed, so it's
@@ -124,7 +137,29 @@ const SelectionToolbar = (() => {
 		MapCore.map.dragging.disable()
 		MapCore.map.doubleClickZoom.disable()
 		if (MapCore.map.tap) MapCore.map.tap.disable()
+		// Shift+drag is Leaflet's native box-zoom gesture; without disabling it,
+		// holding Shift to draw in "add" mode zooms the map to the drawn box
+		// instead (or in addition to) building a selection.
+		if (MapCore.map.boxZoom) MapCore.map.boxZoom.disable()
 		EventBus.emit("selection:toolArmed", {shape: armedShape})
+	}
+
+	function activeModeButton() {
+		return modeButtons.find(btn => btn.classList.contains("is-active"))
+	}
+
+	function setActiveMode(mode) {
+		const btn = modeButtons.find(b => b.dataset.mode === mode)
+		if (!btn) return
+		SelectionState.setMode(mode)
+		modeButtons.forEach(b => b.classList.toggle("is-active", b === btn))
+	}
+
+	function restoreModeOverride() {
+		if (modeOverrideKey == null) return
+		modeOverrideKey = null
+		if (modeBeforeOverride) setActiveMode(modeBeforeOverride)
+		modeBeforeOverride = null
 	}
 
 	function disarm() {
@@ -137,6 +172,7 @@ const SelectionToolbar = (() => {
 		MapCore.map.dragging.enable()
 		MapCore.map.doubleClickZoom.enable()
 		if (MapCore.map.tap) MapCore.map.tap.enable()
+		if (MapCore.map.boxZoom) MapCore.map.boxZoom.enable()
 		cancelDraw()
 		EventBus.emit("selection:toolArmed", {shape: armedShape})
 	}
@@ -172,7 +208,18 @@ const SelectionToolbar = (() => {
 
 	// Arming a tool must only affect the map surface itself (markers/tiles/boundaries), never this chrome.
 	function isOutsideDrawSurface(evt) {
-		return !!evt.target.closest(".visualizer-dialog, .export-dialog, .searchbar-panel, .select-toolbar__row, .results-panel, .zoom-panel, .basemap-panel, .legend-panel, .analytics-panel, .marker-popup")
+		return !!evt.target.closest(".visualizer-dialog, .export-dialog, .searchbar-panel, .select-toolbar__row, .results-panel, .zoom-panel, .basemap-panel, .legend-panel, .analytics-panel, .marker-popup, .attribution-wrapper")
+	}
+
+	// Shift+click with no movement is a native OS/browser gesture for
+	// opening the context menu on some platforms (independent of Leaflet,
+	// so disabling boxZoom above doesn't touch it). It only interferes while
+	// a shape tool is actually armed and drawing on the map surface — a
+	// plain right-click or a click on chrome outside the map should still
+	// get the normal menu.
+	function onContextMenu(evt) {
+		if (!armedShape || armedShape === "object" || isOutsideDrawSurface(evt)) return
+		if (evt.shiftKey) evt.preventDefault()
 	}
 
 	// Unified pointer handling: mouse, touch, and pen all funnel through
@@ -281,6 +328,17 @@ const SelectionToolbar = (() => {
 
 	function onKeyDown(evt) {
 		if (evt.key === "Escape" && armedShape) disarm()
+
+		const mode = KEY_MODE_MAP[evt.key]
+		if (!mode || evt.repeat || modeOverrideKey != null || isEditableTarget(evt.target)) return
+		const activeBtn = activeModeButton()
+		modeBeforeOverride = activeBtn ? activeBtn.dataset.mode : null
+		modeOverrideKey = evt.key
+		setActiveMode(mode)
+	}
+
+	function onKeyUp(evt) {
+		if (evt.key === modeOverrideKey) restoreModeOverride()
 	}
 
 	function init() {
@@ -328,7 +386,12 @@ const SelectionToolbar = (() => {
 		container.addEventListener("pointermove", onPointerMove, {passive: false})
 		container.addEventListener("pointerup", onPointerUp, {passive: false})
 		container.addEventListener("pointercancel", cancelDraw)
+		container.addEventListener("contextmenu", onContextMenu)
 		document.addEventListener("keydown", onKeyDown)
+		document.addEventListener("keyup", onKeyUp)
+		// If focus leaves the window while a modifier is held (alt-tab, devtools,
+		// etc.) no keyup ever arrives, so the override would get stuck active.
+		window.addEventListener("blur", restoreModeOverride)
 	}
 
 	return {init, isObjectSelectActive}

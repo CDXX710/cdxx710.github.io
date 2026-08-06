@@ -33,3 +33,7 @@
 
 	font-size: var(--font-size-xl);
 }
+
+.zoom-button:hover {
+    color: var(--colorAccent);
+}

@@ -3,9 +3,11 @@ import GeoMath from "../geo-math.js"
 import ArchiveData from "./archive-data.js"
 
 // ─────────────────────────────────────────────────────────────
-// GeoIndex — assigns each archive record to an island/territory using
-// the administrative boundary polygons, so "Geographic Distribution"
-// can report real place names instead of raw coordinates.
+// GeoIndex — looks up the island/territory for each archive record, so
+// "Geographic Distribution" can report real place names instead of raw
+// coordinates. Each archive feature now carries its island directly via
+// `properties.location`, so this is a plain read rather than a runtime
+// point-in-polygon lookup against the boundary polygons.
 // ─────────────────────────────────────────────────────────────
 const GeoIndex = (() => {
 	const unmappedLabel = "Unmapped"
@@ -13,7 +15,8 @@ const GeoIndex = (() => {
 	// Full-resolution admin boundaries can have thousands of vertices per
 	// island; testing every ring on every lookup is the main cost. A cheap
 	// bounding-box pre-check (computed once, cached) rejects almost every
-	// polygon before the expensive ray-cast ever runs.
+	// polygon before the expensive ray-cast ever runs. Still needed here for
+	// boundsForIsland, which pans/zooms the map to a given island's extent.
 	let indexedBoundaries = null
 	function getIndexedBoundaries() {
 		if (indexedBoundaries) return indexedBoundaries
@@ -21,19 +24,8 @@ const GeoIndex = (() => {
 		return indexedBoundaries
 	}
 
-	let islandByFeatureIndex = null
-	function build() {
-		const indexed = getIndexedBoundaries()
-		islandByFeatureIndex = ArchiveData.features.map(feature => {
-			if (!indexed.length) return unmappedLabel
-			const [lng, lat] = feature.geometry.coordinates
-			const match = indexed.find(({bbox, feature: boundary}) => GeoMath.bboxContains(bbox, lng, lat) && GeoMath.pointInGeometry(lng, lat, boundary.geometry))
-			return match?.feature?.properties?.NAME_0 || unmappedLabel
-		})
-	}
 	function islandFor(index) {
-		if (!islandByFeatureIndex) build()
-		return islandByFeatureIndex[index]
+		return ArchiveData.features[index]?.properties?.location || unmappedLabel
 	}
 	// Combined lat/lng bounds for every boundary feature matching a given
 	// island name, so the UI can pan/zoom the map to that island.

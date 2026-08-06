@@ -12,8 +12,101 @@ import buildResultRow from "./results-row.js"
 // markers visually highlighted. Sorting/filtering logic lives in
 // ResultsViewState; the export dialog lives in ExportDialog.
 // ─────────────────────────────────────────────────────────────
+// Static onboarding guide shown in the list area when there's no selection
+// yet. Kept as data so content can be edited without touching layout code.
+// `paragraphs` render as separate lines inside a single blockquote;
+// `shortcuts` render as a compact key/action legend instead.
+const GUIDE_SECTIONS = [
+	{
+		heading: "Start by drawing",
+		paragraphs: ["Use any drawing tool (rectangle, circle, lasso, polygon or object) to select features within an area."]
+	},
+	{
+		heading: "Build complex selections",
+		paragraphs: ["Draw a second shape to replace your existing selection.", "Use Union, Subtract or Intersect to control the shapes overlap behaviour."]
+	},
+	{
+		heading: "Keyboard shortcuts",
+		shortcuts: [
+			{key: "Shift", action: "Add"},
+			{key: "Alt", action: "Subtract"},
+			{key: "Ctrl", action: "Intersect"}
+		]
+	},
+	{
+		heading: "Tip",
+		paragraphs: ["Some options only appear when certain selection tools are active."]
+	}
+]
+
+// Words in guide paragraphs that are candidates for a future hover/tooltip
+// treatment (e.g. an Illustrator-style video preview per tool). Wrapping
+// them now in a tagged span costs nothing and means that feature can be
+// added later purely by attaching a listener to `[data-term]` — no changes
+// needed here.
+const GUIDE_TERMS = ["rectangle", "circle", "lasso", "polygon", "object", "union", "subtract", "intersect"]
+const GUIDE_TERMS_RE = new RegExp(`\\b(${GUIDE_TERMS.join("|")})\\b`, "gi")
+
+function markGuideTerms(text) {
+	const frag = document.createDocumentFragment()
+	let lastIndex = 0
+	text.replace(GUIDE_TERMS_RE, (match, _term, offset) => {
+		if (offset > lastIndex) frag.appendChild(document.createTextNode(text.slice(lastIndex, offset)))
+		const span = document.createElement("span")
+		span.className = "guide-term"
+		span.dataset.term = match.toLowerCase()
+		span.textContent = match
+		frag.appendChild(span)
+		lastIndex = offset + match.length
+		return match
+	})
+	if (lastIndex < text.length) frag.appendChild(document.createTextNode(text.slice(lastIndex)))
+	return frag
+}
+
+function buildGuideEl() {
+	const guideEl = document.createElement("div")
+	guideEl.className = "results-panel__guide"
+
+	GUIDE_SECTIONS.forEach(({heading, paragraphs, shortcuts}) => {
+		const section = document.createElement("section")
+		section.className = "results-panel__guide-section"
+
+		const h = document.createElement("h4")
+		h.textContent = heading
+		section.appendChild(h)
+
+		const quote = document.createElement("blockquote")
+
+		if (shortcuts) {
+			const p = document.createElement("p")
+			p.className = "results-panel__guide-shortcuts"
+			shortcuts.forEach(({key, action}, i) => {
+				if (i > 0) p.appendChild(document.createTextNode(" · "))
+				const kbd = document.createElement("kbd")
+				kbd.textContent = key
+				p.appendChild(kbd)
+				p.appendChild(document.createTextNode(` = ${action}`))
+			})
+			quote.appendChild(p)
+		} else {
+			paragraphs.forEach(text => {
+				const p = document.createElement("p")
+				p.appendChild(markGuideTerms(text))
+				quote.appendChild(p)
+			})
+		}
+
+		section.appendChild(quote)
+
+		guideEl.appendChild(section)
+	})
+
+	return guideEl
+}
+
 const SelectionResults = (() => {
-	let listEl, countEl, sortInputEl, collapsible, titleBtn, titleLabelEl
+	let panelEl, listEl, countEl, sortInputEl, collapsible, titleBtn, titleLabelEl, emptyStateEl
 
 	function isolateFromMap(el) {
 		L.DomEvent.disableScrollPropagation(el)
@@ -64,10 +157,20 @@ const SelectionResults = (() => {
 
 	let rowByIndex = new Map()
 
+	// Two empty-state messages exist in the DOM at once (the guide and the
+	// bbox message); which one is visible is decided by CSS off these two
+	// classes, so this function never touches text content or elements.
+	function updateEmptyState(isEmpty) {
+		panelEl.classList.toggle("empty-state", isEmpty)
+		if (!isEmpty) return
+		panelEl.classList.toggle("empty-state--bbox", ResultsViewState.isShowingAllInBbox())
+	}
+
 	function render() {
 		updateTitle()
 		const indices = ResultsViewState.activeIndices()
 		const orderedIndices = indices.length === 0 ? [] : ResultsViewState.sortedIndices(currentSortKey())
+		updateEmptyState(orderedIndices.length === 0)
 		const nextIndexSet = new Set(orderedIndices)
 
 		// Remove rows for indices no longer present.
@@ -100,7 +203,7 @@ const SelectionResults = (() => {
 	}
 
 	function init() {
-		const panelEl = document.getElementById("results-panel")
+		panelEl = document.getElementById("results-panel")
 		titleBtn = panelEl.querySelector(".results-panel__title")
 		countEl = document.getElementById("results-panel__count")
 		titleLabelEl = document.getElementById("results-panel__title-label")
@@ -112,6 +215,16 @@ const SelectionResults = (() => {
 		dividerEl.className = "divider"
 		dividerEl.setAttribute("role", "separator")
 		listEl.parentNode.insertBefore(dividerEl, listEl)
+
+		emptyStateEl = document.createElement("div")
+		emptyStateEl.id = "results-panel__empty-state"
+		emptyStateEl.className = "results-panel__empty-state"
+		emptyStateEl.appendChild(buildGuideEl())
+		const bboxMsgEl = document.createElement("p")
+		bboxMsgEl.className = "results-panel__empty-message"
+		bboxMsgEl.textContent = "No records in the current map view."
+		emptyStateEl.appendChild(bboxMsgEl)
+		listEl.parentNode.insertBefore(emptyStateEl, listEl.nextSibling)
 
 		isolateFromMap(panelEl)
 		collapsible = createCollapsible({panelEl, collapseBtn, expandLabel: "Expand selection panel", collapseLabel: "Collapse selection panel"})
@@ -136,6 +249,16 @@ const SelectionResults = (() => {
 				else if (previousCount === 0) collapsible.setCollapsed(false)
 			}
 			previousCount = count
+		})
+		let hasArmedOnce = false
+		EventBus.on("selection:toolArmed", ({shape}) => {
+			if (!shape || hasArmedOnce) return
+			hasArmedOnce = true
+			if (ResultsViewState.isShowingAllInBbox()) {
+				ResultsViewState.setShowAllInBbox(false)
+				render()
+			}
+			collapsible.setCollapsed(false)
 		})
 		EventBus.on("selection:toolUsed", () => {
 			if (ResultsViewState.isShowingAllInBbox()) {

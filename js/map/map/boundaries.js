@@ -127,8 +127,15 @@ const Boundaries = (() => {
 		}
 	}
 
-	function build() {
-		const features = BoundaryData.getFeatures()
+	// Tracks which simplification level (see BoundaryData/Config.boundaries.
+	// simplifyZoomThreshold) the current layers were built from, so zoomend
+	// only triggers a rebuild when that level actually changes rather than
+	// on every zoom tick.
+	let currentLevel = null
+
+	function build(zoom) {
+		const features = BoundaryData.getFeatures(zoom)
+		currentLevel = BoundaryData.levelForZoom(zoom)
 		flagsLayer = L.layerGroup()
 
 		// Build the shared GID_0 -> island anchor lookup before Leaflet
@@ -146,6 +153,21 @@ const Boundaries = (() => {
 
 		islandsLayer = L.geoJSON({type: "FeatureCollection", features: features.filter(f => !isWater(f))}, {style: styleFor, onEachFeature})
 		watersLayer = L.geoJSON({type: "FeatureCollection", features: features.filter(isWater)}, {style: styleFor, onEachFeature})
+	}
+
+	// Rebuilds islands/waters/flags at whichever simplification level fits
+	// `zoom`, preserving each layer's current on/off state (a user may have
+	// toggled Waters or Flags off via the Legend) and re-adding the new
+	// layer instances in their place.
+	function rebuildForZoom(zoom) {
+		const nextLevel = BoundaryData.levelForZoom(zoom)
+		if (nextLevel === currentLevel) return
+		const wasVisible = Object.fromEntries(toggleDefs.map(def => [def.key, isVisible(def.key)]))
+		;[islandsLayer, watersLayer, flagsLayer].forEach(layer => setLayer(layer, false))
+		build(zoom)
+		toggleDefs.forEach(def => {
+			if (wasVisible[def.key]) setLayer(def.layer(), true)
+		})
 	}
 
 	function setLayer(layer, visible) {
@@ -175,7 +197,8 @@ const Boundaries = (() => {
 	}
 	function init() {
 		if (!cfg.enabled) return
-		build()
+		build(MapCore.map.getZoom())
+		MapCore.map.on("zoomend", () => rebuildForZoom(MapCore.map.getZoom()))
 		toggleDefs.forEach(def => {
 			if (def.default) setLayer(def.layer(), true)
 		})

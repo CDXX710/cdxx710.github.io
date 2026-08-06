@@ -15,6 +15,10 @@
 	cursor: initial;
 }
 
+.results-panel.empty-state .results-panel__list {
+	display: none;
+}
+
 .results-panel__header {
 	display: flex;
 	justify-content: space-between;
@@ -98,6 +102,7 @@
 	transition: opacity 0.44s var(--ease-standard);
 }
 
+.results-panel.is-collapsed .results-panel__empty-state,
 .results-panel.is-collapsed .results-panel__list {
 	max-height: 0 !important;
 	opacity: 0;
@@ -174,4 +179,81 @@
 #results-panel__count {
 	color: var(--colorAccent);
 	font-size: var(--font-size-lg);
+}
+
+/* 
+ *  Empty State
+ */
+
+#results-panel.empty-state .results-panel__list {
+	display: none;
+}
+
+.results-panel__empty-state {
+	display: none;
+	padding: 1rem;
+}
+#results-panel.empty-state .results-panel__empty-state {
+	display: block;
+}
+
+/* Default (non-bbox empty): show guide, hide bbox message */
+.results-panel__guide {
+	display: block;
+}
+.results-panel__empty-message {
+	display: none;
+}
+
+/* Bbox empty: hide guide, show bbox message */
+#results-panel.empty-state--bbox .results-panel__guide {
+	display: none;
+}
+#results-panel.empty-state--bbox .results-panel__empty-message {
+	display: block;
+}
+
+.results-panel__guide-section:first-of-type {
+	margin-top: var(--space-10);
+}
+
+.results-panel__guide-section:last-of-type {
+	margin-bottom: var(--space-10);
+}
+
+.results-panel__guide-section h4 {
+	margin-bottom: 1rem;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+.results-panel__guide-section blockquote {
+	margin: 0;
+	padding-left: 0.75rem;
+	border-left: 2px solid var(--border-color, #ddd);
+	color: var(--muted-text, #666);
+	font-size: 0.875rem;
+}
+.results-panel__guide-section blockquote p + p {
+	margin-top: 0.5rem;
+}
+.results-panel__guide-shortcuts kbd {
+	font-family: inherit;
+	padding: 0.05em 0.4em;
+	border: 1px solid var(--border-color, #ccc);
+	border-radius: 3px;
+}
+
+.guide-term {
+	color: var(--colorAccent);
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+}
+
+.guide-term:hover {
+	cursor: help;
+	color: var(--colorSelection);
+}
+
+kbd {
+	color: var(--colorText);
 }

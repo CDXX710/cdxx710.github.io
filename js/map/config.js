@@ -55,7 +55,8 @@ const Config = {
 	// How close together (ms) two pointer-downs on the polygon tool need to be
 	// to count as "close the polygon", for mouse, touch, and pen alike.
 	polygonCloseTapMs: 300,
-	// Rendering of the admin/water boundary polygons (BoundariesTopo / BoundariesData).
+	// Rendering of the admin/water boundary polygons (BoundariesTopoFine /
+	// BoundariesTopoCoarse, or BoundariesData for a plain-geojson source).
 	// `typeProperty` + `waterTypeValues` decide which features are drawn as "water"
 	// vs "island" — adjust these to match whatever property your boundary source
 	// actually uses (run `console.table(BoundaryData.getFeatures().map(f => f.properties))`
@@ -71,7 +72,12 @@ const Config = {
 		flagSize: 22,
 		island: {color: "#3f8a5c", weight: 1.25, fillColor: "#4f9d76", fillOpacity: 0.14, dashArray: null},
 		water: {color: "#3a7ca5", weight: 1, fillColor: "#3a7ca5", fillOpacity: 0.08, dashArray: "4 3"},
-		hoverWeightBoost: 1.5
+		hoverWeightBoost: 1.5,
+		// Below this zoom, BoundaryData serves BoundariesTopoCoarse (~7% of the
+		// source point count); at or above it, BoundariesTopoFine (~19%). This
+		// is where redraw cost (especially on canvas) is worst — more geometry
+		// visible at once — and where the extra detail is least perceptible.
+		simplifyZoomThreshold: 9
 	}
 }
 

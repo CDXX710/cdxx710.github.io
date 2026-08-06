@@ -172,6 +172,10 @@
 	border-top-right-radius: var(--panel-radius);
 }
 
+.leaflet-pane.leaflet-overlay-pane .leaflet-interactive {
+	pointer-events: none !important; /* No boundaries/water hover/interactions if object select is not */
+}
+
 .is-armed .leaflet-interactive {
 	pointer-events: none !important; /* Prevent marker/polygons interaction when drawing */
 }

@@ -33,8 +33,8 @@
 ───────────────────────────────────────── */
 
 :root {
-    color-scheme: light dark;
-    forced-color-adjust: none;
+	color-scheme: light dark;
+	forced-color-adjust: none;
 
 	/* Category colours — orange (warm) to purple (cool), diverging */
 	--color-cat-bible: #d95f5f; /* #d95f02*/
@@ -108,25 +108,25 @@
 
 [data-theme="dark"] {
 	/* ── Colour: Surfaces ── */
-	--color-bg: #0e0e10; /* page background */
-	--color-surface: #18181c; /* cards, panels, nav */
-	--color-elevated: #18181cd9; /* elevated panels (popups, headers) */
+	--color-bg: #262626; /* page background (kept) */
+	--color-surface: #302f33; /* lighter than bg, mirrors light's surface > bg relationship */
+	--color-elevated: #302f33dd; /* elevated panels, alpha-matched to light */
 
 	/* ── Surfaces: Glass ── */
 	--glass-bg-color: rgba(255, 255, 255, 0.05);
 	--glass-border: 2px solid rgba(255, 255, 255, 0.1);
-    --glass-blur: blur(8px);
+	--glass-blur: blur(8px);
 	--glass-border-color: rgba(255, 255, 255, 0.1);
 
 	/* ── Colour: Text ── */
 	--colorText: #e8e8ec; /* primary text */
-    --colorTextInverted: #1a1a1e;
-	--colorTextSecondary: #e8e8ec70; /* subtly muted / secondary */
-	--colorTextTertiary: #e8e8ec40; /* subtly muted / secondary */
-	--colorTextMuted: #3a3a42; /* very dim — counts, urls, placeholders */
+	--colorTextInverted: #1a1a1e;
+	--colorTextSecondary: #a8a8b3; /* mid gray, same distance from bg as light's secondary */
+	--colorTextTertiary: #75757e; /* deeper mid gray step */
+	--colorTextMuted: #47474e; /* gray close to bg, mirrors light's muted */
 
 	/* ── Colour: Accent ── */
-	--colorAccent: #c8ff57; /* lime green — primary accent */
+	--colorAccent: #c8ff57; /* lime green — kept */
 	--colorAccentFade: #c8ff5733;
 	--colorAccentGlow: #c8ff5766;
 	--colorAccentDim: #95ac65;
@@ -141,12 +141,12 @@
 	/* ── Surfaces: Glass ── */
 	--glass-bg-color: rgba(0, 0, 0, 0.05);
 	--glass-border: 2px solid rgba(0, 0, 0, 0.1);
-    --glass-blur: blur(4px);
+	--glass-blur: blur(4px);
 	--glass-border-color: rgba(0, 0, 0, 0.1);
 
 	/* ── Colour: Text ── */
 	--colorText: #1a1a1e; /* primary text — near-black, mirrors dark's near-white */
-    --colorTextInverted: #e8e8ec; /* primary text */
+	--colorTextInverted: #e8e8ec; /* primary text */
 	--colorTextSecondary: #75757e; /* mid gray, same distance from bg as dark's secondary */
 	--colorTextMuted: #b6b6bf; /* light gray close to bg — mirrors dark's dim-near-surface muted */
 

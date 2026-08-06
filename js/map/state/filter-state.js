@@ -44,9 +44,18 @@ const FilterState = (() => {
 	function roleKeyFor(creole) {
 		return creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
 	}
+	// "others" is treated like a missing/unknown value for both category
+	// and authorType — it always passes its check, the same way a missing
+	// (null) authorType always passes. This keeps every "Other / Unknown"
+	// record visible no matter which single category or author type is
+	// being focused on, and means the real "others" authorType id and the
+	// null/missing authorType collapse into one and the same bucket.
+	function isOtherOrMissing(authorType) {
+		return !authorType || authorType === "others"
+	}
 	function isFeatureVisible(properties) {
 		const {time, category, creole, authorType} = properties
-		return time >= state.minYear && time <= state.maxYear && state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeAuthorTypes.has(authorType))
+		return time >= state.minYear && time <= state.maxYear && (category === "others" || state.activeCategories.has(category)) && state.showCreoleRole[roleKeyFor(creole)] && (isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))
 	}
 	// Same as isFeatureVisible but ignores the active year range. Used by
 	// the decade timeline itself, which needs to show the full
@@ -54,7 +63,7 @@ const FilterState = (() => {
 	// while a year filter is already narrowing what's on the map.
 	function isFeatureVisibleIgnoringYear(properties) {
 		const {category, creole, authorType} = properties
-		return state.activeCategories.has(category) && state.showCreoleRole[roleKeyFor(creole)] && (!authorType || state.activeAuthorTypes.has(authorType))
+		return (category === "others" || state.activeCategories.has(category)) && state.showCreoleRole[roleKeyFor(creole)] && (isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))
 	}
 	function isCategoryActive(category) {
 		return state.activeCategories.has(category)

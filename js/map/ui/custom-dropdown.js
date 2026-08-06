@@ -21,16 +21,28 @@ const CustomDropdown = (() => {
 			rootEl.classList.remove("open")
 			trigger.setAttribute("aria-expanded", "false")
 		}
+		// Moves the visual selection to `value` WITHOUT firing onSelect —
+		// for programmatic restoration (e.g. from a shared/restored URL),
+		// where the state is already applied and re-notifying would loop.
+		function selectValue(value) {
+			const match = Array.from(options).find(o => o.dataset.value === value)
+			if (!match) return
+			options.forEach(o => {
+				o.classList.remove("is-selected")
+				o.setAttribute("aria-selected", "false")
+			})
+			match.classList.add("is-selected")
+			match.setAttribute("aria-selected", "true")
+			valueEl.textContent = match.textContent
+			hiddenInput.value = value
+		}
 		trigger.addEventListener("click", () => {
 			const open = rootEl.classList.toggle("open")
 			trigger.setAttribute("aria-expanded", String(open))
 		})
 		options.forEach(option => {
 			option.addEventListener("click", () => {
-				options.forEach(o => o.classList.remove("is-selected"))
-				option.classList.add("is-selected")
-				valueEl.textContent = option.textContent
-				hiddenInput.value = option.dataset.value
+				selectValue(option.dataset.value)
 				close()
 				onSelect?.(option.dataset.value)
 			})
@@ -38,6 +50,7 @@ const CustomDropdown = (() => {
 		document.addEventListener("click", evt => {
 			if (!rootEl.contains(evt.target)) close()
 		})
+		return {selectValue}
 	}
 	return {init}
 })()

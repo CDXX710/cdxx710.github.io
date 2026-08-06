@@ -12,6 +12,7 @@ import AnalyticsPanel from "./ui/analytics-panel.js"
 import CustomDropdown from "./ui/custom-dropdown.js"
 import mapTheme from "./map/map-theme.js"
 import EventBus from "./event-bus.js"
+import StateSyncManager from "./state/state-sync-manager.js"
 // ─────────────────────────────────────────────────────────────
 // App — bootstraps every module, in dependency order.
 // ─────────────────────────────────────────────────────────────
@@ -29,8 +30,18 @@ function bootstrap() {
 	Searchbar.init()
 	AnalyticsPanel.init()
 	document.querySelectorAll("[data-dropdown-root]").forEach(rootEl => {
-		CustomDropdown.init(rootEl, {onSelect: value => EventBus.emit("sort:changed", value)})
+		const dropdown = CustomDropdown.init(rootEl, {onSelect: value => EventBus.emit("sort:changed", value)})
+		// Keeps the dropdown's own visual selection in sync whenever
+		// "sort:changed" fires from anywhere — a real user click (already
+		// visually in sync, so this is a harmless no-op) or a restored
+		// URL/history state (where it's the only thing that moves the
+		// dropdown's label/highlighted option to match).
+		EventBus.on("sort:changed", value => dropdown?.selectValue(value))
 	})
+	// Must run last: it reads every other module's just-initialized
+	// default state to compute what "default" means, then may
+	// immediately override that state from the URL.
+	StateSyncManager.initialize()
 }
 
 bootstrap()

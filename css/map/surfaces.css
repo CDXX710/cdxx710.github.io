@@ -117,3 +117,15 @@ a.leaflet-popup-close-button {
 .panel-close:hover {
 	color: var(--colorAccent);
 }
+
+.legend-panel__collapse,
+.analytics-panel__collapse {
+	display: grid;
+	grid-template-rows: 1fr;
+	transition: grid-template-rows 200ms ease;
+}
+
+.legend-panel__collapse[data-collapsed="true"],
+.analytics-panel__collapse[data-collapsed="true"] {
+	grid-template-rows: 0fr;
+}

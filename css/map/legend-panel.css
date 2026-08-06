@@ -17,7 +17,7 @@
 	 *  available above the panel's bottom anchor, and let the list
 	 *  scroll internally instead.
 	 */
-	max-height: calc(100dvh - var(--space-8) - var(--space-5));
+	max-height: 80%;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -97,8 +97,8 @@
 	text-transform: uppercase;
 }
 .legend-panel__header span:last-of-type {
-    text-transform: lowercase;
-    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	text-transform: lowercase;
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
 	font-style: italic;
 	font-size: var(--font-size-sm);
 	letter-spacing: var(--letter-spacing-thin);
@@ -231,22 +231,9 @@
 	cursor: default;
 }
 
-.legend-panel__collapse,
-.analytics-panel__collapse {
-	display: grid;
-	grid-template-rows: 1fr;
-	transition: grid-template-rows 200ms ease;
-}
-
-.legend-panel__collapse > *,
-.analytics-panel__collapse > * {
+.legend-panel__collapse > * {
 	min-height: 0;
 	overflow: hidden;
-}
-
-.legend-panel__collapse[data-collapsed="true"],
-.analytics-panel__collapse[data-collapsed="true"] {
-	grid-template-rows: 0fr;
 }
 
 /*

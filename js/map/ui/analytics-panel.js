@@ -24,7 +24,7 @@ const AnalyticsPanel = (() => {
 	const decades = []
 	for (let d = decadeOf(dataMinYear); d <= decadeOf(dataMaxYear); d += 10) decades.push(d)
 
-	let bodyEl, recordsEl, islandsEl, timelineEl, categoriesEl, collapsible
+	let bodyEl, recordsEl, islandsEl, timelineEl, categoriesEl, authorTypesEl, collapsible
 	let recordsInView = 0
 
 	function isolateFromMap(el) {
@@ -81,8 +81,14 @@ const AnalyticsPanel = (() => {
 		return ViewportQuery.featuresInView({respectFilters: "ignoreYear"})
 	}
 
-	function topEntries(counts, total) {
-		const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
+	function topEntries(counts, total, lastKey) {
+		const sorted = Object.entries(counts).sort((a, b) => {
+			// The designated "other/unknown" bucket always sorts last,
+			// regardless of its share of the total.
+			if (a[0] === lastKey) return 1
+			if (b[0] === lastKey) return -1
+			return b[1] - a[1]
+		})
 		return sorted.map(([key, count]) => ({key, count, pct: total ? Math.round((count / total) * 100) : 0}))
 	}
 	function barRow({label, pct, count, color, onClick}) {
@@ -138,6 +144,30 @@ const AnalyticsPanel = (() => {
 		})
 	}
 
+	// Clicking a category row focuses it (turns every other real category
+	// off); clicking the already-isolated category again restores all
+	// categories. "others" is treated like the author-type "unknown"
+	// bucket below (see filter-state.js) — it always stays visible, so
+	// isolating it just means turning off every other real category
+	// rather than turning "others" on, and it's never itself required to
+	// be "active" for another category's isolation to count.
+	function isCategoryIsolated(key) {
+		const realCategories = Object.keys(Theme.categoryColors).filter(cat => cat !== "others")
+		if (key === "others") return realCategories.every(cat => !FilterState.isCategoryActive(cat))
+		return realCategories.every(cat => FilterState.isCategoryActive(cat) === (cat === key))
+	}
+	function toggleCategoryIsolation(key) {
+		const allCategories = Object.keys(Theme.categoryColors)
+		const realCategories = allCategories.filter(cat => cat !== "others")
+		if (isCategoryIsolated(key)) {
+			allCategories.forEach(cat => FilterState.setCategoryActive(cat, true))
+		} else if (key === "others") {
+			realCategories.forEach(cat => FilterState.setCategoryActive(cat, false))
+		} else {
+			realCategories.forEach(cat => FilterState.setCategoryActive(cat, cat === key))
+		}
+	}
+
 	function renderCategories(scope) {
 		categoriesEl.innerHTML = `<div class="analytics-section__title">Categories represented</div>`
 		if (!scope.length) {
@@ -149,9 +179,56 @@ const AnalyticsPanel = (() => {
 			const category = ArchiveData.features[index].properties.category
 			counts[category] = (counts[category] ?? 0) + 1
 		})
-		topEntries(counts, scope.length).forEach(({key, pct, count}) => {
-			const color = key === "Unknown" ? Utils.readCssVar("--color-unknown") : Theme.categoryColor(key)
-			categoriesEl.appendChild(barRow({label: Utils.capitalize(key), pct, count, color}))
+		topEntries(counts, scope.length, "others").forEach(({key, pct, count}) => {
+			const label = key === "others" ? "Other / Unknown" : Utils.capitalize(key)
+			const color = key === "others" ? Utils.readCssVar("--color-unknown") : Theme.categoryColor(key)
+			const row = barRow({label, pct, count, color, onClick: () => toggleCategoryIsolation(key)})
+			row.classList.toggle("is-isolated", isCategoryIsolated(key))
+			categoriesEl.appendChild(row)
+		})
+	}
+
+	// Author types mirror the category isolation behaviour above. Two
+	// buckets collapse into the same "unknown" row: a genuinely missing
+	// (null) authorType, and the real authorType id "others" — both read
+	// as "Other / Unknown" to the user and both always pass FilterState's
+	// author-type check (see isOtherOrMissing in filter-state.js), so
+	// isolating either one turns off every other real author type rather
+	// than turning one on.
+	function isAuthorTypeIsolated(key) {
+		const realAuthorTypes = Object.keys(Theme.authorTypeColors).filter(type => type !== "others")
+		if (key === "unknown") return realAuthorTypes.every(type => !FilterState.isAuthorTypeActive(type))
+		return realAuthorTypes.every(type => FilterState.isAuthorTypeActive(type) === (type === key))
+	}
+	function toggleAuthorTypeIsolation(key) {
+		const allAuthorTypes = Object.keys(Theme.authorTypeColors)
+		const realAuthorTypes = allAuthorTypes.filter(type => type !== "others")
+		if (isAuthorTypeIsolated(key)) {
+			allAuthorTypes.forEach(type => FilterState.setAuthorTypeActive(type, true))
+		} else if (key === "unknown") {
+			realAuthorTypes.forEach(type => FilterState.setAuthorTypeActive(type, false))
+		} else {
+			realAuthorTypes.forEach(type => FilterState.setAuthorTypeActive(type, type === key))
+		}
+	}
+	function renderAuthorTypes(scope) {
+		authorTypesEl.innerHTML = `<div class="analytics-section__title">Author types represented</div>`
+		if (!scope.length) {
+			authorTypesEl.appendChild(Utils.el("div", {className: "analytics-empty", text: "No records in this view."}))
+			return
+		}
+		const counts = {}
+		scope.forEach(index => {
+			const raw = ArchiveData.features[index].properties.authorType
+			const authorType = !raw || raw === "others" ? "unknown" : raw
+			counts[authorType] = (counts[authorType] ?? 0) + 1
+		})
+		topEntries(counts, scope.length, "unknown").forEach(({key, pct, count}) => {
+			const label = key === "unknown" ? "Other / Unknown" : Utils.capitalize(key)
+			const color = key === "unknown" ? Utils.readCssVar("--color-unknown") : Theme.authorTypeColor(key)
+			const row = barRow({label, pct, count, color, onClick: () => toggleAuthorTypeIsolation(key)})
+			row.classList.toggle("is-isolated", isAuthorTypeIsolated(key))
+			authorTypesEl.appendChild(row)
 		})
 	}
 
@@ -247,6 +324,7 @@ const AnalyticsPanel = (() => {
 		renderIslands(scope)
 		renderTimeline(timelineScope, hiddenByTimeline)
 		renderCategories(scope)
+		renderAuthorTypes(scope)
 	}
 
 	function init() {
@@ -277,9 +355,10 @@ const AnalyticsPanel = (() => {
 		islandsEl = Utils.el("div", {className: "analytics-section"})
 		timelineEl = Utils.el("div", {className: "analytics-section"})
 		categoriesEl = Utils.el("div", {className: "analytics-section"})
+		authorTypesEl = Utils.el("div", {className: "analytics-section"})
 
 		// Sections joined by a divider, none trailing the last one.
-		const sections = [recordsEl, islandsEl, timelineEl, categoriesEl]
+		const sections = [recordsEl, islandsEl, timelineEl, categoriesEl, authorTypesEl]
 		sections.forEach((section, index) => {
 			if (index > 0) bodyEl.appendChild(Utils.el("div", {className: "divider", role: "separator"}))
 			bodyEl.appendChild(section)

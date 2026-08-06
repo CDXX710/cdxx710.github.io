@@ -231,7 +231,7 @@
 	margin: 0;
 	padding-left: 0.75rem;
 	border-left: 2px solid var(--border-color, #ddd);
-	color: var(--muted-text, #666);
+	color: var(--colorTextSecondary);
 	font-size: 0.875rem;
 }
 .results-panel__guide-section blockquote p + p {
@@ -240,7 +240,7 @@
 .results-panel__guide-shortcuts kbd {
 	font-family: inherit;
 	padding: 0.05em 0.4em;
-	border: 1px solid var(--border-color, #ccc);
+	border: 1px solid var(--colorText);
 	border-radius: 3px;
 }
 
@@ -255,5 +255,5 @@
 }
 
 kbd {
-	color: var(--colorText);
+	color: var(--colorAccent);
 }

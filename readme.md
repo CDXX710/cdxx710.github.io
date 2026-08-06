@@ -1,6 +1,6 @@
 -   [x] **Popup/marker centering needs refinement.** Popups are not consistently centered on their associated markers.
 
--   [ ] **No state serialization.** The application does not persist or encode state via URL parameters, `history.pushState`, or `localStorage`. Nothing is bookmarkable, shareable, or resumable—not even the current filters and selection. This is the highest-leverage infrastructure improvement and a prerequisite for future Comparison and Story features.
+-   [x] **No state serialization.** The application does not persist or encode state via URL parameters, `history.pushState`, or `localStorage`. Nothing is bookmarkable, shareable, or resumable—not even the current filters and selection. This is the highest-leverage infrastructure improvement and a prerequisite for future Comparison and Story features.
 
 -   [x] **Poor discoverability of the selection tools.** Four drawing tools × two object-selection modes × four boolean combine modes create a GIS-level interaction surface with little onboarding. Native `title` tooltips are insufficient, and there is no empty-state guidance to help users discover that selections can be combined using boolean operations.
 

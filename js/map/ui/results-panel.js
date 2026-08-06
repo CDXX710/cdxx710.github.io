@@ -199,7 +199,7 @@ const SelectionResults = (() => {
 		const showAllInBbox = ResultsViewState.toggleShowAllInBbox()
 		render()
 		if (showAllInBbox) collapsible.setCollapsed(false)
-		else if (SelectionState.size() === 0 && !isNarrowViewport()) collapsible.setCollapsed(true)
+		else if (SelectionState.size() === 0 && !isNarrowViewport()) collapsible.setCollapsed(false)
 	}
 
 	function init() {
@@ -245,8 +245,7 @@ const SelectionResults = (() => {
 			render()
 			const count = SelectionState.size()
 			if (!isNarrowViewport()) {
-				if (count === 0) collapsible.setCollapsed(true)
-				else if (previousCount === 0) collapsible.setCollapsed(false)
+				if (count === 0) collapsible.setCollapsed(false)
 			}
 			previousCount = count
 		})

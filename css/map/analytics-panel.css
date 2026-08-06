@@ -16,10 +16,11 @@
 	 *  screens. Cap to the space between the panel's top anchor and
 	 *  the bottom of the viewport, and scroll the body internally.
 	 */
-	max-height: calc(100dvh - (2 * var(--space-5) + var(--top-left-panels-height)) - var(--space-6));
+	max-height: 77%;
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 	cursor: initial;
 }
 
@@ -30,6 +31,11 @@
 .analytics-panel.is-collapsed .analytics-panel__header {
 	padding: var(--space-3);
 	margin: 0;
+}
+
+.analytics-panel__collapse {
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .analytics-panel.is-collapsed .analytics-panel__collapse-btn svg {
@@ -46,15 +52,18 @@
 }
 
 .analytics-panel__body {
-    margin: 0 var(--space-3) 0;
+	margin: 0 var(--space-3) 0;
 	opacity: 1;
 	display: flex;
 	flex-direction: column;
 	gap: 1.1rem;
 	min-width: 0;
 	overflow-y: auto;
+	overflow-x: hidden;
 	min-height: 0;
 	transition: opacity 0.2s var(--ease-in-out);
+	margin-right: -0.1rem;
+	padding-right: 0.6rem;
 }
 
 .analytics-panel.is-collapsed .analytics-panel__body,
@@ -193,11 +202,11 @@
 	touch-action: none;
 }
 
-.analytics-timeline__hidden{
+.analytics-timeline__hidden {
 	font-style: italic;
-    font-size: var(--font-size-sm);
-    letter-spacing: var(--letter-spacing-thin);
-    color: var(--colorTextTertiary);
+	font-size: var(--font-size-sm);
+	letter-spacing: var(--letter-spacing-thin);
+	color: var(--colorTextTertiary);
 }
 
 .analytics-timeline__bar {

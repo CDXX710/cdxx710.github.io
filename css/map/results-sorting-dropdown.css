@@ -10,7 +10,7 @@
 
 [data-dropdown-root] {
 	position: relative;
-	width: 10rem;
+	width: stretch;
 }
 
 [data-dropdown-trigger] {
@@ -52,7 +52,7 @@
 	position: absolute;
 	width: 100%;
 
-    z-index: var(--z-tooltip);
+	z-index: var(--z-tooltip);
 	margin: 0;
 	padding: 0.35rem;
 	list-style: none;

@@ -15,30 +15,48 @@ const FilterState = (() => {
 		activeCategories: new Set(Object.keys(Theme.categoryColors)),
 		activeAuthorTypes: new Set(Object.keys(Theme.authorTypeColors))
 	}
+	// Tracks which of the four filter groups the user last touched, so
+	// classifyHiddenReason (below) can attribute a record hidden by
+	// several filters at once to whichever one the user is actually
+	// paying attention to, rather than a fixed guess. Higher = more
+	// recently touched. Seeded in this order so the very first hidden
+	// record (before any interaction) still resolves deterministically.
+	let touchCounter = 0
+	const lastTouched = {creoleRole: touchCounter++, timeline: touchCounter++, authorType: touchCounter++, category: touchCounter++}
+	function touch(group) {
+		lastTouched[group] = ++touchCounter
+	}
 	function notify() {
 		EventBus.emit("filters:changed", state)
 	}
 	function setYearRange(minYear, maxYear) {
 		state.minYear = minYear
 		state.maxYear = maxYear
+		touch("timeline")
 		notify()
 	}
 	function setCreoleRoleActive(roleKey, isOn) {
 		state.showCreoleRole[roleKey] = isOn
+		touch("creoleRole")
 		notify()
 	}
 	function setCategoryActive(category, isOn) {
 		isOn ? state.activeCategories.add(category) : state.activeCategories.delete(category)
+		touch("category")
 		notify()
 	}
 	function setAuthorTypeActive(authorType, isOn) {
 		isOn ? state.activeAuthorTypes.add(authorType) : state.activeAuthorTypes.delete(authorType)
+		touch("authorType")
 		notify()
 	}
 	function setAllVisible(isOn) {
 		state.activeCategories = isOn ? new Set(Object.keys(Theme.categoryColors)) : new Set()
 		state.activeAuthorTypes = isOn ? new Set(Object.keys(Theme.authorTypeColors)) : new Set()
 		state.showCreoleRole = {using: isOn, about: isOn, unknown: isOn}
+		// Touches every group equally, preserving their relative order —
+		// this is a blanket reset/clear-all, not the user focusing on one
+		// particular filter, so it shouldn't reshuffle attribution priority.
 		notify()
 	}
 	function roleKeyFor(creole) {
@@ -53,17 +71,44 @@ const FilterState = (() => {
 	function isOtherOrMissing(authorType) {
 		return !authorType || authorType === "others"
 	}
-	function isFeatureVisible(properties) {
+	// Single parameterised predicate — isFeatureVisible and
+	// isFeatureVisibleIgnoringYear are both this with `ignoreYear`
+	// toggled, so they can never drift apart.
+	function isFeatureVisibleIgnoring(properties, {ignoreYear = false} = {}) {
 		const {time, category, creole, authorType} = properties
-		return time >= state.minYear && time <= state.maxYear && (category === "others" || state.activeCategories.has(category)) && state.showCreoleRole[roleKeyFor(creole)] && (isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))
+		return (ignoreYear || (time >= state.minYear && time <= state.maxYear)) && (category === "others" || state.activeCategories.has(category)) && state.showCreoleRole[roleKeyFor(creole)] && (isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))
 	}
-	// Same as isFeatureVisible but ignores the active year range. Used by
-	// the decade timeline itself, which needs to show the full
-	// distribution (so users have context for where to drag/click) even
-	// while a year filter is already narrowing what's on the map.
+	function isFeatureVisible(properties) {
+		return isFeatureVisibleIgnoring(properties)
+	}
+	// Ignores the active year range. Used by the decade timeline itself,
+	// which needs to show the full distribution (so users have context
+	// for where to drag/click) even while a year filter is already
+	// narrowing what's on the map.
 	function isFeatureVisibleIgnoringYear(properties) {
-		const {category, creole, authorType} = properties
-		return (category === "others" || state.activeCategories.has(category)) && state.showCreoleRole[roleKeyFor(creole)] && (isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))
+		return isFeatureVisibleIgnoring(properties, {ignoreYear: true})
+	}
+	// Backs the analytics panel's "x records hidden by the ... filter"
+	// notices. A record failing more than one filter at once is only
+	// ever "hidden by" one of them — attributing it to every filter it
+	// happens to fail would double-count it, and attributing it to none
+	// (an earlier approach: diff against a scope with only that one
+	// filter lifted, which still enforces every other filter) would
+	// silently undercount it and leave the four notices not summing to
+	// the real hidden total. So this picks exactly one reason per hidden
+	// record: among the filters currently failing it, whichever one the
+	// user most recently touched (see `touch` above) — that's the filter
+	// they're actively working with, so it's the most useful one to
+	// blame. Ties (nothing touched yet) fall back to the seed order.
+	function classifyHiddenReason(properties) {
+		const {time, category, creole, authorType} = properties
+		const failing = []
+		if (!state.showCreoleRole[roleKeyFor(creole)]) failing.push("creoleRole")
+		if (time < state.minYear || time > state.maxYear) failing.push("timeline")
+		if (!(isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))) failing.push("authorType")
+		if (!(category === "others" || state.activeCategories.has(category))) failing.push("category")
+		if (!failing.length) return null
+		return failing.reduce((mostRecent, group) => (lastTouched[group] < lastTouched[mostRecent] ? group : mostRecent))
 	}
 	function isCategoryActive(category) {
 		return state.activeCategories.has(category)
@@ -88,6 +133,7 @@ const FilterState = (() => {
 		setAllVisible,
 		isFeatureVisible,
 		isFeatureVisibleIgnoringYear,
+		classifyHiddenReason,
 		isCategoryActive,
 		isAuthorTypeActive,
 		isCreoleRoleActive

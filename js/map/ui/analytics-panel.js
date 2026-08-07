@@ -24,7 +24,7 @@ const AnalyticsPanel = (() => {
 	const decades = []
 	for (let d = decadeOf(dataMinYear); d <= decadeOf(dataMaxYear); d += 10) decades.push(d)
 
-	let bodyEl, recordsEl, islandsEl, timelineEl, categoriesEl, authorTypesEl, collapsible
+	let bodyEl, recordsEl, islandsEl, timelineEl, creoleRolesEl, categoriesEl, authorTypesEl, collapsible
 	let recordsInView = 0
 
 	function isolateFromMap(el) {
@@ -80,6 +80,19 @@ const AnalyticsPanel = (() => {
 		if (SelectionState.size() > 0) return SelectionState.indices()
 		return ViewportQuery.featuresInView({respectFilters: "ignoreYear"})
 	}
+	// Priority-ordered, mutually-exclusive hidden-record tally backing the
+	// "x records hidden by the ... filter" notices (see
+	// FilterState.classifyHiddenReason for the priority order: creole
+	// role, timeline, author type, category). A selection bypasses
+	// filters entirely (see currentScopeIndices), so nothing reads as
+	// hidden by anything in that case.
+	function hiddenCounts() {
+		if (SelectionState.size() > 0) return {creoleRole: 0, timeline: 0, authorType: 0, category: 0}
+		return ViewportQuery.hiddenCounts()
+	}
+	function hiddenNoticeHtml(hiddenCount, filterLabel) {
+		return hiddenCount > 0 ? Utils.html`<div class="analytics-timeline__hidden">${hiddenCount} record${hiddenCount === 1 ? "" : "s"} hidden by the ${filterLabel} filter</div>` : ""
+	}
 
 	function topEntries(counts, total, lastKey) {
 		const sorted = Object.entries(counts).sort((a, b) => {
@@ -118,12 +131,19 @@ const AnalyticsPanel = (() => {
 		const total = ArchiveData.features.length
 		recordsInView = scope.length
 		recordsEl.innerHTML = Utils.html`
-			<div class="analytics-section__title">Records in view</div>
+			<div class="analytics-section__title-row">
+				<div class="analytics-section__title">Records in view</div>
+				<button type="button" class="analytics-filter__clear" id="clearAllBtn" aria-label="Clear all filters">Clear all</button>
+			</div>
 			<div class="analytics-hero">
 				<span class="analytics-hero__count">${scope.length}</span>
 				<span class="analytics-hero__total">/ ${total}</span>
 			</div>
             `
+		recordsEl.querySelector("#clearAllBtn").addEventListener("click", () => {
+			TimeSlider.setRange(dataMinYear, dataMaxYear)
+			FilterState.setAllVisible(true)
+		})
 		EventBus.emit("analytics:recordsInViewChanged", recordsInView)
 	}
 
@@ -168,8 +188,61 @@ const AnalyticsPanel = (() => {
 		}
 	}
 
-	function renderCategories(scope) {
-		categoriesEl.innerHTML = `<div class="analytics-section__title">Categories represented</div>`
+	// Creole role has no "others"/missing-value bypass like category and
+	// authorType do — "unknown" here is just a third real, independently
+	// toggleable role (see FilterState.roleKeyFor), so isolation is the
+	// plain "exactly one of the three is active" version.
+	const creoleRoleLabels = {using: "Using creoles", about: "About creoles", unknown: "Unknown"}
+	function roleKeyFor(creole) {
+		return creole === "using" ? "using" : creole === "about" ? "about" : "unknown"
+	}
+	function isCreoleRoleIsolated(key) {
+		return Object.keys(creoleRoleLabels).every(role => FilterState.isCreoleRoleActive(role) === (role === key))
+	}
+	function toggleCreoleRoleIsolation(key) {
+		const allRoles = Object.keys(creoleRoleLabels)
+		if (isCreoleRoleIsolated(key)) {
+			allRoles.forEach(role => FilterState.setCreoleRoleActive(role, true))
+		} else {
+			allRoles.forEach(role => FilterState.setCreoleRoleActive(role, role === key))
+		}
+	}
+	function renderCreoleRoles(scope, hiddenCount) {
+		creoleRolesEl.innerHTML = `
+			<div class="analytics-section__title-row">
+				<div class="analytics-section__title">Creole role represented</div>
+				<button type="button" class="analytics-filter__clear" id="creoleRolesClearBtn" aria-label="Clear creole role filter">Clear</button>
+			</div>
+			${hiddenNoticeHtml(hiddenCount, "creole role")}`
+		creoleRolesEl.querySelector("#creoleRolesClearBtn").addEventListener("click", () => {
+			Object.keys(creoleRoleLabels).forEach(role => FilterState.setCreoleRoleActive(role, true))
+		})
+		if (!scope.length) {
+			creoleRolesEl.appendChild(Utils.el("div", {className: "analytics-empty", text: "No records in this view."}))
+			return
+		}
+		const counts = {}
+		scope.forEach(index => {
+			const role = roleKeyFor(ArchiveData.features[index].properties.creole)
+			counts[role] = (counts[role] ?? 0) + 1
+		})
+		topEntries(counts, scope.length).forEach(({key, pct, count}) => {
+			const row = barRow({label: creoleRoleLabels[key], pct, count, onClick: () => toggleCreoleRoleIsolation(key)})
+			row.classList.toggle("is-isolated", isCreoleRoleIsolated(key))
+			creoleRolesEl.appendChild(row)
+		})
+	}
+
+	function renderCategories(scope, hiddenCount) {
+		categoriesEl.innerHTML = `
+			<div class="analytics-section__title-row">
+				<div class="analytics-section__title">Categories represented</div>
+				<button type="button" class="analytics-filter__clear" id="categoriesClearBtn" aria-label="Clear category filter">Clear</button>
+			</div>
+			${hiddenNoticeHtml(hiddenCount, "category")}`
+		categoriesEl.querySelector("#categoriesClearBtn").addEventListener("click", () => {
+			Object.keys(Theme.categoryColors).forEach(cat => FilterState.setCategoryActive(cat, true))
+		})
 		if (!scope.length) {
 			categoriesEl.appendChild(Utils.el("div", {className: "analytics-empty", text: "No records in this view."}))
 			return
@@ -211,8 +284,16 @@ const AnalyticsPanel = (() => {
 			realAuthorTypes.forEach(type => FilterState.setAuthorTypeActive(type, type === key))
 		}
 	}
-	function renderAuthorTypes(scope) {
-		authorTypesEl.innerHTML = `<div class="analytics-section__title">Author types represented</div>`
+	function renderAuthorTypes(scope, hiddenCount) {
+		authorTypesEl.innerHTML = `
+			<div class="analytics-section__title-row">
+				<div class="analytics-section__title">Author types represented</div>
+				<button type="button" class="analytics-filter__clear" id="authorTypesClearBtn" aria-label="Clear author type filter">Clear</button>
+			</div>
+			${hiddenNoticeHtml(hiddenCount, "author type")}`
+		authorTypesEl.querySelector("#authorTypesClearBtn").addEventListener("click", () => {
+			Object.keys(Theme.authorTypeColors).forEach(type => FilterState.setAuthorTypeActive(type, true))
+		})
 		if (!scope.length) {
 			authorTypesEl.appendChild(Utils.el("div", {className: "analytics-empty", text: "No records in this view."}))
 			return
@@ -253,11 +334,11 @@ const AnalyticsPanel = (() => {
 				return Utils.html`<rect class="analytics-timeline__bar${isActive ? " is-active" : ""}" data-decade="${d}" x="${x}" y="${y}" width="${Math.max(1, barWidth)}" height="${h}"><title>${d}s: ${counts[d]} record${counts[d] === 1 ? "" : "s"}</title></rect>`
 			})
 			.join("")
-		const hiddenNotice = hiddenCount > 0 ? Utils.html`<div class="analytics-timeline__hidden">${hiddenCount} record${hiddenCount === 1 ? "" : "s"} hidden by the timeline filter</div>` : ""
+		const hiddenNotice = hiddenNoticeHtml(hiddenCount, "timeline")
 		timelineEl.innerHTML = Utils.html`
 			<div class="analytics-section__title-row">
 				<div class="analytics-section__title">Timeline</div>
-				<button type="button" class="analytics-timeline__clear" id="timelineClearBtn" aria-label="Clear timeline filter">Clear</button>
+				<button type="button" class="analytics-filter__clear" id="timelineClearBtn" aria-label="Clear timeline filter">Clear</button>
 			</div>
 			<svg class="analytics-timeline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-label="Records per decade, click or drag to filter by year">${bars}</svg>
 			<div class="analytics-timeline__range"><span>${decades[0]}s</span><span>${decades[decades.length - 1]}s</span></div>
@@ -317,14 +398,13 @@ const AnalyticsPanel = (() => {
 	function render() {
 		const scope = currentScopeIndices()
 		const timelineScope = timelineScopeIndices()
-		// When a selection is active, both scopes are the selection itself
-		// (filters are bypassed), so nothing reads as "hidden by timeline".
-		const hiddenByTimeline = Math.max(0, timelineScope.length - scope.length)
+		const hidden = hiddenCounts()
 		renderRecordsInView(scope)
 		renderIslands(scope)
-		renderTimeline(timelineScope, hiddenByTimeline)
-		renderCategories(scope)
-		renderAuthorTypes(scope)
+		renderTimeline(timelineScope, hidden.timeline)
+		renderCreoleRoles(scope, hidden.creoleRole)
+		renderCategories(scope, hidden.category)
+		renderAuthorTypes(scope, hidden.authorType)
 	}
 
 	function init() {
@@ -354,11 +434,12 @@ const AnalyticsPanel = (() => {
 		recordsEl = Utils.el("div", {className: "analytics-section"})
 		islandsEl = Utils.el("div", {className: "analytics-section"})
 		timelineEl = Utils.el("div", {className: "analytics-section"})
+		creoleRolesEl = Utils.el("div", {className: "analytics-section"})
 		categoriesEl = Utils.el("div", {className: "analytics-section"})
 		authorTypesEl = Utils.el("div", {className: "analytics-section"})
 
 		// Sections joined by a divider, none trailing the last one.
-		const sections = [recordsEl, islandsEl, timelineEl, categoriesEl, authorTypesEl]
+		const sections = [recordsEl, islandsEl, timelineEl, creoleRolesEl, categoriesEl, authorTypesEl]
 		sections.forEach((section, index) => {
 			if (index > 0) bodyEl.appendChild(Utils.el("div", {className: "divider", role: "separator"}))
 			bodyEl.appendChild(section)

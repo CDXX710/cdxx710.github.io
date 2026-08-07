@@ -190,17 +190,16 @@
 	fill: transparent;
 }
 
-/* 
- *  Legend tabs — added for the "On map" / "Filter" split. Kept minimal and
- *  scoped so it layers on top of whatever map.css already defines for
- *  .legend-panel / .legend__* rather than fighting it. 
- */
-
 .legend__actions {
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
 	margin: var(--space-3) var(--space-3);
+
+	text-transform: uppercase;
+	font-family: var(--font-sans);
+	font-size: var(--font-size-sm);
+	color: var(--colorTextSecondary);
 }
 
 .legend__actions button {
@@ -208,14 +207,48 @@
 	font-family: var(--font-sans);
 	font-size: var(--font-size-sm);
 	color: var(--colorText);
-	opacity: 0.6;
 	cursor: pointer;
 	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
-}
+
+	padding: 0.05em 0.4em;
+	border: 1px solid var(--colorTextTertiary);
+	border-radius: 3px;
+	/* --- pushable-button mechanics --- */
+	--push-depth: 2px;
+	position: relative;
+	top: 0;
+	color: var(--colorTextSecondary);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.125);
+	transition: color var(--duration-fast), opacity var(--duration-slow), top var(--duration-fast) ease-out, border var(--duration-normal);}
 
 .legend__actions button:hover {
 	color: var(--colorAccent);
-	opacity: 1;
+	border-color: var(--colorTextSecondary);
+}
+
+.legend__actions button:active {
+	top: var(--push-depth);
+	border-color: var(--colorTextMuted);
+}
+
+.legend__actions button:active::before {
+	top: 0;
+	box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15), 0 3px 9px rgba(0, 0, 0, 0.1);
+}
+
+.legend__actions button::before {
+	content: "";
+	display: inline-block;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: calc(-1 * var(--push-depth));
+	z-index: -1;
+	top: var(--push-depth);
+	height: 100%;
+	border-radius: 3px;
+	box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.25), 0 3px 3px rgba(0, 0, 0, 0.1);
+	transition: top 0.078s ease-out;
 }
 
 .legend-panel__body[hidden] {

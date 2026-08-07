@@ -85,9 +85,9 @@ a.leaflet-popup-close-button {
 
 .divider {
 	height: 1px;
-	border: none;
 	margin: 0 5%;
 	background: var(--glass-border-color);
+    flex: none
 }
 
 .body__divider {

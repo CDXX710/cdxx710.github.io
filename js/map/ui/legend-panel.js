@@ -100,7 +100,7 @@ const Legend = (() => {
 	function groupTitle(text) {
 		return Utils.el("div", {className: "legend__group-title", text})
 	}
-	function divider(className = "legend__divider") {
+	function divider(className = "divider") {
 		return Utils.el("div", {className, role: "separator"})
 	}
 
@@ -198,14 +198,11 @@ const Legend = (() => {
 			)
 		]
 	}
-	// Builds every group, drops the empty ones, and joins what's left with
-	// a single `legend__divider` between consecutive groups.
 	function buildPanel(body) {
 		syncFns = []
 		body.innerHTML = ""
 		const groups = [layersGroup(), creoleRoleGroup(null), authorTypeGroup(null), categoryGroup(null)].filter(Boolean)
 		groups.forEach((els, i) => {
-			if (i > 0) body.appendChild(divider())
 			els.forEach(el => body.appendChild(el))
 		})
 	}
@@ -239,9 +236,9 @@ const Legend = (() => {
 		const bodyWrap = Utils.el("div", {className: "legend-panel__body"})
 		collapseWrap.appendChild(bodyWrap)
 
-		const actionsRow = Utils.el("div", {className: "legend__actions"})
-		const defaultBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Show all features", text: "Default"})
-		const noneBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Hide all features", text: "Clear"})
+		const actionsRow = Utils.el("div", {className: "legend__actions", text: "Toggle all:"})
+		const defaultBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Show all features", text: "ON"})
+		const noneBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Hide all features", text: "OFF"})
 		defaultBtn.addEventListener("click", () => FilterState.setAllVisible(true))
 		noneBtn.addEventListener("click", () => FilterState.setAllVisible(false))
 		actionsRow.append(defaultBtn, noneBtn)

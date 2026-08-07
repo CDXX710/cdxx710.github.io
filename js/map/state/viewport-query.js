@@ -45,7 +45,24 @@ const ViewportQuery = (() => {
 		return indices
 	}
 
-	return {featuresInView}
+	// Tally of in-viewport records hidden by each filter, for
+	// AnalyticsPanel's "x records hidden by the ... filter" notices.
+	// Each hidden record is attributed to exactly one filter (see
+	// FilterState.classifyHiddenReason's priority order), so these four
+	// counts always sum to (records in bounds) - (records in view).
+	function hiddenCounts() {
+		const bounds = MapCore.map.getBounds()
+		const counts = {creoleRole: 0, timeline: 0, authorType: 0, category: 0}
+		ArchiveData.features.forEach(feature => {
+			const [lng, lat] = feature.geometry.coordinates
+			if (!bounds.contains([lat, lng])) return
+			const reason = FilterState.classifyHiddenReason(feature.properties)
+			if (reason) counts[reason] += 1
+		})
+		return counts
+	}
+
+	return {featuresInView, hiddenCounts}
 })()
 
 export default ViewportQuery

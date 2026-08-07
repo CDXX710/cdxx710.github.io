@@ -43,6 +43,21 @@
 	text-transform: uppercase;
 	color: var(--colorText);
 	cursor: pointer;
+
+	/* --- pushable-button mechanics --- */
+	--push-depth: 2px;
+	position: relative;
+	top: 0;
+	color: var(--colorTextSecondary);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.125);
+	transition: color var(--duration-fast), opacity var(--duration-slow), top var(--duration-fast) ease-out, border var(--duration-normal);}
+
+.results-panel__title:hover {
+	color: var(--colorAccent);
+}
+
+.results-panel__title:active {
+	top: var(--push-depth);
 }
 
 .results-panel__actions {
@@ -76,10 +91,48 @@
 	display: flex;
 	align-items: center;
 	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+
+	padding: 0.05em 0.4em;
+	border: 1px solid var(--colorTextTertiary);
+	border-radius: 3px;
+
+	/* --- pushable-button mechanics --- */
+	--push-depth: 2px;
+	position: relative;
+	top: 0;
+	color: var(--colorTextSecondary);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.125);
+	transition: color var(--duration-fast), opacity var(--duration-slow), top var(--duration-fast) ease-out, border var(--duration-normal);
 }
 
 .results-panel__actions-btn:hover {
 	color: var(--colorAccent);
+	border-color: var(--colorTextSecondary);
+}
+
+.results-panel__actions-btn:active {
+	top: var(--push-depth);
+	border-color: var(--colorTextMuted);
+}
+
+.results-panel__actions-btn:active::before {
+	top: 0;
+	box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15), 0 3px 9px rgba(0, 0, 0, 0.1);
+}
+
+.results-panel__actions-btn::before {
+	content: "";
+	display: inline-block;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: calc(-1 * var(--push-depth));
+	z-index: -1;
+	top: var(--push-depth);
+	height: 100%;
+	border-radius: 3px;
+	box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.25), 0 3px 3px rgba(0, 0, 0, 0.1);
+	transition: top 0.078s ease-out;
 }
 
 #results-panel__select-all-btn {
@@ -130,6 +183,10 @@
 .result-row:hover {
 	border-color: var(--color-border-strong);
 	transform: translateY(-1px);
+}
+
+.result-row:active {
+	transform: translateY(0px);
 }
 
 .result-row__left {

@@ -8,6 +8,7 @@ import Theme from "../state/theme.js"
 import Utils from "../utils.js"
 import TimeSlider from "./time-slider-footer.js"
 import EventBus from "../event-bus.js"
+import {isolateFromMap, createCollapsible, mountHeader, isNarrowViewport} from "./panel-behaviors.js"
 
 // ─────────────────────────────────────────────────────────────
 // AnalyticsPanel — the "Research Summary" panel: always reflects the
@@ -26,43 +27,6 @@ const AnalyticsPanel = (() => {
 
 	let bodyEl, recordsEl, islandsEl, timelineEl, creoleRolesEl, categoriesEl, authorTypesEl, collapsible
 	let recordsInView = 0
-
-	function isolateFromMap(el) {
-		L.DomEvent.disableScrollPropagation(el)
-		L.DomEvent.disableClickPropagation(el)
-	}
-
-	const collapseChevronSvg = Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,9 7,4 12,9" /></svg>`
-
-	// Builds a "<title> ...... <collapse button>" header row.
-	function buildHeader({title, collapseLabel}) {
-		const headerEl = Utils.el("div", {className: "analytics-panel__header"})
-		if (title) headerEl.appendChild(Utils.el("span", {className: "analytics-panel__title", text: title}))
-		const collapseBtn = Utils.el("button", {
-			className: "collapse-btn analytics-panel__collapse-btn",
-			"aria-label": collapseLabel,
-			"aria-expanded": "false",
-			html: collapseChevronSvg
-		})
-		headerEl.appendChild(collapseBtn)
-		return {headerEl, collapseBtn}
-	}
-
-	// Collapse/expand only toggles classes + aria state; the header divider
-	// lives statically inside `collapseWrap` (see init()) and is hidden for
-	// free when the CSS collapse transition shrinks the wrapper to nothing.
-	function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
-		function setCollapsed(collapsed) {
-			panelEl.classList.toggle(collapsedClass, collapsed)
-			bodyEl.dataset.collapsed = String(collapsed)
-			collapseBtn.setAttribute("aria-expanded", String(!collapsed))
-			collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
-		}
-		function isCollapsed() {
-			return panelEl.classList.contains(collapsedClass)
-		}
-		return {setCollapsed, isCollapsed}
-	}
 
 	function inViewIndices() {
 		return ViewportQuery.featuresInView({respectFilters: "active"})
@@ -407,44 +371,33 @@ const AnalyticsPanel = (() => {
 		renderAuthorTypes(scope, hidden.authorType)
 	}
 
+	// Markup (collapse wrapper, sections, dividers) lives statically in
+	// map.html (#analytics-panel); the header is mounted via the shared
+	// `mountHeader` component, and this otherwise only wires up behavior
+	// and fills in the data-driven section content — matching how Legend
+	// and SelectionResults attach to their static shells.
 	function init() {
-		const startCollapsed = window.matchMedia("(max-width: 30rem)").matches
+		const startCollapsed = isNarrowViewport()
 
-		// Starts expanded on wider viewports (no is-collapsed class) so the
-		// research summary is visible as soon as the page loads; starts
-		// collapsed by default on narrow/mobile viewports instead.
-		const panel = Utils.el("div", {className: `analytics-panel${startCollapsed ? " is-collapsed" : ""}`, "aria-label": "Analytics summary"})
-		document.getElementById("map").appendChild(panel)
+		const panel = document.getElementById("analytics-panel")
+		const headerEl = document.getElementById("analytics-panel__header")
+		const collapseWrap = document.getElementById("analytics-panel__collapse")
+		bodyEl = document.getElementById("analytics-panel__body")
 
-		const {headerEl, collapseBtn} = buildHeader({title: "Research Summary", collapseLabel: "Expand research summary"})
-		panel.appendChild(headerEl)
+		recordsEl = document.getElementById("analytics-panel__records")
+		islandsEl = document.getElementById("analytics-panel__islands")
+		timelineEl = document.getElementById("analytics-panel__timeline")
+		creoleRolesEl = document.getElementById("analytics-panel__creole-roles")
+		categoriesEl = document.getElementById("analytics-panel__categories")
+		authorTypesEl = document.getElementById("analytics-panel__author-types")
 
-		// data-collapsed starts in sync with `startCollapsed` above — the CSS
-		// collapse transition in ADD_TO_YOUR_CSS.css keys off this attribute.
-		// This wrapper exists purely to give the CSS grid collapse trick a
-		// single grid item to animate — `bodyEl` below (which holds the
-		// actual section content) sits inside it unchanged.
-		const collapseWrap = Utils.el("div", {className: "analytics-panel__collapse", "data-collapsed": String(startCollapsed)})
-		panel.appendChild(collapseWrap)
-
-		bodyEl = Utils.el("div", {className: "analytics-panel__body"})
-		collapseWrap.appendChild(bodyEl)
-		bodyEl.appendChild(Utils.el("div", {className: "divider", role: "separator"}))
-
-		recordsEl = Utils.el("div", {className: "analytics-section"})
-		islandsEl = Utils.el("div", {className: "analytics-section"})
-		timelineEl = Utils.el("div", {className: "analytics-section"})
-		creoleRolesEl = Utils.el("div", {className: "analytics-section"})
-		categoriesEl = Utils.el("div", {className: "analytics-section"})
-		authorTypesEl = Utils.el("div", {className: "analytics-section"})
-
-		// Sections joined by a divider, none trailing the last one.
-		const sections = [recordsEl, islandsEl, timelineEl, creoleRolesEl, categoriesEl, authorTypesEl]
-		sections.forEach((section, index) => {
-			if (index > 0) bodyEl.appendChild(Utils.el("div", {className: "divider", role: "separator"}))
-			bodyEl.appendChild(section)
+		const collapseBtn = mountHeader(headerEl, "analytics-panel", {
+			title: "Research Summary"
 		})
 
+		// Starts expanded on wider viewports so the research summary is
+		// visible as soon as the page loads; starts collapsed by default on
+		// narrow/mobile viewports instead.
 		collapsible = createCollapsible({panelEl: panel, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand research summary", collapseLabel: "Collapse research summary"})
 		collapsible.setCollapsed(startCollapsed)
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))

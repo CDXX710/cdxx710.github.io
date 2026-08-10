@@ -5,7 +5,7 @@
 .basemap-panel {
 	position: absolute;
 	top: var(--space-5);
-	left: calc(2 * var(--space-6) + 2.5rem); /* Twice zoom-panel left alignement + its width */
+	left: calc(2 * var(--space-6) + var(--zoom-panel-width)); /* Twice zoom-panel left alignment + its width */
 	padding: 0.25rem;
 	font-family: "DM Sans", sans-serif;
 	width: var(--toolbar-width);
@@ -48,8 +48,4 @@
 .basemap-panel__btn.is-active {
 	background: var(--colorAccent);
 	color: var(--colorTextInverted);
-}
-
-.basemap-panel__btn--overlay.is-active {
-	box-shadow: inset 0 0 0 1px var(--colorAccentGlow);
 }

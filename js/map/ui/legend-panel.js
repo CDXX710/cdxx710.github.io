@@ -6,6 +6,7 @@ import Boundaries from "../map/boundaries.js"
 import EventBus from "../event-bus.js"
 import ViewportQuery from "../state/viewport-query.js"
 import MapCore from "../map/map-core.js"
+import {isolateFromMap, createCollapsible, mountHeader} from "./panel-behaviors.js"
 
 // ─────────────────────────────────────────────────────────────
 // Legend — the "On map / Filters" legend panel. Presentation only;
@@ -17,57 +18,23 @@ const Legend = (() => {
 	let syncFns = []
 	let updateHeaderHidden = () => {}
 
-	function isolateFromMap(el) {
-		L.DomEvent.disableScrollPropagation(el)
-		L.DomEvent.disableClickPropagation(el)
+	// Wires the "N hidden by filters" notice living next to the title
+	// (see init()); the returned function should be re-invoked whenever
+	// filters or the viewport change (see syncCheckedState()).
+	function wireHiddenNotice(hiddenEl, hiddenCountFn) {
+		const updateHidden = () => {
+			const count = hiddenCountFn()
+			hiddenEl.textContent = count > 0 ? `${count} hidden by filters` : ""
+			hiddenEl.classList.toggle("is-visible", count > 0)
+		}
+		updateHidden()
+		return updateHidden
 	}
 
-	const collapseChevronSvg = Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,9 7,4 12,9" /></svg>`
-
-	// Builds a "<title> ...... <collapse button>" header row. When
-	// `hiddenCountFn` is given, an inline notice sits right after the
-	// title; the returned `updateHidden` should be re-invoked whenever
-	// filters or the viewport change (see init()/syncCheckedState()).
-	function buildHeader({title, collapseLabel, hiddenCountFn}) {
-		const headerEl = Utils.el("div", {className: "legend-panel__header"})
-		if (title) headerEl.appendChild(Utils.el("span", {className: "legend-panel__title", text: title}))
-		let updateHidden = () => {}
-		if (hiddenCountFn) {
-			const hiddenEl = Utils.el("span", {className: "legend-panel__hidden"})
-			headerEl.appendChild(hiddenEl)
-			updateHidden = () => {
-				const count = hiddenCountFn()
-				hiddenEl.textContent = count > 0 ? `${count} hidden by filters` : ""
-				hiddenEl.classList.toggle("is-visible", count > 0)
-			}
-			updateHidden()
-		}
-		const collapseBtn = Utils.el("button", {
-			className: "collapse-btn legend-panel__collapse-btn",
-			"aria-label": collapseLabel,
-			"aria-expanded": "false",
-			html: collapseChevronSvg
-		})
-		headerEl.appendChild(collapseBtn)
-		return {headerEl, collapseBtn, updateHidden}
-	}
-
-	// Collapse/expand only toggles classes + aria state; the dividers live
-	// statically in the markup (see init()) and are hidden for free when
-	// `bodyEl`'s CSS collapse transition shrinks it to nothing.
-	function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
-		function setCollapsed(collapsed) {
-			panelEl.classList.toggle(collapsedClass, collapsed)
-			bodyEl.dataset.collapsed = String(collapsed)
-			collapseBtn.setAttribute("aria-expanded", String(!collapsed))
-			collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
-		}
-		function isCollapsed() {
-			return panelEl.classList.contains(collapsedClass)
-		}
-		return {setCollapsed, isCollapsed}
-	}
-
+	// toggleRow builds a single legend row: an icon-checkbox toggle plus
+	// label. The row set itself is static (defined by Theme/Boundaries
+	// config); only checked/is-off state changes afterwards (see
+	// syncCheckedState()).
 	function toggleRow({id, label, shapeKind, initialColor, checked = true, onChange, getChecked}) {
 		const checkboxId = `cb-${id}`
 		const row = Utils.el("div", {className: "legend__item"})
@@ -99,9 +66,6 @@ const Legend = (() => {
 	}
 	function groupTitle(text) {
 		return Utils.el("div", {className: "legend__group-title", text})
-	}
-	function divider(className = "divider") {
-		return Utils.el("div", {className, role: "separator"})
 	}
 
 	// Total records currently hidden by the legend's own filters (creole
@@ -211,45 +175,37 @@ const Legend = (() => {
 		updateHeaderHidden()
 	}
 
+	// Markup (header, collapse wrapper, actions row, dividers) lives
+	// statically in map.html (#legend-panel); this only wires up behavior
+	// and fills in the data-driven groups content, matching how
+	// SelectionResults and AnalyticsPanel attach to their static shells.
+	// Markup (collapse wrapper, actions row, dividers) lives statically in
+	// map.html (#legend-panel); the header is mounted via the shared
+	// `mountHeader` component, and this otherwise only wires up behavior
+	// and fills in the data-driven groups content — matching how
+	// SelectionResults and AnalyticsPanel attach to their static shells.
 	function init() {
-		const legend = Utils.el("div", {className: "legend-panel is-collapsed", "aria-label": "Map legend"})
-		document.getElementById("map").appendChild(legend)
+		const legend = document.getElementById("legend-panel")
+		const headerEl = document.getElementById("legend-panel__header")
+		const collapseWrap = document.getElementById("legend-panel__collapse")
+		const panel = document.getElementById("legend-panel__groups")
 
-		const {headerEl, collapseBtn, updateHidden} = buildHeader({
+		const hiddenEl = Utils.el("span", {className: "legend-panel__hidden"})
+		const collapseBtn = mountHeader(headerEl, "legend-panel", {
 			title: "Legend",
-			collapseLabel: "Expand legend",
-			hiddenCountFn: totalHiddenByFilters
+			extraEl: hiddenEl
 		})
-		updateHeaderHidden = updateHidden
+		updateHeaderHidden = wireHiddenNotice(hiddenEl, totalHiddenByFilters)
 
-		legend.appendChild(headerEl)
-
-		// Starts collapsed (matches the "is-collapsed" class set on `legend`
-		// above); kept in sync so the CSS collapse transition in
-		// ADD_TO_YOUR_CSS.css has a correct starting point. This wrapper
-		// exists purely to give the CSS grid collapse trick a single grid
-		// item to animate — `bodyWrap` below (which holds the actual
-		// content: actions row, divider, groups) sits inside it unchanged.
-		const collapseWrap = Utils.el("div", {className: "legend-panel__collapse", "data-collapsed": "true"})
-		legend.appendChild(collapseWrap)
-
-		const bodyWrap = Utils.el("div", {className: "legend-panel__body"})
-		collapseWrap.appendChild(bodyWrap)
-
-		const actionsRow = Utils.el("div", {className: "legend__actions", text: "Toggle all:"})
-		const defaultBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Show all features", text: "ON"})
-		const noneBtn = Utils.el("button", {type: "button", className: "legend-panel__action-btn", "aria-label": "Hide all features", text: "OFF"})
-		defaultBtn.addEventListener("click", () => FilterState.setAllVisible(true))
-		noneBtn.addEventListener("click", () => FilterState.setAllVisible(false))
-		actionsRow.append(defaultBtn, noneBtn)
-
-		const panel = Utils.el("div", {className: "legend-panel__content", id: "legend-panel__groups"})
-
-		// Static dividers, matching the panel's markup: one before the
-		// actions row, one between actions and the groups content.
-		bodyWrap.append(divider("divider"), actionsRow, divider("divider"), panel)
+		document.getElementById("legend-panel__all-on-btn").addEventListener("click", () => FilterState.setAllVisible(true))
+		document.getElementById("legend-panel__all-off-btn").addEventListener("click", () => FilterState.setAllVisible(false))
 
 		const collapsible = createCollapsible({panelEl: legend, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
+		// Starts collapsed (matches the "is-collapsed" class + collapseWrap's
+		// data-collapsed="true" already set on the static markup); set here
+		// too so the collapse button's aria state agrees with it from the
+		// start, since the header itself is only mounted in JS.
+		collapsible.setCollapsed(true)
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
 
 		buildPanel(panel)

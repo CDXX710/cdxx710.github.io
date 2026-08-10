@@ -1,22 +1,16 @@
-import Utils from "../../utils.js"
+import {isolateFromMap} from "../../dom-utils.js"
 
+// ─────────────────────────────────────────────────────────────
+// Zoom control — markup lives statically in map.html (#zoom-panel);
+// this just wires up behavior.
+// ─────────────────────────────────────────────────────────────
 export function createZoomUI(map) {
-	const container = map.getContainer()
-
-	const el = Utils.el("div", {className: "zoom-panel"})
-	el.innerHTML = Utils.html`
-		<button type="button" class="zoom-button" id="zoom-panel__in-btn">+</button>
-		<button type="button" class="zoom-button" id="zoom-panel__out-btn">−</button>
-	`
+	const el = document.getElementById("zoom-panel")
 
 	el.querySelector("#zoom-panel__in-btn").addEventListener("click", () => map.zoomIn())
 	el.querySelector("#zoom-panel__out-btn").addEventListener("click", () => map.zoomOut())
 
-	// Prevent Leaflet map interactions
-	L.DomEvent.disableClickPropagation(el)
-	L.DomEvent.disableScrollPropagation(el)
-
-	container.appendChild(el)
+	isolateFromMap(el)
 
 	return {
 		element: el,

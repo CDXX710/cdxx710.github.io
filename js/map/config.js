@@ -1,18 +1,34 @@
 // ─────────────────────────────────────────────────────────────
 // Config — every tunable value lives here, nowhere else.
 // ─────────────────────────────────────────────────────────────
+
+// CARTO basemap tiles are named "{theme}_{labelsSuffix}", e.g.
+// light_all, dark_all, light_nolabels, dark_nolabels. buildBaseTileUrl
+// assembles the right URL from a theme ("light"/"dark") and a labels
+// mode ("all"/"no_labels") instead of every base layer hardcoding its
+// own near-identical URL.
+const CARTO_BASE_TILE_URL = "https://{s}.basemaps.cartocdn.com/{style}/{z}/{x}/{y}{r}.png"
+
+function buildBaseTileUrl(theme, labels) {
+	const labelsSuffix = labels === "all" ? "all" : "nolabels"
+	return CARTO_BASE_TILE_URL.replace("{style}", `${theme}_${labelsSuffix}`)
+}
+
 const Config = {
 	map: {
 		center: [15.5, -61.2],
 		zoom: 8,
 		maxZoom: 19
 	},
+	buildBaseTileUrl,
+	// Default labels mode for base layers: "all" shows place/road labels,
+	// "no_labels" hides them. Independent of which base layer (light/dark) is active.
+	defaultLabelsMode: "all",
 	baseLayers: [
 		{
 			id: "light",
 			label: "Light",
 			theme: "light",
-			tileUrl: "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
 			tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			tileSubdomains: "abcd"
 		},
@@ -20,7 +36,6 @@ const Config = {
 			id: "dark",
 			label: "Dark",
 			theme: "dark",
-			tileUrl: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
 			tileAttribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			tileSubdomains: "abcd"
 		}

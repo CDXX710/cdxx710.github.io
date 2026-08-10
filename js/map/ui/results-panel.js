@@ -5,6 +5,7 @@ import EventBus from "../event-bus.js"
 import ResultsViewState from "../state/results-view-state.js"
 import ExportDialog from "./export-dialog.js"
 import buildResultRow from "./results-row.js"
+import {isolateFromMap, createCollapsible, isNarrowViewport} from "./panel-behaviors.js"
 
 // ─────────────────────────────────────────────────────────────
 // SelectionResults — the selected-records list panel: rendering
@@ -107,32 +108,6 @@ function buildGuideEl() {
 
 const SelectionResults = (() => {
 	let panelEl, listEl, countEl, sortInputEl, collapsible, titleBtn, titleLabelEl, emptyStateEl
-
-	function isolateFromMap(el) {
-		L.DomEvent.disableScrollPropagation(el)
-		L.DomEvent.disableClickPropagation(el)
-	}
-
-	// No header/body params here (unlike Legend/AnalyticsPanel) — this
-	// panel's header markup lives in the external HTML, not built here,
-	// and its collapse transition is already CSS-driven off the
-	// `collapsedClass` toggle alone; nothing here ever measures or writes
-	// height from JS.
-	function createCollapsible({panelEl, collapseBtn, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
-		function setCollapsed(collapsed) {
-			panelEl.classList.toggle(collapsedClass, collapsed)
-			collapseBtn.setAttribute("aria-expanded", String(!collapsed))
-			collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
-		}
-		function isCollapsed() {
-			return panelEl.classList.contains(collapsedClass)
-		}
-		return {setCollapsed, isCollapsed}
-	}
-
-	function isNarrowViewport() {
-		return window.matchMedia("(max-width: 30rem)").matches
-	}
 
 	function currentSortKey() {
 		return sortInputEl.value

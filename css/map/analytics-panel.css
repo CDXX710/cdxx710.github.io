@@ -7,7 +7,7 @@
 	top: calc(2 * var(--space-5) + var(--top-left-panels-height));
 	left: var(--space-6);
 	min-width: var(--legend-min-width);
-	max-width: var(--analytics-max-width);
+	width: var(--analytics-max-width);
 	padding: var(--space-3) 0.4rem;
 	/*
 	 *  No lower bound previously: with only `top` set, the analytics

@@ -12,15 +12,14 @@
 
 .searchbar-panel {
 	position: absolute;
-
 	--searchbar-height: var(--top-left-panels-height);
-	--searchbar-width: calc(0.9 * (var(--top-left-panels-height)));
+	--searchbar-width: calc(0.7 * (var(--top-left-panels-height)));
 	--searchbar-field-width: clamp(10rem, 20vw, 18rem);
 	height: var(--searchbar-height);
 	width: var(--searchbar-width);
 
 	top: var(--space-5);
-	left: calc(3 * var(--space-6) + 2.5rem + var(--toolbar-width)); /* (Thrice zoom-panel left alignement + its width) + basemap-panel width */
+	left: calc(3 * var(--space-6) + var(--zoom-panel-width) + var(--toolbar-width)); /* (Thrice zoom-panel left alignment + its width) + basemap-panel width */
 
 	display: flex;
 	align-items: center;

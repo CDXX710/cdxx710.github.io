@@ -65,10 +65,18 @@
 	--popup-width: clamp(20rem, 32dvw, 34rem);
 	--popup-height: clamp(16rem, 42dvh, 26rem);
 	--slider-handle-size: 2rem;
-	--toolbar-width: 11rem;
+	--toolbar-width: 12rem;
 	--legend-min-width: 2rem;
 	--analytics-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
 	--top-left-panels-height: 5rem;
+	/*
+	 *   Width of the zoom control (and so of the whole zoom-panel,
+	 *   which has no width of its own — it shrinks to fit this).
+	 *   basemap-panel and searchbar-panel both offset themselves past
+	 *   it, so this is the single source of truth for that offset math
+	 *   instead of each repeating the literal.
+	 */
+	--zoom-panel-width: 2.5rem;
 
 	/*
 	 *   Floating-panel width shared by legend + results panels.

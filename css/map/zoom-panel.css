@@ -3,6 +3,7 @@
 	top: var(--space-5);
 	left: var(--space-6);
 	height: var(--top-left-panels-height);
+	width: var(--zoom-panel-width);
 
 	display: flex;
 	flex-direction: column;
@@ -28,7 +29,7 @@
 
 	color: var(--colorTextSecondary);
 
-	width: 2.5rem;
+	width: var(--zoom-panel-width);
 	height: 50%;
 
 	font-size: var(--font-size-xl);

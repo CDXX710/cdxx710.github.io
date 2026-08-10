@@ -2,11 +2,7 @@ import Config from "../config.js"
 import EventBus from "../event-bus.js"
 import MapCore from "./map-core.js"
 import Utils from "../utils.js"
-
-function isolateFromMap(el) {
-	L.DomEvent.disableScrollPropagation(el)
-	L.DomEvent.disableClickPropagation(el)
-}
+import {isolateFromMap} from "../dom-utils.js"
 
 // ─────────────────────────────────────────────────────────────
 // Basemaps — base layer (radio) + historical overlay (optional, at
@@ -17,12 +13,13 @@ const Basemaps = (() => {
 	let currentBaseId = null
 	let overlayLayerInstances = new Map()
 	let currentOverlayId = null
+	let currentLabelsMode = Config.defaultLabelsMode ?? "no_labels"
 
 	function baseLayerFor(def) {
 		if (!baseLayerInstances.has(def.id)) {
 			baseLayerInstances.set(
 				def.id,
-				L.tileLayer(def.tileUrl, {
+				L.tileLayer(Config.buildBaseTileUrl(def.theme, currentLabelsMode), {
 					attribution: def.tileAttribution,
 					subdomains: def.tileSubdomains ?? "abc",
 					maxZoom: Config.map.maxZoom
@@ -63,6 +60,23 @@ const Basemaps = (() => {
 		EventBus.emit("basemap:baseChanged", def)
 	}
 
+	// Labels toggle is independent of which base layer (light/dark) is
+	// active: it just swaps every cached base layer's tile URL between
+	// the "all" and "no_labels" CARTO variants in place.
+	function setLabels(mode) {
+		if (mode === currentLabelsMode) return
+		currentLabelsMode = mode
+		Config.baseLayers.forEach(def => {
+			const layer = baseLayerInstances.get(def.id)
+			if (layer) layer.setUrl(Config.buildBaseTileUrl(def.theme, currentLabelsMode))
+		})
+		EventBus.emit("basemap:labelsChanged", currentLabelsMode)
+	}
+
+	function toggleLabels() {
+		setLabels(currentLabelsMode === "all" ? "no_labels" : "all")
+	}
+
 	function setOverlay(id) {
 		// Passing null (or the currently-active id, to allow toggling off) clears the overlay.
 		const nextId = id === currentOverlayId ? null : id
@@ -78,8 +92,7 @@ const Basemaps = (() => {
 		EventBus.emit("basemap:overlayChanged", currentOverlayId)
 	}
 
-	function buildBaseControl(container) {
-		const row = Utils.el("div", {className: "basemap-panel__row", role: "radiogroup", "aria-label": "Choose base map"})
+	function buildBaseControl(row) {
 		const buttons = Config.baseLayers.map(def => {
 			const btn = Utils.el("button", {
 				type: "button",
@@ -92,7 +105,6 @@ const Basemaps = (() => {
 			return btn
 		})
 		buttons.forEach(btn => row.appendChild(btn))
-		container.appendChild(row)
 		EventBus.on("basemap:baseChanged", layer => {
 			buttons.forEach(btn => {
 				const isActive = btn.dataset.basemap === layer.id
@@ -102,8 +114,25 @@ const Basemaps = (() => {
 		})
 	}
 
-	function buildOverlayControl(container) {
-		const row = Utils.el("div", {className: "basemap-panel__row basemap-panel__row--overlay", role: "group", "aria-label": "Toggle historical map overlay"})
+	function buildLabelsToggle(row) {
+		const btn = Utils.el("button", {
+			type: "button",
+			className: "basemap-panel__btn basemap-panel__btn--labels" + (currentLabelsMode === "all" ? " is-active" : ""),
+			"data-labels-toggle": "",
+			"aria-pressed": String(currentLabelsMode === "all"),
+			title: "Toggle place labels",
+			text: "Labels"
+		})
+		btn.addEventListener("click", () => toggleLabels())
+		row.appendChild(btn)
+		EventBus.on("basemap:labelsChanged", mode => {
+			const isActive = mode === "all"
+			btn.classList.toggle("is-active", isActive)
+			btn.setAttribute("aria-pressed", String(isActive))
+		})
+	}
+
+	function buildOverlayControl(row) {
 		const buttons = Config.overlayLayers.map(def => {
 			const btn = Utils.el("button", {
 				type: "button",
@@ -117,7 +146,6 @@ const Basemaps = (() => {
 			return btn
 		})
 		buttons.forEach(btn => row.appendChild(btn))
-		container.appendChild(row)
 		EventBus.on("basemap:overlayChanged", activeId => {
 			buttons.forEach(btn => {
 				const isActive = btn.dataset.overlay === activeId
@@ -127,11 +155,15 @@ const Basemaps = (() => {
 		})
 	}
 
+	// Markup (the panel shell + both rows) lives statically in map.html
+	// (#basemap-panel); only the per-layer buttons are data-driven from
+	// Config, so those are the only pieces built here.
 	function buildControl() {
-		const control = Utils.el("div", {className: "basemap-panel", "aria-label": "Basemap selector"})
-		buildBaseControl(control)
-		buildOverlayControl(control)
-		document.getElementById("map").appendChild(control)
+		const control = document.getElementById("basemap-panel")
+		const baseRow = document.getElementById("basemap-panel__base-row")
+		buildBaseControl(baseRow)
+		buildLabelsToggle(baseRow)
+		buildOverlayControl(document.getElementById("basemap-panel__overlay-row"))
 		isolateFromMap(control)
 	}
 
@@ -141,7 +173,7 @@ const Basemaps = (() => {
 		if (Config.defaultOverlayLayerId) setOverlay(Config.defaultOverlayLayerId)
 	}
 
-	return {init, setBase, setOverlay}
+	return {init, setBase, setOverlay, setLabels, toggleLabels}
 })()
 
 export default Basemaps

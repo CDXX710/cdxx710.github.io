@@ -32,6 +32,52 @@
 		</header>
 
 		<main id="map" aria-label="Archive map">
+			<div class="zoom-panel" id="zoom-panel">
+				<button type="button" class="zoom-button" id="zoom-panel__in-btn">+</button>
+				<button type="button" class="zoom-button" id="zoom-panel__out-btn">−</button>
+			</div>
+
+			<div class="basemap-panel" id="basemap-panel" aria-label="Basemap selector">
+				<div class="basemap-panel__row" id="basemap-panel__base-row" role="radiogroup" aria-label="Choose base map"></div>
+				<div class="basemap-panel__row basemap-panel__row--overlay" id="basemap-panel__overlay-row" role="group" aria-label="Toggle historical map overlay"></div>
+			</div>
+
+			<div class="legend-panel is-collapsed" id="legend-panel" aria-label="Map legend">
+				<div class="legend-panel__header" id="legend-panel__header"></div>
+				<div class="legend-panel__collapse" id="legend-panel__collapse" data-collapsed="true">
+					<div class="legend-panel__body" id="legend-panel__body">
+						<div class="divider" role="separator"></div>
+						<div class="legend__actions">
+							Toggle all:
+							<button type="button" class="legend-panel__action-btn" id="legend-panel__all-on-btn" aria-label="Show all features">ON</button>
+							<button type="button" class="legend-panel__action-btn" id="legend-panel__all-off-btn" aria-label="Hide all features">OFF</button>
+						</div>
+						<div class="divider" role="separator"></div>
+						<div class="legend-panel__content" id="legend-panel__groups"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="analytics-panel" id="analytics-panel" aria-label="Analytics summary">
+				<div class="analytics-panel__header" id="analytics-panel__header"></div>
+				<div class="analytics-panel__collapse" id="analytics-panel__collapse" data-collapsed="false">
+					<div class="analytics-panel__body" id="analytics-panel__body">
+						<div class="divider" role="separator"></div>
+						<div class="analytics-section" id="analytics-panel__records"></div>
+						<div class="divider" role="separator"></div>
+						<div class="analytics-section" id="analytics-panel__islands"></div>
+						<div class="divider" role="separator"></div>
+						<div class="analytics-section" id="analytics-panel__timeline"></div>
+						<div class="divider" role="separator"></div>
+						<div class="analytics-section" id="analytics-panel__creole-roles"></div>
+						<div class="divider" role="separator"></div>
+						<div class="analytics-section" id="analytics-panel__categories"></div>
+						<div class="divider" role="separator"></div>
+						<div class="analytics-section" id="analytics-panel__author-types"></div>
+					</div>
+				</div>
+			</div>
+
 			<div class="searchbar-panel" id="searchbar-panel" role="search">
 				<button type="button" id="searchbar-panel__trigger" class="searchbar__shell" aria-label="Open search" aria-expanded="false">
 					<svg class="searchbar__vector" id="searchbar-panel__vector" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -154,7 +200,7 @@
 							<input type="hidden" id="results-panel__sort-value" name="resultsSortValue" value="name" />
 						</div>
 					</div>
-					<button type="button" class="collapse-btn results-panel__collapse-btn" id="results-panel__collapse-btn" aria-label="Close results panel">
+					<button type="button" class="collapse-btn results-panel__collapse-btn" id="results-panel__collapse-btn">
 						<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 							<polyline points="12,5 7,10 2,5" />
 						</svg>

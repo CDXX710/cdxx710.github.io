@@ -37,7 +37,7 @@
 
 .searchbar__shell {
 	position: relative;
-	width: 100%;
+	width: 90%;
 	height: 100%;
 	border: none;
 	background: transparent;
@@ -47,6 +47,9 @@
 	display: flex;
 	align-items: center;
 }
+
+.searchbar-panel.is-open .searchbar__shell {
+width: 100%;}
 
 .searchbar__shell:focus {
 	outline: none;
@@ -133,6 +136,7 @@
 
 .searchbar__clear {
 	position: absolute;
+	display: none;
 	right: var(--space-8);
 	top: 50%;
 	transform: translateY(-50%);
@@ -144,14 +148,13 @@
 	font-size: var(--font-size-xs);
 	line-height: 1;
 	padding: 0.2rem;
-	opacity: 0;
 	pointer-events: none;
 	transition: opacity var(--duration-fast), color var(--duration-fast);
 	z-index: 3;
 }
 
-.searchbar__clear.is-visible {
-	opacity: 1;
+.searchbar-panel.is-open .searchbar__clear {
+	display: block;
 	pointer-events: auto;
 }
 

@@ -37,7 +37,7 @@ const StateSyncManager = (() => {
 			baseIds: Config.baseLayers.map(b => b.id),
 			overlayIds: Config.overlayLayers.map(o => o.id),
 			categoryIds: Object.keys(Theme.categoryColors),
-			authorTypeIds: Object.keys(Theme.authorTypeColors),
+			authorTypeIds: Theme.authorTypeIds,
 			creoleRoleIds: ["using", "about", "unknown"],
 			sortKeys: ["name", "date", "authorType", "documentType"],
 			featureCount: ArchiveData.features.length
@@ -206,9 +206,7 @@ const StateSyncManager = (() => {
 		const search = window.location.search
 		// Priority 1: explicit URL params. Priority 2: defaults, if there
 		// are no URL params to restore from.
-		const source = search && search.length > 1
-			? sanitizeState(deserializeState(search), defaults, bounds)
-			: {...defaults}
+		const source = search && search.length > 1 ? sanitizeState(deserializeState(search), defaults, bounds) : {...defaults}
 		applyStateToApp(source)
 		writeHistory("replace")
 	}

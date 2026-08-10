@@ -6,7 +6,7 @@ import Boundaries from "../map/boundaries.js"
 import EventBus from "../event-bus.js"
 import ViewportQuery from "../state/viewport-query.js"
 import MapCore from "../map/map-core.js"
-import {isolateFromMap, createCollapsible, mountHeader} from "./panel-behaviors.js"
+import {isolateFromMap, createCollapsible, mountHeader, isNarrowViewport} from "./panel-behaviors.js"
 
 // ─────────────────────────────────────────────────────────────
 // Legend — the "On map / Filters" legend panel. Presentation only;
@@ -35,13 +35,13 @@ const Legend = (() => {
 	// label. The row set itself is static (defined by Theme/Boundaries
 	// config); only checked/is-off state changes afterwards (see
 	// syncCheckedState()).
-	function toggleRow({id, label, shapeKind, initialColor, checked = true, onChange, getChecked}) {
+	function toggleRow({id, label, iconHtml, initialColor, checked = true, onChange, getChecked}) {
 		const checkboxId = `cb-${id}`
 		const row = Utils.el("div", {className: "legend__item"})
 		row.style.setProperty("--shape-color", initialColor)
 		row.innerHTML = Utils.html` <label class="legend__icon-toggle" id="toggle-${id}" title="Toggle ${label}">
 	                                    <input type="checkbox" id="${checkboxId}" ${checked ? "checked" : ""} aria-label="Toggle ${label}" />
-	                                    ${Shapes.legendSvg(shapeKind)}
+	                                    ${iconHtml}
                                     </label>
                                     <label class="legend__item-label" for="${checkboxId}">${label}</label>`
 		const checkbox = row.querySelector("input")
@@ -82,9 +82,9 @@ const Legend = (() => {
 	}
 
 	const creoleRoleEntries = [
-		{key: "using", label: "Using creoles", shapeKind: "using"},
-		{key: "about", label: "About creoles", shapeKind: "about"},
-		{key: "unknown", label: "Unknown", shapeKind: "unknown"}
+		{key: "using", label: "Using creoles"},
+		{key: "about", label: "About creoles"},
+		{key: "unknown", label: "Unknown"}
 	]
 	// Each group builder returns [titleEl, ...rowEls] or null when empty.
 	// `presentKeys` can limit a group to a specific set of keys; currently
@@ -95,30 +95,31 @@ const Legend = (() => {
 		if (!entries.length) return null
 		return [
 			groupTitle("Creole"),
-			...entries.map(({key, label, shapeKind}) =>
-				toggleRow({
+			...entries.map(({key, label}) => {
+				const color = Theme.roleColor(key)
+				return toggleRow({
 					id: `legend-creole-${key}`,
 					label,
-					shapeKind,
-					initialColor: "white",
+					iconHtml: Shapes.roleLegendSvg(key, color),
+					initialColor: color,
 					checked: FilterState.isCreoleRoleActive(key),
 					onChange: isOn => FilterState.setCreoleRoleActive(key, isOn),
 					getChecked: () => FilterState.isCreoleRoleActive(key)
 				})
-			)
+			})
 		]
 	}
 	function authorTypeGroup(presentKeys) {
-		const entries = Object.entries(Theme.authorTypeColors).filter(([key]) => !presentKeys || presentKeys.has(key))
+		const entries = Theme.authorTypeIds.filter(key => !presentKeys || presentKeys.has(key))
 		if (!entries.length) return null
 		return [
 			groupTitle("Author type"),
-			...entries.map(([typeKey, color]) =>
+			...entries.map(typeKey =>
 				toggleRow({
 					id: `legend-atype-${typeKey}`,
 					label: Utils.capitalize(typeKey),
-					shapeKind: "ring",
-					initialColor: color,
+					iconHtml: Shapes.legendSvg("unknown"),
+					initialColor: "var(--colorTextSecondary)",
 					checked: FilterState.isAuthorTypeActive(typeKey),
 					onChange: isOn => FilterState.setAuthorTypeActive(typeKey, isOn),
 					getChecked: () => FilterState.isAuthorTypeActive(typeKey)
@@ -135,7 +136,7 @@ const Legend = (() => {
 				toggleRow({
 					id: `legend-cat-${catKey}`,
 					label: Utils.capitalize(catKey),
-					shapeKind: "unknown",
+					iconHtml: Shapes.legendSvg("unknown"),
 					initialColor: color,
 					checked: FilterState.isCategoryActive(catKey),
 					onChange: isOn => FilterState.setCategoryActive(catKey, isOn),
@@ -153,7 +154,7 @@ const Legend = (() => {
 				toggleRow({
 					id: `legend-layer-${key}`,
 					label,
-					shapeKind,
+					iconHtml: Shapes.legendSvg(shapeKind),
 					initialColor: color,
 					checked: Boundaries.isVisible(key),
 					onChange: isOn => Boundaries.setVisible(key, isOn),
@@ -165,7 +166,7 @@ const Legend = (() => {
 	function buildPanel(body) {
 		syncFns = []
 		body.innerHTML = ""
-		const groups = [layersGroup(), creoleRoleGroup(null), authorTypeGroup(null), categoryGroup(null)].filter(Boolean)
+		const groups = [layersGroup(), creoleRoleGroup(null), categoryGroup(null), authorTypeGroup(null)].filter(Boolean)
 		groups.forEach((els, i) => {
 			els.forEach(el => body.appendChild(el))
 		})
@@ -200,13 +201,18 @@ const Legend = (() => {
 		document.getElementById("legend-panel__all-on-btn").addEventListener("click", () => FilterState.setAllVisible(true))
 		document.getElementById("legend-panel__all-off-btn").addEventListener("click", () => FilterState.setAllVisible(false))
 
-		const collapsible = createCollapsible({panelEl: legend, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend"})
+		const collapsible = createCollapsible({panelEl: legend, collapseBtn, bodyEl: collapseWrap, expandLabel: "Expand legend", collapseLabel: "Collapse legend", name: "legend"})
 		// Starts collapsed (matches the "is-collapsed" class + collapseWrap's
 		// data-collapsed="true" already set on the static markup); set here
 		// too so the collapse button's aria state agrees with it from the
 		// start, since the header itself is only mounted in JS.
 		collapsible.setCollapsed(true)
 		collapseBtn.addEventListener("click", () => collapsible.setCollapsed(!collapsible.isCollapsed()))
+		// Desktop-only: the legend and results panels can overlap when both
+		// are expanded, so collapse this one whenever results expands.
+		EventBus.on("panel:collapseChanged", ({name, collapsed}) => {
+			if (name === "results" && !collapsed && !isNarrowViewport()) collapsible.setCollapsed(true)
+		})
 
 		buildPanel(panel)
 		// Keep the panel honest as filters/time-range change which markers are

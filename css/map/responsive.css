@@ -66,10 +66,6 @@
 }
 
 @media (max-width: 30rem) {
-	:root {
-		--select-btn-w: 3.4rem;
-	}
-
 	/* ── Select toolbar ── */
 	.select-toolbar__btn {
 		width: 2.4rem;
@@ -77,7 +73,7 @@
 	}
 
 	.zoom-button {
-		width: var(--select-btn-w) !important;
+		width: var(--zoom-panel-width) !important;
 	}
 
 	#select-toolbar-panel {

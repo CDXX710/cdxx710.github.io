@@ -13,7 +13,7 @@ const FilterState = (() => {
 		maxYear: Math.max(...years),
 		showCreoleRole: {using: true, about: true, unknown: true},
 		activeCategories: new Set(Object.keys(Theme.categoryColors)),
-		activeAuthorTypes: new Set(Object.keys(Theme.authorTypeColors))
+		activeAuthorTypes: new Set(Theme.authorTypeIds)
 	}
 	// Tracks which of the four filter groups the user last touched, so
 	// classifyHiddenReason (below) can attribute a record hidden by
@@ -52,7 +52,7 @@ const FilterState = (() => {
 	}
 	function setAllVisible(isOn) {
 		state.activeCategories = isOn ? new Set(Object.keys(Theme.categoryColors)) : new Set()
-		state.activeAuthorTypes = isOn ? new Set(Object.keys(Theme.authorTypeColors)) : new Set()
+		state.activeAuthorTypes = isOn ? new Set(Theme.authorTypeIds) : new Set()
 		state.showCreoleRole = {using: isOn, about: isOn, unknown: isOn}
 		// Touches every group equally, preserving their relative order —
 		// this is a blanket reset/clear-all, not the user focusing on one
@@ -136,7 +136,8 @@ const FilterState = (() => {
 		classifyHiddenReason,
 		isCategoryActive,
 		isAuthorTypeActive,
-		isCreoleRoleActive
+		isCreoleRoleActive,
+		roleKeyFor
 	}
 })()
 

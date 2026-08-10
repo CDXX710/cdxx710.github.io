@@ -6,13 +6,14 @@
 	width: var(--zoom-panel-width);
 
 	display: flex;
+	flex-wrap: wrap;
+	align-content: center;
 	flex-direction: column;
-	justify-content: space-between;
 	pointer-events: auto;
 	cursor: auto;
 }
 
-.zoom-panel > * {
+.zoom-button:not(:last-of-type) {
 	border-bottom: var(--glass-border);
 }
 
@@ -36,5 +37,5 @@
 }
 
 .zoom-button:hover {
-    color: var(--colorAccent);
+	color: var(--colorAccent);
 }

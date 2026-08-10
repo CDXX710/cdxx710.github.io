@@ -22,7 +22,7 @@
 .basemap-panel__row--overlay {
 	margin-top: 0.35rem;
 	padding-top: 0.35rem;
-	border-top: 1px solid var(--color-border);
+	border-top: 1px solid var(--glass-border-color);
 }
 
 .basemap-panel__btn {

@@ -202,7 +202,7 @@ const SelectionResults = (() => {
 		listEl.parentNode.insertBefore(emptyStateEl, listEl.nextSibling)
 
 		isolateFromMap(panelEl)
-		collapsible = createCollapsible({panelEl, collapseBtn, expandLabel: "Expand selection panel", collapseLabel: "Collapse selection panel"})
+		collapsible = createCollapsible({panelEl, collapseBtn, expandLabel: "Expand selection panel", collapseLabel: "Collapse selection panel", name: "results"})
 
 		document.getElementById("results-panel__clear-btn").addEventListener("click", () => SelectionState.clear())
 		document.getElementById("results-panel__select-all-btn").addEventListener("click", ResultsViewState.selectAll)
@@ -212,6 +212,11 @@ const SelectionResults = (() => {
 		// Starts expanded on wider viewports; starts collapsed by default on
 		// narrow/mobile viewports instead.
 		collapsible.setCollapsed(isNarrowViewport())
+		// Desktop-only: the legend and results panels can overlap when both
+		// are expanded, so collapse this one whenever legend expands.
+		EventBus.on("panel:collapseChanged", ({name, collapsed}) => {
+			if (name === "legend" && !collapsed && !isNarrowViewport()) collapsible.setCollapsed(true)
+		})
 
 		let previousCount = 0
 		EventBus.on("selection:changed", () => {

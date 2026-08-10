@@ -3,6 +3,7 @@ import Shapes from "./shapes.js"
 import PopupContent from "./popup-content.js"
 import MarkerPopup from "./marker-popup.js"
 import Config from "../config.js"
+import ArchiveData from "../data/archive-data.js"
 import FilterState from "../state/filter-state.js"
 import SelectionState from "../state/selection-state.js"
 import MapCore from "../map/map-core.js"
@@ -22,21 +23,57 @@ const Markers = (() => {
 	// in place rather than hiding the rest, so this stays search-only.
 	let searchActive = false
 
+	// True (the default) once more than one creoleRole remains under
+	// the active filters — markers then use their role's own brand
+	// colour, since role is the useful thing to highlight. Flips to
+	// false once filtering leaves only a single creoleRole visible, at
+	// which point role has nothing left to distinguish and markers
+	// fall back to their category colour instead (same icon either
+	// way — see Shapes.markerSvg). Recomputed on every filters:changed,
+	// since that's the only thing that can change which roles remain.
+	let highlightByRole = true
+
 	function invalidateVisibleCache() {
 		visibleCache = null
 	}
 
-	function createMarker(feature, index) {
-		const {category, creole, authorType} = feature.properties
-		const [lng, lat] = feature.geometry.coordinates
-		const fillColor = Theme.categoryColor(category)
-		const ringColor = Theme.authorTypeColor(authorType) ?? fillColor
-		const icon = L.divIcon({
+	// Scans every record (not just currently-created markers) against
+	// the active filters to see how many distinct creoleRoles would
+	// remain visible. Bails out as soon as a 2nd role is found.
+	function computeHighlightByRole() {
+		const rolesPresent = new Set()
+		for (const feature of ArchiveData.features) {
+			if (!FilterState.isFeatureVisible(feature.properties)) continue
+			rolesPresent.add(FilterState.roleKeyFor(feature.properties.creole))
+			if (rolesPresent.size > 1) return true
+		}
+		return false
+	}
+
+	function buildIcon(properties) {
+		const roleKey = FilterState.roleKeyFor(properties.creole)
+		const fillColor = highlightByRole ? Theme.roleColor(roleKey) : Theme.categoryColor(properties.category)
+		return L.divIcon({
 			className: "marker-icon",
-			html: Shapes.markerSvg(creole, fillColor, ringColor),
+			html: Shapes.markerSvg(roleKey, fillColor),
 			iconSize: [24, 24],
 			iconAnchor: [12, 12]
 		})
+	}
+
+	// Re-derives highlightByRole from the current filters and, if it
+	// actually changed, restyles every existing marker in place
+	// (visibility is untouched — that's applyVisibility's job).
+	function refreshIconMode() {
+		const next = computeHighlightByRole()
+		if (next === highlightByRole) return
+		highlightByRole = next
+		markers.forEach(marker => marker.setIcon(buildIcon(marker.feature.properties)))
+	}
+
+	function createMarker(feature, index) {
+		const icon = buildIcon(feature.properties)
+		const [lng, lat] = feature.geometry.coordinates
 		const marker = L.marker([lat, lng], {icon, keyboard: true, alt: feature.properties.name})
 		const openPopup = () => {
 			MarkerPopup.open(marker.getLatLng(), PopupContent.build(feature.properties), {
@@ -68,12 +105,16 @@ const Markers = (() => {
 		invalidateVisibleCache()
 	}
 	function init(features) {
+		highlightByRole = computeHighlightByRole()
 		markers = features.map((feature, index) => {
 			const marker = createMarker(feature, index)
 			marker.addTo(MapCore.map)
 			return marker
 		})
-		EventBus.on("filters:changed", applyVisibility)
+		EventBus.on("filters:changed", () => {
+			refreshIconMode()
+			applyVisibility()
+		})
 		EventBus.on("selection:changed", applyVisibility)
 		EventBus.on("search:queryChanged", isActive => {
 			searchActive = isActive

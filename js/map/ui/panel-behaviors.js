@@ -1,5 +1,6 @@
 import Utils from "../utils.js"
 import {isolateFromMap} from "../dom-utils.js"
+import EventBus from "../event-bus.js"
 
 // ─────────────────────────────────────────────────────────────
 // panel-behaviors — shared building blocks for the collapsible
@@ -63,12 +64,20 @@ export function mountHeader(headerEl, prefix, {title, extraEl} = {}) {
 // wrapper's `data-collapsed` attribute (Legend, AnalyticsPanel);
 // omit it when the panel only needs the `collapsedClass` toggle on
 // `panelEl` itself (SelectionResults).
-export function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel}) {
+//
+// `name`, if given, is broadcast on the shared `"panel:collapseChanged"`
+// EventBus event every time setCollapsed runs — this is how
+// Legend/SelectionResults mutually collapse each other on desktop to
+// avoid overlapping (see their own EventBus.on("panel:collapseChanged", ...)
+// listeners); panels that don't pass `name` (e.g. AnalyticsPanel) simply
+// don't participate.
+export function createCollapsible({panelEl, collapseBtn, bodyEl, collapsedClass = "is-collapsed", expandLabel, collapseLabel, name}) {
 	function setCollapsed(collapsed) {
 		panelEl.classList.toggle(collapsedClass, collapsed)
 		if (bodyEl) bodyEl.dataset.collapsed = String(collapsed)
 		collapseBtn.setAttribute("aria-expanded", String(!collapsed))
 		collapseBtn.setAttribute("aria-label", collapsed ? expandLabel : collapseLabel)
+		if (name) EventBus.emit("panel:collapseChanged", {name, collapsed})
 	}
 	function isCollapsed() {
 		return panelEl.classList.contains(collapsedClass)

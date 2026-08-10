@@ -50,3 +50,11 @@ button {
 	width: 0.75rem;
 	margin: 0 0.5rem;
 }
+
+.leaflet-marker-icon.boundary-flag-icon.leaflet-zoom-animated.leaflet-interactive {
+	z-index: 600 !important;
+}
+
+.leaflet-marker-icon.marker-icon.leaflet-zoom-animated.leaflet-interactive {
+    z-index: 400 !important;
+}

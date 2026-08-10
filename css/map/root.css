@@ -56,6 +56,14 @@
 
 	--color-unknown: #4f4f4f; /*#f6d392*/
 
+	/* Creole-role icon colours — fixed brand colours for the "about /
+	   using / unknown" marker icons themselves (see markers/shapes.js).
+	   Distinct from --color-writ-* above, which colours the author-type
+	   legend/ring, not the role icon. */
+	--color-role-about: #4b77bb;
+	--color-role-using: #33af7f;
+	--color-role-unknown: #6b7281;
+
 	/*  
      *   Fluid sizing: shrinks continuously with viewport instead of
 	 *   jumping at a breakpoint, so narrow screens keep the same
@@ -119,6 +127,7 @@
 	--color-bg: #262626; /* page background (kept) */
 	--color-surface: #302f33; /* lighter than bg, mirrors light's surface > bg relationship */
 	--color-elevated: #302f33dd; /* elevated panels, alpha-matched to light */
+	--color-border: #2a2a30; /* default border */
 
 	/* ── Surfaces: Glass ── */
 	--glass-bg-color: rgba(255, 255, 255, 0.05);
@@ -145,6 +154,7 @@
 	--color-bg: #d8d8dc; /* page background */
 	--color-surface: #e6e6ea; /* cards, panels, nav — lighter than bg, like dark mode */
 	--color-elevated: #e6e6eadd; /* elevated panels — same base as surface, w/ alpha */
+	--color-border: #d4d4d8; /* default border */
 
 	/* ── Surfaces: Glass ── */
 	--glass-bg-color: rgba(0, 0, 0, 0.05);

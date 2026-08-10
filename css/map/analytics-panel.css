@@ -191,6 +191,13 @@
 	border-radius: 50%;
 }
 
+.analytics-bar-row__dot.analytics-bar-row__dot--icon{
+    flex: unset;
+	width: unset;
+	height: unset;
+	border-radius: unset;
+}
+
 .analytics-bar-row__label {
 	width: 50%;
 	color: var(--colorText);

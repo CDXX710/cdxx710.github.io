@@ -5,6 +5,7 @@ import FilterState from "../state/filter-state.js"
 import ViewportQuery from "../state/viewport-query.js"
 import GeoIndex from "../data/geo-index.js"
 import Theme from "../state/theme.js"
+import Shapes from "../markers/shapes.js"
 import Utils from "../utils.js"
 import TimeSlider from "./time-slider-footer.js"
 import EventBus from "../event-bus.js"
@@ -68,10 +69,10 @@ const AnalyticsPanel = (() => {
 		})
 		return sorted.map(([key, count]) => ({key, count, pct: total ? Math.round((count / total) * 100) : 0}))
 	}
-	function barRow({label, pct, count, color, onClick}) {
+	function barRow({label, pct, count, color, icon, onClick}) {
 		const row = Utils.el("div", {className: "analytics-bar-row"})
 		row.innerHTML = Utils.html`
-			${color ? `<span class="analytics-bar-row__dot" style="background:${color}"></span>` : ""}
+			${icon ? `<span class="analytics-bar-row__dot analytics-bar-row__dot--icon">${icon}</span>` : color ? `<span class="analytics-bar-row__dot" style="background:${color}"></span>` : ""}
 			<span class="analytics-bar-row__label" title="${label}">${label}</span>
 			<span class="analytics-bar-row__track"><span class="analytics-bar-row__fill" style="width:${pct}%"></span></span>
 			<span class="analytics-bar-row__value">${pct}%</span>`
@@ -191,7 +192,7 @@ const AnalyticsPanel = (() => {
 			counts[role] = (counts[role] ?? 0) + 1
 		})
 		topEntries(counts, scope.length).forEach(({key, pct, count}) => {
-			const row = barRow({label: creoleRoleLabels[key], pct, count, onClick: () => toggleCreoleRoleIsolation(key)})
+			const row = barRow({label: creoleRoleLabels[key], pct, count, icon: Shapes.roleLegendSvg(key, Theme.roleColor(key)), onClick: () => toggleCreoleRoleIsolation(key)})
 			row.classList.toggle("is-isolated", isCreoleRoleIsolated(key))
 			creoleRolesEl.appendChild(row)
 		})
@@ -233,12 +234,12 @@ const AnalyticsPanel = (() => {
 	// isolating either one turns off every other real author type rather
 	// than turning one on.
 	function isAuthorTypeIsolated(key) {
-		const realAuthorTypes = Object.keys(Theme.authorTypeColors).filter(type => type !== "others")
+		const realAuthorTypes = Theme.authorTypeIds.filter(type => type !== "others")
 		if (key === "unknown") return realAuthorTypes.every(type => !FilterState.isAuthorTypeActive(type))
 		return realAuthorTypes.every(type => FilterState.isAuthorTypeActive(type) === (type === key))
 	}
 	function toggleAuthorTypeIsolation(key) {
-		const allAuthorTypes = Object.keys(Theme.authorTypeColors)
+		const allAuthorTypes = Theme.authorTypeIds
 		const realAuthorTypes = allAuthorTypes.filter(type => type !== "others")
 		if (isAuthorTypeIsolated(key)) {
 			allAuthorTypes.forEach(type => FilterState.setAuthorTypeActive(type, true))
@@ -256,7 +257,7 @@ const AnalyticsPanel = (() => {
 			</div>
 			${hiddenNoticeHtml(hiddenCount, "author type")}`
 		authorTypesEl.querySelector("#authorTypesClearBtn").addEventListener("click", () => {
-			Object.keys(Theme.authorTypeColors).forEach(type => FilterState.setAuthorTypeActive(type, true))
+			Theme.authorTypeIds.forEach(type => FilterState.setAuthorTypeActive(type, true))
 		})
 		if (!scope.length) {
 			authorTypesEl.appendChild(Utils.el("div", {className: "analytics-empty", text: "No records in this view."}))
@@ -270,8 +271,7 @@ const AnalyticsPanel = (() => {
 		})
 		topEntries(counts, scope.length, "unknown").forEach(({key, pct, count}) => {
 			const label = key === "unknown" ? "Other / Unknown" : Utils.capitalize(key)
-			const color = key === "unknown" ? Utils.readCssVar("--color-unknown") : Theme.authorTypeColor(key)
-			const row = barRow({label, pct, count, color, onClick: () => toggleAuthorTypeIsolation(key)})
+			const row = barRow({label, pct, count, onClick: () => toggleAuthorTypeIsolation(key)})
 			row.classList.toggle("is-isolated", isAuthorTypeIsolated(key))
 			authorTypesEl.appendChild(row)
 		})

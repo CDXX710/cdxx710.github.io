@@ -48,14 +48,32 @@ const Shapes = (() => {
 
 	// Generic abstract swatches — used by the Layers group only
 	// (islands/waters/flags in boundaries.js), which predates and is
-	// unrelated to creoleRole/authorType/category. Category and
-	// author-type rows use the plain "unknown" dot; creoleRole rows use
-	// the real icon via roleLegendSvg below instead of any of these.
+	// unrelated to creoleRole/authorType/category. Author-type rows use
+	// the plain "unknown" dot; creoleRole rows use the real icon via
+	// roleLegendSvg below instead of any of these.
 	const legendFragments = {
-		using: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
-		about: `<polygon class="shape-fill" points="7,1 13,13 1,13" stroke-width="1.5" stroke-linejoin="round" />`,
-		unknown: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
+		square: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
+		triangle: `<polygon class="shape-fill" points="7,1 13,13 1,13" stroke-width="1.5" stroke-linejoin="round" />`,
+		circle: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
 		ring: `<circle class="shape-fill shape-fill--ring" cx="7" cy="7" r="5" stroke-width="3" />`
+	}
+
+	// Document-type (category) swatches — one entry per Theme.categoryColors
+	// key. These are placeholders: each fragment is a standalone 14x14
+	// (viewBox 0 0 14 14) SVG snippet, swap it out per category once real
+	// curated icons are ready. Keep the `shape-fill` class on whichever
+	// element should carry `--shape-color` so the legend's colouring and
+	// is-off dimming (see legend-panel.css) keep working without any other
+	// changes; if a replacement icon is stroke-only (no fill), also add
+	// `shape-fill--ring` the way the Layers "waters" ring icon does.
+	const categoryFragments = {
+		bible: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
+		letter: `<polygon class="shape-fill" points="7,1 13,13 1,13" stroke-width="1.5" stroke-linejoin="round" />`,
+		notes: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
+		poem: `<polygon class="shape-fill" points="7,1 13,7 7,13 1,7" stroke-width="1.5" stroke-linejoin="round" />`,
+		report: `<rect class="shape-fill" x="1.5" y="1.5" width="11" height="11" stroke-width="1.5" rx="1" />`,
+		roman: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
+		others: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`
 	}
 
 	function roleSvg(roleKey, fillColor, pxSize) {
@@ -83,7 +101,14 @@ const Shapes = (() => {
 		return Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${legendFragments[kind] ?? legendFragments.unknown}</svg>`
 	}
 
-	return {markerSvg, roleLegendSvg, legendSvg}
+	// Legend row for the category (document-type) group — see
+	// categoryFragments above for where to swap in curated per-category
+	// icons later.
+	function categorySvg(category) {
+		return Utils.html`<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${categoryFragments[category] ?? categoryFragments.others}</svg>`
+	}
+
+	return {markerSvg, roleLegendSvg, legendSvg, categorySvg}
 })()
 
 export default Shapes

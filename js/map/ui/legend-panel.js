@@ -118,7 +118,7 @@ const Legend = (() => {
 				toggleRow({
 					id: `legend-atype-${typeKey}`,
 					label: Utils.capitalize(typeKey),
-					iconHtml: Shapes.legendSvg("unknown"),
+					iconHtml: Shapes.legendSvg("triangle"),
 					initialColor: "var(--colorTextSecondary)",
 					checked: FilterState.isAuthorTypeActive(typeKey),
 					onChange: isOn => FilterState.setAuthorTypeActive(typeKey, isOn),
@@ -136,7 +136,7 @@ const Legend = (() => {
 				toggleRow({
 					id: `legend-cat-${catKey}`,
 					label: Utils.capitalize(catKey),
-					iconHtml: Shapes.legendSvg("unknown"),
+					iconHtml: Shapes.categorySvg(catKey),
 					initialColor: color,
 					checked: FilterState.isCategoryActive(catKey),
 					onChange: isOn => FilterState.setCategoryActive(catKey, isOn),
@@ -150,11 +150,11 @@ const Legend = (() => {
 		if (!toggles.length) return null
 		return [
 			groupTitle("Layers"),
-			...toggles.map(({key, label, shapeKind, color}) =>
+			...toggles.map(({key, label, shapeKind, iconUrl, color}) =>
 				toggleRow({
 					id: `legend-layer-${key}`,
 					label,
-					iconHtml: Shapes.legendSvg(shapeKind),
+					iconHtml: iconUrl ? Utils.html`<img class="legend__icon-img" src="${iconUrl}" alt="" />` : Shapes.legendSvg(shapeKind),
 					initialColor: color,
 					checked: Boundaries.isVisible(key),
 					onChange: isOn => Boundaries.setVisible(key, isOn),

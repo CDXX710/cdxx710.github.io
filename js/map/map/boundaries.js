@@ -177,14 +177,21 @@ const Boundaries = (() => {
 	}
 
 	const toggleDefs = [
-		{key: "islands", label: "Islands", layer: () => islandsLayer, shapeKind: "unknown", color: () => cfg.island.fillColor, default: true},
+		{key: "islands", label: "Islands", layer: () => islandsLayer, shapeKind: "circle", color: () => cfg.island.fillColor, default: true},
 		{key: "waters", label: "Waters", layer: () => watersLayer, shapeKind: "ring", color: () => cfg.water.color, default: true},
-		{key: "flags", label: "Flags", layer: () => flagsLayer, shapeKind: "about", color: () => "#c9a227", default: cfg.showFlagsByDefault}
+		{
+			key: "flags",
+			label: "Flags",
+			layer: () => flagsLayer,
+			iconUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Flag_of_Dominica.svg",
+			color: () => "#c9a227",
+			default: cfg.showFlagsByDefault
+		}
 	]
 	// Consumed by the Legend to render an "Islands / Waters / Flags" group
 	// alongside the existing filter groups, rather than a separate floating panel.
 	function getToggles() {
-		return toggleDefs.map(({key, label, shapeKind, color, default: def}) => ({key, label, shapeKind, color: color(), default: def}))
+		return toggleDefs.map(({key, label, shapeKind, iconUrl, color, default: def}) => ({key, label, shapeKind, iconUrl, color: color(), default: def}))
 	}
 	function isVisible(key) {
 		const def = toggleDefs.find(t => t.key === key)

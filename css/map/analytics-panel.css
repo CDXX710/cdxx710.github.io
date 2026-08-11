@@ -236,7 +236,7 @@
 	flex: 0 0 2.4rem;
 	text-align: right;
 	font-family: var(--font-mono);
-	color: var(--colorAccentDim);
+	color: var(--colorAccent);
 	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 

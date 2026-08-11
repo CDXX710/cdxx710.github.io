@@ -47,5 +47,5 @@
 
 .basemap-panel__btn.is-active {
 	background: var(--colorAccent);
-	color: var(--colorTextInverted);
+	color: var(--colorText);
 }

@@ -25,13 +25,11 @@ body {
     z-index: var(--z-modal);
 }
 
-.site-header__dot {
-	width: var(--dot-size-lg);
-	height: var(--dot-size-lg);
-	border-radius: var(--radius-circle);
-	background: var(--colorAccent);
-	box-shadow: var(--shadow-glow-accent);
-	flex-shrink: 0;
+.site-header__logo {
+	height: 80%;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-glow-accent);
+    background: transparent;
 }
 
 .site-header__title {

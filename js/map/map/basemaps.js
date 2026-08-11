@@ -22,7 +22,7 @@ const Basemaps = (() => {
 				L.tileLayer(Config.buildBaseTileUrl(def.theme, currentLabelsMode), {
 					attribution: def.tileAttribution,
 					subdomains: def.tileSubdomains ?? "abc",
-					maxZoom: Config.map.maxZoom
+					maxZoom: Config.map.maxZoom,
 				})
 			)
 		}
@@ -37,14 +37,17 @@ const Basemaps = (() => {
 					attribution: def.tileAttribution,
 					subdomains: def.tileSubdomains ?? "abc",
 					maxZoom: Config.map.maxZoom,
+					maxNativeZoom: def.maxNativeZoom ?? Config.map.maxZoom,
 					opacity: def.opacity ?? 0.85,
-					pane: "overlayPane"
+					pane: "overlayPane",
+					updateWhenZooming: false,
+					keepBuffer: 4,
+                    bounds: def.bounds ? L.latLngBounds(def.bounds) : undefined
 				})
 			)
 		}
 		return overlayLayerInstances.get(def.id)
 	}
-
 	function setBase(id) {
 		const def = Config.baseLayers.find(b => b.id === id)
 		if (!def || id === currentBaseId) return

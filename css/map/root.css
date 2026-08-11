@@ -105,72 +105,80 @@
 	--panel-blur: blur(0.75rem);
 	--panel-shadow: var(--shadow-popup);
 
-	/*
-	 *   Repeated white-overlay tints used for hover/track/fill states
-	 *   on translucent surfaces (analytics bars, basemap control
-	 *   dividers). Named once instead of five inline rgba() repeats.
-	 */
-	--overlay-tint-subtle: rgba(255, 255, 255, 0.06);
-	--overlay-tint-soft: rgba(255, 255, 255, 0.09);
-	--overlay-tint-medium: rgba(255, 255, 255, 0.16);
-	--overlay-tint-strong: rgba(255, 255, 255, 0.34);
-
 	--tail-size: 2vw;
 	--tail-height: 2vw;
 
 	--glass-border-radius: var(--panel-radius);
 	--glass-shadow: var(--panel-shadow);
+	--glass-blur: blur(6px);
 }
 
 [data-theme="dark"] {
-	/* ── Colour: Surfaces ── */
+	/* ── Colour Dark: Surfaces ── */
 	--color-bg: #262626; /* page background (kept) */
 	--color-surface: #302f33; /* lighter than bg, mirrors light's surface > bg relationship */
 	--color-elevated: #302f33dd; /* elevated panels, alpha-matched to light */
 	--color-border: #2a2a30; /* default border */
 
-	/* ── Surfaces: Glass ── */
+	--overlay-tint-subtle: rgba(255, 255, 255, 0.06);
+	--overlay-tint-soft: rgba(255, 255, 255, 0.09);
+	--overlay-tint-medium: rgba(255, 255, 255, 0.16);
+	--overlay-tint-strong: rgba(255, 255, 255, 0.34);
+
+	/* ── Surfaces Dark: Glass ── */
 	--glass-bg-color: rgba(255, 255, 255, 0.05);
 	--glass-border: 2px solid rgba(255, 255, 255, 0.1);
-	--glass-blur: blur(8px);
 	--glass-border-color: rgba(255, 255, 255, 0.1);
 
-	/* ── Colour: Text ── */
+	/* ── Colour Dark: Text ── */
 	--colorText: #e8e8ec; /* primary text */
 	--colorTextInverted: #1a1a1e;
 	--colorTextSecondary: #a8a8b3; /* mid gray, same distance from bg as light's secondary */
 	--colorTextTertiary: #75757e; /* deeper mid gray step */
 	--colorTextMuted: #47474e; /* gray close to bg, mirrors light's muted */
 
-	/* ── Colour: Accent ── */
-	--colorAccent: #c8ff57; /* lime green — kept */
-	--colorAccentFade: #c8ff5733;
-	--colorAccentGlow: #c8ff5766;
-	--colorAccentDim: #95ac65;
+	/* ── Colour Dark: Accent ── */
+	--colorAccent: #3b88d8;
+	--colorAccentGlow: #0e5ea980;
+	--colorAccentFade: #0e5ea960;
+	--colorAccentDim: #4a6e8f;
+
+	.leaflet-overlay-pane .leaflet-layer {
+		filter: brightness(0.5) contrast(1.2);
+	}
 }
 
 [data-theme="light"] {
-	/* ── Colour: Surfaces ── */
+	/* ── Colour Light: Surfaces ── */
 	--color-bg: #d8d8dc; /* page background */
 	--color-surface: #e6e6ea; /* cards, panels, nav — lighter than bg, like dark mode */
 	--color-elevated: #e6e6eadd; /* elevated panels — same base as surface, w/ alpha */
 	--color-border: #d4d4d8; /* default border */
 
-	/* ── Surfaces: Glass ── */
+	--overlay-tint-subtle: rgba(0, 0, 0, 0.06);
+	--overlay-tint-soft: rgba(0, 0, 0, 0.09);
+	--overlay-tint-medium: rgba(0, 0, 0, 0.16);
+	--overlay-tint-strong: rgba(0, 0, 0, 0.34);
+
+	/* ── Surfaces Light: Glass ── */
 	--glass-bg-color: rgba(0, 0, 0, 0.05);
 	--glass-border: 2px solid rgba(0, 0, 0, 0.1);
-	--glass-blur: blur(4px);
 	--glass-border-color: rgba(0, 0, 0, 0.1);
 
-	/* ── Colour: Text ── */
+	/* ── Colour Light: Text ── */
 	--colorText: #1a1a1e; /* primary text — near-black, mirrors dark's near-white */
 	--colorTextInverted: #e8e8ec; /* primary text */
 	--colorTextSecondary: #75757e; /* mid gray, same distance from bg as dark's secondary */
+	--colorTextTertiary: #95959e; /* softer mid gray, midpoint step between secondary and muted */
 	--colorTextMuted: #b6b6bf; /* light gray close to bg — mirrors dark's dim-near-surface muted */
 
-	/* ── Colour: Accent ── */
-	--colorAccent: #8f59ff;
-	--colorAccentFade: #8f59ff33;
-	--colorAccentGlow: #8f59ff66;
-	--colorAccentDim: #7f68af;
+	/* ── Colour Light: Accent ── */
+	--colorAccent: #3b88d8;
+	--colorAccentGlow: #0e5ea966;
+	--colorAccentFade: #0e5ea933;
+	--colorAccentDim: #4a6e8f;
+
+	.leaflet-overlay-pane .leaflet-layer {
+		filter: brightness(0.8) contrast(1.4);
+	}
 }

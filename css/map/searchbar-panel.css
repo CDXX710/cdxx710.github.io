@@ -25,7 +25,7 @@
 	align-items: center;
 	overflow: visible;
 	cursor: pointer;
-	transition: width var(--duration-normal) var(--ease-standard);
+	transition: width var(--duration-expand) var(--ease-standard);
 	z-index: var(--z-map-overlay);
 }
 

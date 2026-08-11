@@ -47,18 +47,22 @@ const Config = {
 		{
 			id: "atlas",
 			label: "World Atlas",
-			tileUrl: "https://wmts.oldmapsonline.org/maps/bca48631-ffd0-5797-a725-21d54ac4f67b/2017-11-01T22:10:49.806598Z/{z}/{x}/{y}.png?key=L9mp0mSv8QUT19QPhCnL",
+			tileUrl: "../../img/tiles/world-atlas/{z}/{x}/{y}.png",
 			tileAttribution: '&copy; <a href="https://www.oldmapsonline.org/">Old Maps Online</a>',
 			tileSubdomains: "",
-			opacity: 0.85
+			opacity: 0.8,
+            maxNativeZoom: 10,
+            bounds: [[8.101184743046101, -57.510504408646185], [21.015217535045473, -76.6346092899388]]
 		},
 		{
 			id: "piccole",
 			label: "Piccole",
-			tileUrl: "https://wmts.oldmapsonline.org/maps/6091e498-082d-4e3e-a8d4-dd34aa26be74/2024-07-29T16:34:18.856393Z/{z}/{x}/{y}.png?key=L9mp0mSv8QUT19QPhCnL",
+			tileUrl: "../../img/tiles/le-piccole/{z}/{x}/{y}.png",
 			tileAttribution: '&copy; <a href="https://www.oldmapsonline.org/">Old Maps Online</a>',
 			tileSubdomains: "",
-			opacity: 0.85
+			opacity: 0.8,
+            maxNativeZoom: 10,
+            bounds: [[7.698238957076736, -56.44554021052002], [20.53069314339214, -66.71402885580099]]
 		}
 	],
 	defaultBaseLayerId: window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark",
@@ -66,7 +70,7 @@ const Config = {
 	popup: {maxWidth: 512},
 	search: {debounceMs: 200},
 	flyTo: {minZoom: 11},
-	searchbarAnimationMs: 200,
+	searchbarAnimationMs: 600,
 	// How close together (ms) two pointer-downs on the polygon tool need to be
 	// to count as "close the polygon", for mouse, touch, and pen alike.
 	polygonCloseTapMs: 300,

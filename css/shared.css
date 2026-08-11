@@ -97,7 +97,7 @@
 
 	/* ── Shadows ── */
 	--shadow-popup: 0 0.5rem 2rem rgba(0, 0, 0, 0.6), 0 0 0 0.0625rem var(--color-border-subtle);
-	--shadow-glow-accent: 0 0 0.375rem var(--colorAccentGlow);
+	--shadow-glow-accent: 0 0 0.375rem var(--colorAccentDim);
 
 	/* ── Scrollbar ── */
 	--scrollbar-width: 6px;

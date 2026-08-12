@@ -220,7 +220,7 @@ const AnalyticsPanel = (() => {
 		topEntries(counts, scope.length, "others").forEach(({key, pct, count}) => {
 			const label = key === "others" ? "Other / Unknown" : Utils.capitalize(key)
 			const color = key === "others" ? Utils.readCssVar("--color-unknown") : Theme.categoryColor(key)
-			const row = barRow({label, pct, count, color, onClick: () => toggleCategoryIsolation(key)})
+			const row = barRow({label, pct, count, icon: Shapes.categorySvg(key, color), onClick: () => toggleCategoryIsolation(key)})
 			row.classList.toggle("is-isolated", isCategoryIsolated(key))
 			categoriesEl.appendChild(row)
 		})

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #6b7281;
+        stroke-linecap: round;
+        stroke-width: 48px;
+      }
+
+      .cls-3 {
+        fill: #6b7281;
+      }
+    </style>
+  </defs>
+  <circle id="Circle" class="cls-3" cx="500" cy="500" r="500"/>
+  <path id="Speech" class="cls-1" d="M233.33,350c0-36.83,29.83-66.67,66.67-66.67h400c36.83,0,66.67,29.83,66.67,66.67v200c0,36.83-29.83,66.67-66.67,66.67h-233.33l-133.33,100v-100h-33.33c-36.83,0-66.67-29.83-66.67-66.67v-200Z"/>
+  <g id="Unknown">
+    <circle class="cls-3" cx="500" cy="540" r="24"/>
+    <path class="cls-2" d="M450,387.17c0-27.67,22.33-50,50-50s50,22.33,50,50-23.33,43.33-40,56.67c-6.67,5-10,13.33-10,21.67v13.33"/>
+  </g>
+</svg>

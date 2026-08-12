@@ -52,10 +52,10 @@ const Markers = (() => {
 
 	function buildIcon(properties) {
 		const roleKey = FilterState.roleKeyFor(properties.creole)
-		const fillColor = highlightByRole ? Theme.roleColor(roleKey) : Theme.categoryColor(properties.category)
+		const html = highlightByRole ? Shapes.markerSvg(roleKey, Theme.roleColor(roleKey)) : Shapes.categoryMarkerSvg(properties.category, Theme.categoryColor(properties.category))
 		return L.divIcon({
 			className: "marker-icon",
-			html: Shapes.markerSvg(roleKey, fillColor),
+			html,
 			iconSize: [24, 24],
 			iconAnchor: [12, 12]
 		})

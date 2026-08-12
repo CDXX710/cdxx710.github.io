@@ -52,7 +52,7 @@ button {
 }
 
 .leaflet-marker-icon.boundary-flag-icon.leaflet-zoom-animated.leaflet-interactive {
-	z-index: 600 !important;
+	z-index: 399 !important;
 }
 
 .leaflet-marker-icon.marker-icon.leaflet-zoom-animated.leaflet-interactive {

@@ -1,23 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #fff;
-      }
-
-      .cls-2 {
-        fill: #33af7f;
-      }
-
-      .cls-3 {
-        stroke: #33af7f;
-        stroke-linecap: round;
-        stroke-width: 48px;
-      }
-    </style>
-  </defs>
-  <circle id="Circle" class="cls-2" cx="500" cy="500" r="500"/>
-  <path id="Speech" class="cls-1" d="M233,350.46c0-36.72,29.87-66.46,66.75-66.46h400.5c36.88,0,66.75,29.74,66.75,66.46v199.38c0,36.72-29.87,66.46-66.75,66.46h-233.62l-133.5,99.69v-99.69h-33.37c-36.88,0-66.75-29.74-66.75-66.46v-199.38Z"/>
-  <path id="Using" class="cls-3" d="M360,400h280M360,500h140"/>
+<svg id="a" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <path id="b" data-name="Speech" d="M2,6.4c0-1.38,1.12-2.49,2.5-2.49h15c1.38,0,2.5,1.11,2.5,2.49v7.47c0,1.38-1.12,2.49-2.5,2.49h-8.75l-5,3.73v-3.73h-1.25c-1.38,0-2.5-1.11-2.5-2.49v-7.47h0Z" style="fill: #33af7f;"/>
+  <path id="c" data-name="Using" d="M6.76,8.25h10.49M6.76,12h5.24" style="fill: none; stroke: #fff; stroke-linecap: round; stroke-width: 2px;"/>
 </svg>

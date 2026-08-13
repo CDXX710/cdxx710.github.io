@@ -1,6 +1,7 @@
 import Utils from "../utils.js"
 import ArchiveData from "../data/archive-data.js"
 import Markers from "../markers/markers.js"
+import Shapes from "../markers/shapes.js"
 import Theme from "../state/theme.js"
 import MapCore from "../map/map-core.js"
 import Config from "../config.js"
@@ -19,9 +20,7 @@ function buildResultRow(index) {
 
 	const row = Utils.el("div", {className: "result-row"})
 	row.innerHTML = Utils.html` <div class="result-row__left">
-                                    	<svg class="result-row__dot" viewBox="0 0 14 14" aria-hidden="true">
-                                    		<circle cx="7" cy="7" r="6" fill="${color}" />
-                                    	</svg>
+                                    	<span class="result-row__dot">${Shapes.categorySvg(category, color)}</span>
                                     	<span class="result-row__name">${name}</span>
                                     </div>
                                     <div class="result-row__body">

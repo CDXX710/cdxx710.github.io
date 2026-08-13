@@ -114,17 +114,18 @@ const Legend = (() => {
 		if (!entries.length) return null
 		return [
 			groupTitle("Author type"),
-			...entries.map(typeKey =>
-				toggleRow({
+			...entries.map(typeKey => {
+				const color = Theme.authorTypeColor(typeKey)
+				return toggleRow({
 					id: `legend-atype-${typeKey}`,
 					label: Utils.capitalize(typeKey),
-					iconHtml: Shapes.legendSvg("triangle"),
-					initialColor: "var(--colorTextSecondary)",
+					iconHtml: Shapes.authorTypeSvg(typeKey, color),
+					initialColor: color,
 					checked: FilterState.isAuthorTypeActive(typeKey),
 					onChange: isOn => FilterState.setAuthorTypeActive(typeKey, isOn),
 					getChecked: () => FilterState.isAuthorTypeActive(typeKey)
 				})
-			)
+			})
 		]
 	}
 	function categoryGroup(presentKeys) {

@@ -125,7 +125,9 @@ const AnalyticsPanel = (() => {
 		})
 		topEntries(counts, scope.length).forEach(({key, pct, count}) => {
 			const bounds = GeoIndex.boundsForIsland(key)
-			islandsEl.appendChild(barRow({label: key, pct, count, onClick: bounds ? () => MapCore.map.flyToBounds(bounds, {padding: [24, 24]}) : null}))
+			const flagUrl = GeoIndex.flagForIsland(key)
+			const icon = flagUrl ? Utils.html`<img class="analytics-bar-row__flag" src="${flagUrl}" alt="" />` : null
+			islandsEl.appendChild(barRow({label: key, pct, count, icon, onClick: bounds ? () => MapCore.map.flyToBounds(bounds, {padding: [24, 24]}) : null}))
 		})
 	}
 
@@ -271,7 +273,8 @@ const AnalyticsPanel = (() => {
 		})
 		topEntries(counts, scope.length, "unknown").forEach(({key, pct, count}) => {
 			const label = key === "unknown" ? "Other / Unknown" : Utils.capitalize(key)
-			const row = barRow({label, pct, count, onClick: () => toggleAuthorTypeIsolation(key)})
+			const color = key === "unknown" ? Utils.readCssVar("--color-unknown") : Theme.authorTypeColor(key)
+			const row = barRow({label, pct, count, icon: Shapes.authorTypeSvg(key === "unknown" ? "others" : key, color), onClick: () => toggleAuthorTypeIsolation(key)})
 			row.classList.toggle("is-isolated", isAuthorTypeIsolated(key))
 			authorTypesEl.appendChild(row)
 		})

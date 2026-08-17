@@ -33,8 +33,12 @@
 ───────────────────────────────────────── */
 
 :root {
+	/* Prevents Android browsers to auto-boost font sizes to improve readability, which nudges everything*/
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+
 	color-scheme: light dark;
-	forced-color-adjust: none;
+	forced-color-adjust: none; /* Prevents auto dark-mode */
 
 	/* Category colours — orange (warm) to purple (cool), diverging */
 	--color-cat-bible: #d95f5f; /* #d95f02*/

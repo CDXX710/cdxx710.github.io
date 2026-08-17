@@ -1,5 +1,5 @@
 .export-dialog {
-	z-index: var(--z-tooltip);
+	z-index: var(--z-modal);
 	backdrop-filter: var(--glass-blur) !important;
 	position: fixed;
 	inset: 0;

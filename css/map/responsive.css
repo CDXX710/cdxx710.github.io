@@ -1,18 +1,18 @@
 /* ─────────────────────────────────────────
-    15. RESPONSIVE
-    Most sizing above is already fluid (clamp/dvw/dvh), so mobile
-    tracks the desktop layout continuously and these breakpoints only
-    cover the handful of changes that are structural, not scalable:
-    the popup's two-column layout can't shrink below a usable column
-    width, so it stacks; the selection-results card becomes a bottom
-    sheet once there's no room for a floating card beside the map.
+	RESPONSIVE
+	Most sizing above is already fluid (clamp/dvw/dvh), so mobile
+	tracks the desktop layout continuously and these breakpoints only
+	cover the handful of changes that are structural, not scalable:
+	the popup's two-column layout can't shrink below a usable column
+	width, so it stacks; the selection-results card becomes a bottom
+	sheet once there's no room for a floating card beside the map.
 ───────────────────────────────────────── */
 
 /*
  *  The zoom / basemap / search cluster is laid out as three siblings
  *  positioned by an additive left-offset formula (each panel's left
  *  = sum of the previous panels' width + gaps). That math assumes a
- *  fixed --toolbar-width (11rem) and a fully desktop-width map, so
+ *  fixed --toolbar-width (12rem) and a fully desktop-width map, so
  *  on phones the row runs off the right edge of the viewport — worst
  *  case once the searchbar opens. Below 40rem we drop the row and
  *  stack the three panels vertically instead, each pinned to the

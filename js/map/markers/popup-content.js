@@ -37,7 +37,7 @@ const PopupContent = (() => {
 	function build(props) {
 		const {time, category, creole, authorType, urlIMG, urlText, resume} = props
 		const categoryPill = Utils.html`<span class="pill pill--category">${category}</span>`
-        const yearPill = Utils.html`<span class="pill pill--year">${time}</span>`
+		const yearPill = Utils.html`<span class="pill pill--year">${time}</span>`
 		return Utils.html`
                         <div class="popup__panels">
 		                <div class="popup__left">
@@ -55,7 +55,7 @@ const PopupContent = (() => {
                                             We're sorry,
                                         </div>
                                         <div class="popup__resume-empty-subtitle">
-                                            No resumés are available at the moment..
+                                            No resumés are available at the moment.
                                         </div>
                                     `
 						}</div>

@@ -1,11 +1,11 @@
 /* ─────────────────────────────────────────
-    13. CUSTOM SELECT (generic dropdown)
+	CUSTOM SELECT (generic dropdown)
 
-    Styled via [data-dropdown-*] hooks rather than a fixed
-    ".custom-dropdown" block name, so the same rules apply
-    no matter which BEM wrapper class a given instance uses
-    (".custom-dropdown", ".results-panel__actions-dropdown", …).
-    Mirrors the data-attribute hooks CustomDropdown's JS relies on.
+	Styled via [data-dropdown-*] hooks rather than a fixed
+	".custom-dropdown" block name, so the same rules apply
+	no matter which BEM wrapper class a given instance uses
+	(".custom-dropdown", ".results-panel__actions-dropdown", …).
+	Mirrors the data-attribute hooks CustomDropdown's JS relies on.
 ───────────────────────────────────────── */
 
 [data-dropdown-root] {

@@ -51,10 +51,16 @@ button {
 	margin: 0 0.5rem;
 }
 
+/*
+ *  Leaflet stacks markers by pane, then by insertion order/vertical
+ *  position within it — not by a rule we can express declaratively.
+ *  These two explicit z-indices force boundary flags to always sit
+ *  just below archive markers, regardless of insertion order.
+ */
 .leaflet-marker-icon.boundary-flag-icon.leaflet-zoom-animated.leaflet-interactive {
 	z-index: 399 !important;
 }
 
 .leaflet-marker-icon.marker-icon.leaflet-zoom-animated.leaflet-interactive {
-    z-index: 400 !important;
+	z-index: 400 !important;
 }

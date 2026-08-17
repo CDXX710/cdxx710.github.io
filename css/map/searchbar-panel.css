@@ -1,13 +1,13 @@
 /* ─────────────────────────────────────────
-    SEARCH BAR
+	SEARCH BAR
 
-    An animated pill that morphs from a magnifying-glass icon into a
-    full text field. The glass outline and handle are drawn as an SVG
-    path/line (not baked-in artwork), redrawn every frame by
-    js/map/ui/searchbar.js as the bar's real pixel size changes, so it
-    still tracks the panel height / viewport width like the rest of
-    the toolbar. Colour comes from the shared design tokens
-    (currentColor + var(--color-*)) so it follows the active theme.
+	An animated pill that morphs from a magnifying-glass icon into a
+	full text field. The glass outline and handle are drawn as an SVG
+	path/line (not baked-in artwork), redrawn every frame by
+	js/map/ui/searchbar-panel.js as the bar's real pixel size changes, so it
+	still tracks the panel height / viewport width like the rest of
+	the toolbar. Colour comes from the shared design tokens
+	(currentColor + var(--color-*)) so it follows the active theme.
 ───────────────────────────────────────── */
 
 .searchbar-panel {

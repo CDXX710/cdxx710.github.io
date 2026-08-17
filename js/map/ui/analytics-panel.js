@@ -103,8 +103,7 @@ const AnalyticsPanel = (() => {
 			<div class="analytics-hero">
 				<span class="analytics-hero__count">${scope.length}</span>
 				<span class="analytics-hero__total">/ ${total}</span>
-			</div>
-            `
+			</div>`
 		recordsEl.querySelector("#clearAllBtn").addEventListener("click", () => {
 			TimeSlider.setRange(dataMinYear, dataMaxYear)
 			FilterState.setAllVisible(true)

@@ -3,6 +3,7 @@ import Config from "../config.js"
 import ArchiveData from "../data/archive-data.js"
 import SelectionState from "../state/selection-state.js"
 import EventBus from "../event-bus.js"
+import {isolateFromMap} from "../dom-utils.js"
 
 // ─────────────────────────────────────────────────────────────
 // Searchbar — the search input: matching, debouncing, and the
@@ -14,10 +15,6 @@ import EventBus from "../event-bus.js"
 // (rem/vw) dimensions instead of a fixed pixel geometry.
 // ─────────────────────────────────────────────────────────────
 const Searchbar = (() => {
-	function isolateFromMap(el) {
-		L.DomEvent.disableScrollPropagation(el)
-		L.DomEvent.disableClickPropagation(el)
-	}
 	function matchesQuery(feature, query) {
 		const {name, time, category, creole, authorType, location} = feature.properties
 		const haystack = [name, time, category, creole, authorType, location].filter(Boolean).join(" ").toLowerCase()

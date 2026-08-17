@@ -5,6 +5,7 @@ import DrawOverlay from "../map/draw-overlay.js"
 import SelectionState from "../state/selection-state.js"
 import EventBus from "../event-bus.js"
 import Config from "../config.js"
+import {isolateFromMap} from "../dom-utils.js"
 
 // ─────────────────────────────────────────────────────────────
 // SelectionToolbar — shape/object selection tools and the drag-to-
@@ -13,10 +14,6 @@ import Config from "../config.js"
 // rather than parallel mouse/touch handler pairs.
 // ─────────────────────────────────────────────────────────────
 const SelectionToolbar = (() => {
-	function isolateFromMap(el) {
-		L.DomEvent.disableScrollPropagation(el)
-		L.DomEvent.disableClickPropagation(el)
-	}
 	const hitTesters = {
 		rectangle: (start, end) => Markers.visible().filter(marker => GeoMath.inRectangle(containerPoint(marker), start, end)),
 		ellipse: (start, end) => Markers.visible().filter(marker => GeoMath.inEllipse(containerPoint(marker), start, end)),

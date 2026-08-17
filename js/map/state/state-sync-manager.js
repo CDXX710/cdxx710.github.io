@@ -294,25 +294,23 @@ export default StateSyncManager
 //    trades a few hundred ms of URL staleness after a checkbox click
 //    for not flooding history.replaceState during a slider drag.
 //
-// 6b. localStorage persistence was intentionally dropped: state now
+// 6. localStorage persistence was intentionally dropped: state now
 //    comes only from URL params, falling back to defaults when none
 //    are present. There is no "returning visitor" preference layer.
 //
-// 6. Viewport sync required new plumbing: nothing previously put pan/
+// 7. Viewport sync required new plumbing: nothing previously put pan/
 //    zoom on the EventBus. `MapCore` now emits `viewport:changed` on
 //    Leaflet's `moveend` (see map-core.js) — this is a new event this
 //    integration introduces, not one that already existed.
 //
-// 7. Selections above 200 indices are dropped from the shareable URL
+// 8. Selections above 200 indices are dropped from the shareable URL
 //    (still fully functional in the live session) to avoid an
 //    unusably long / copy-paste-truncated link. There is currently no
 //    warning shown to the user when this happens.
 //
-// 8. Restoring `sort` re-orders the results list (via the same
-//    "sort:changed" event CustomDropdown emits) but does not move the
-//    dropdown's own visual selection, since CustomDropdown only
-//    exposes an onSelect callback, not a setValue method. A URL with
-//    ?sort=date will show date-sorted results under a dropdown still
-//    labeled "Name" until the user opens it. Fixing this cleanly means
-//    adding a small setValue/selectOption method to CustomDropdown.
+// 9. Restoring `sort` re-orders the results list and also moves
+//    CustomDropdown's own visual selection to match, via the same
+//    "sort:changed" event CustomDropdown's onSelect emits (see the
+//    dropdown wiring in app.js) — a URL with ?sort=date shows both
+//    the date-sorted results and a dropdown already labeled "Date".
 // ─────────────────────────────────────────────────────────────

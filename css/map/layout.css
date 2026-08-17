@@ -22,14 +22,14 @@ body {
 	flex-shrink: 0;
 	background: var(--color-surface);
 	border-bottom: 1px solid var(--color-border);
-    z-index: var(--z-modal);
+	z-index: var(--z-modal);
 }
 
 .site-header__logo {
 	height: 80%;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-glow-accent);
-    background: transparent;
+	border-radius: var(--radius-sm);
+	box-shadow: var(--shadow-glow-accent);
+	background: transparent;
 }
 
 .site-header__title {
@@ -80,9 +80,11 @@ body {
 	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
 }
 
-.site-header__back:hover {
+.map-header__back:hover {
 	color: var(--colorAccent);
 }
+
+/* ── Slider footer ── */
 
 .slider-footer {
 	background: var(--color-surface);

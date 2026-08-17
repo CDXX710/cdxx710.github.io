@@ -102,6 +102,10 @@ const Shapes = (() => {
 		circle: `<circle class="shape-fill" cx="7" cy="7" r="5" stroke-width="1.5" />`,
 		ring: `<circle class="shape-fill shape-fill--ring" cx="7" cy="7" r="5" stroke-width="3" />`
 	}
+	// legendSvg()'s default/fallback arg is "unknown" — alias it to a plain
+	// dot so an unrecognized shapeKind degrades to something visible
+	// instead of rendering blank.
+	legendFragments.unknown = legendFragments.circle
 
 	// Raw path data per category, still in native 24×24 coordinates —
 	// the single source of truth for both renderings below.
@@ -220,9 +224,8 @@ const Shapes = (() => {
 	//   - "solid" icons (clergy, merchant, poet, writer) are single
 	//     filled glyphs — wrapped with fill:${color} instead.
 	//   - military mixes a solid silhouette with a few cutout accents
-	//     (originally white) that need their own group so they can
-	//     stay transparent in the legend and show the marker's own
-	//     circle colour on the map — see authorTypeMarkerFragments.
+	//     (originally white) that need their own group so they stay
+	//     transparent against the legend row's fill.
 	const authorTypeStrokePaths = {
 		admin: `
 		<rect x="2" y="6" width="20" height="15" rx="2" ry="2" />
@@ -258,10 +261,9 @@ const Shapes = (() => {
 	const militaryMainPath = `
 		<path d="M19.98,2.18c.54,0,1.05.21,1.43.59.38.38.59.89.59,1.43,0,.54-.21,1.05-.59,1.43l-2.76,2.76,1.09,1.09c.32.32.32.83,0,1.14-.32.32-.83.32-1.14,0l-.9-.9-2.44,2.44,2.59,2.59c1.37,1.37,2.46,2.97,3.25,4.74l.53,1.2c.13.31.07.66-.17.9-.24.24-.59.3-.9.17l-1.2-.53c-1.78-.78-3.37-1.87-4.74-3.25l-2.59-2.59-2.59,2.59c-1.37,1.37-2.97,2.46-4.74,3.25h0l-1.2.53c-.31.13-.66.07-.9-.17-.24-.24-.3-.59-.17-.9l.53-1.2c.78-1.78,1.87-3.37,3.25-4.74l2.59-2.59-2.46-2.46-.92.92c-.32.32-.83.32-1.14,0-.32-.32-.32-.83,0-1.14l1.09-1.09-2.76-2.76c-.38-.38-.59-.89-.59-1.43s.21-1.05.59-1.43c.79-.79,2.07-.79,2.86,0l2.76,2.76,1.09-1.09c.32-.32.83-.32,1.14,0,.32.32.32.83,0,1.14l-.88.88,2.46,2.46,2.44-2.44-.9-.9c-.32-.32-.32-.83,0-1.14.32-.32.83-.32,1.14,0l1.09,1.09,2.76-2.76c.38-.38.89-.59,1.43-.59Z" />
 	`
-	// Detail accents — white in the original two-tone artwork. In the
-	// legend they stay transparent (a gap in the silhouette); on the
-	// map marker they're drawn in the badge's own fill colour, see
-	// authorTypeMarkerFragments below.
+	// Detail accents — white in the original two-tone artwork; kept
+	// transparent in the legend row (authorTypeFragments below) so the
+	// row's own fill shows through the gap in the silhouette instead.
 	const militaryCutoutPaths = `
 		<path d="M17.5,7.24l2.76-2.76c.1-.1.12-.22.12-.29,0-.06-.02-.18-.12-.29-.16-.16-.41-.16-.57,0h0l-2.76,2.76.57.57Z" />
 		<path d="M7.07,6.67l-2.76-2.76c-.16-.16-.41-.16-.57,0-.1.1-.12.22-.12.29s.02.18.12.29h0s2.76,2.76,2.76,2.76l.57-.57Z" />
@@ -286,40 +288,6 @@ const Shapes = (() => {
         `
 	}
 
-	const authorTypeMarkerFragments = {
-		...Object.fromEntries(
-			Object.entries(authorTypeStrokePaths).map(([key, paths]) => [
-				key,
-				fill => Utils.html`
-				    <circle class="shape-fill" cx="500" cy="500" r="500" fill="${fill}" />
-				    <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="translate(250,250) scale(20.8333)">${paths}</g>
-			    `
-			])
-		),
-		...Object.fromEntries(
-			Object.entries(authorTypeSolidPaths).map(([key, paths]) => [
-				key,
-				fill => Utils.html`
-				    <circle class="shape-fill" cx="500" cy="500" r="500" fill="${fill}" />
-				    <g fill="#fff" transform="translate(250,250) scale(20.8333)">${paths}</g>
-			    `
-			])
-		),
-		military: fill => Utils.html`
-            <circle class="shape-fill" cx="500" cy="500" r="500" fill="${fill}" />
-            <g fill="#fff" transform="translate(250,250) scale(20.8333)">${militaryMainPath}</g>
-            <g fill="${fill}" transform="translate(250,250) scale(20.8333)">${militaryCutoutPaths}</g>
-        `
-	}
-
-	// Map marker: author-type icon, sized up, with a soft glow —
-	// same treatment as categoryMarkerSvg.
-	function authorTypeMarkerSvg(authorType, fillColor) {
-		const inner = (authorTypeMarkerFragments[authorType] ?? authorTypeMarkerFragments.others)(fillColor)
-		const glow = `filter:drop-shadow(0 0 0.25rem ${fillColor})`
-		return Utils.html`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 1000 1000" style="overflow:visible; ${glow};">${inner}</svg>`
-	}
-
 	// Legend/analytics row for author type — same flat treatment as
 	// categorySvg/roleLegendSvg.
 	function authorTypeSvg(authorType, fillColor) {
@@ -330,7 +298,6 @@ const Shapes = (() => {
 	return {
 		markerSvg,
 		categoryMarkerSvg,
-		authorTypeMarkerSvg,
 		roleLegendSvg,
 		legendSvg,
 		categorySvg,

@@ -1,7 +1,6 @@
 // ─────────────────────────────────────────────────────────────
 // dom-utils — tiny, generic DOM helpers with no panel/domain
-// knowledge, shared by both the map/ controls (zoom, basemap) and
-// the ui/ panels (legend, analytics, results).
+// knowledge, shared across map/, markers/, and ui/ modules.
 // ─────────────────────────────────────────────────────────────
 
 // Stops Leaflet from treating clicks/scrolls inside a floating UI

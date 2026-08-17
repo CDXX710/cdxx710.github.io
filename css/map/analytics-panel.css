@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────
-    15. Analytics Summary panel
+	ANALYTICS SUMMARY PANEL
 ───────────────────────────────────────── */
 
 .analytics-panel {
@@ -9,13 +9,6 @@
 	min-width: var(--legend-min-width);
 	width: var(--analytics-max-width);
 	padding: var(--space-3) 0.4rem;
-	/*
-	 *  No lower bound previously: with only `top` set, the analytics
-	 *  body (hero stat + bar rows + timeline) could run past the
-	 *  bottom of the viewport with no way to scroll to it on shorter
-	 *  screens. Cap to the space between the panel's top anchor and
-	 *  the bottom of the viewport, and scroll the body internally.
-	 */
 	max-height: 77%;
 	display: flex;
 	flex-direction: column;
@@ -193,7 +186,7 @@
 }
 
 .analytics-bar-row__label {
-    margin-left: var(--space-3);
+	margin-left: var(--space-3);
 	width: 50%;
 	color: var(--colorText);
 	opacity: 0.8;
@@ -287,7 +280,6 @@
 	font-style: italic;
 	color: var(--colorTextSecondary);
 }
-
 
 .analytics-bar-row__flag {
 	display: block;

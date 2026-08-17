@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────
-    SELECTION TOOLS
+	SELECTION TOOLS
 ───────────────────────────────────────── */
 
 #select-toolbar-panel {
@@ -172,16 +172,35 @@
 	border-top-right-radius: var(--panel-radius);
 }
 
+// Boundary/water pointer-events: off by default, on only for Object Select.
+//
+// Boundaries and water polygons live in leaflet-overlay-pane and are
+// interactive (bound to click/hover in boundaries.js) so they *can*
+// respond to the pointer — but by default they're kept pointer-events:
+// none here regardless of arm state, so ordinary browsing/panning near
+// a coastline never triggers a boundary hover tooltip. The Object
+// Select tool is the one deliberate exception: while it's armed,
+// boundaries need to receive clicks (to select the archive markers
+// inside them — see selection-toolbar.js's "boundary:objectClick"
+// handling), so the third rule below re-enables pointer-events, but
+// only for that specific tool/pane combination.
 .leaflet-pane.leaflet-overlay-pane .leaflet-interactive {
-	pointer-events: none !important; /* No boundaries/water hover/interactions if object select is not */
+	pointer-events: none !important;
 }
 
+/* Any armed shape tool (not just Object Select) also disables pointer-events
+   on markers, so a drag-to-draw gesture never gets intercepted by a marker's
+   own click/hover handling underneath the cursor. */
 .is-armed .leaflet-interactive {
-	pointer-events: none !important; /* Prevent marker/polygons interaction when drawing */
+	pointer-events: none !important;
 }
 
+/* The one override: with Object Select specifically armed, boundaries/water
+   regain pointer-events so they can receive the click Object Select needs
+   (see the rule above this whole block for why they're off otherwise).
+   Markers stay non-interactive per the .is-armed rule above. */
 .is-armed.is-object .leaflet-pane.leaflet-overlay-pane .leaflet-interactive {
-	pointer-events: auto !important; /* But allow object select to work */
+	pointer-events: auto !important;
 }
 
 /* Prevent panels text selection when drawing */

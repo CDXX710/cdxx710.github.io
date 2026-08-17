@@ -42,7 +42,7 @@ const Basemaps = (() => {
 					pane: "overlayPane",
 					updateWhenZooming: false,
 					keepBuffer: 4,
-                    bounds: def.bounds ? L.latLngBounds(def.bounds) : undefined
+					bounds: def.bounds ? L.latLngBounds(def.bounds) : undefined
 				})
 			)
 		}
@@ -59,7 +59,6 @@ const Basemaps = (() => {
 		nextLayer.addTo(MapCore.map)
 		currentBaseId = id
 
-		document.documentElement.dataset.theme = def.theme
 		EventBus.emit("basemap:baseChanged", def)
 	}
 

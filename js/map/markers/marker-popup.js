@@ -1,4 +1,5 @@
 import MapCore from "../map/map-core.js"
+import {isolateFromMap} from "../dom-utils.js"
 
 // ─────────────────────────────────────────────────────────────
 // MarkerPopup — replaces L.popup with a fully CSS-controlled DOM
@@ -28,8 +29,7 @@ const MarkerPopup = (() => {
 		el.appendChild(tailMask)
 
 		// stop map drag/zoom from hijacking clicks/scroll inside popup
-		L.DomEvent.disableClickPropagation(el)
-		L.DomEvent.disableScrollPropagation(el)
+		isolateFromMap(el)
 
 		MapCore.map.getContainer().appendChild(el)
 		MapCore.map.on("move zoom viewreset", updatePosition)

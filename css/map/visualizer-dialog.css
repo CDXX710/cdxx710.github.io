@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────
-    VISUALIZER
+	VISUALIZER
 ───────────────────────────────────────── */
 
 /* The dialog is only ever in the DOM while open (mounted on show(), removed

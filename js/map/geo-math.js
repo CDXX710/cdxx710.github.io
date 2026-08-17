@@ -82,9 +82,6 @@ const GeoMath = (() => {
 		}
 		return [minX, minY, maxX, maxY]
 	}
-	function bboxContains([minX, minY, maxX, maxY], lng, lat) {
-		return lng >= minX && lng <= maxX && lat >= minY && lat <= maxY
-	}
 	function ringArea(ring) {
 		let sum = 0
 		for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) sum += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1]
@@ -136,7 +133,6 @@ const GeoMath = (() => {
 		pointInPolygonRings,
 		pointInGeometry,
 		geometryBBox,
-		bboxContains,
 		ringArea,
 		ringCentroid,
 		largestPolygon

@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────
-    MAP LEGEND
+	MAP LEGEND
 ───────────────────────────────────────── */
 
 .legend-panel {
@@ -8,15 +8,6 @@
 	right: var(--space-6);
 	padding: var(--space-3) 0.4rem;
 	width: var(--floating-panel-width);
-	/*
-	 *  Previously had no height limit at all: with only `bottom` set
-	 *  and no `top`/`max-height`, the group list could grow past the
-	 *  top of the viewport on anything shorter than the 1440px-tall
-	 *  reference screen (laptops, landscape tablets) with no way to
-	 *  reach the clipped-off content. Cap it to the space actually
-	 *  available above the panel's bottom anchor, and let the list
-	 *  scroll internally instead.
-	 */
 	max-height: 80%;
 	display: flex;
 	flex-direction: column;
@@ -27,27 +18,6 @@
 .legend-panel.is-collapsed .legend-panel__header {
 	padding: var(--space-3);
 	margin-bottom: 0;
-}
-
-/*  
- *  Shared icon-button reset: the legend's collapse button and the
- *  selection-results' collapse button both carry this class, so
- *  the hover/focus treatment for "collapse a panel" is defined once.
- */
-.collapse-btn {
-	background: none;
-	border: none;
-	cursor: pointer;
-	color: var(--colorTextSecondary);
-	border-radius: var(--radius-sm);
-	display: flex;
-	align-items: center;
-	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
-}
-
-.collapse-btn:hover,
-.leaflet-popup-close-button:hover {
-	color: var(--colorAccent) !important;
 }
 
 /*
@@ -271,8 +241,8 @@
 }
 
 .legend__icon-toggle svg {
-    width: 100%;
-    height: 100%;
+	width: 100%;
+	height: 100%;
 }
 
 .legend__icon-toggle .legend__icon-img {

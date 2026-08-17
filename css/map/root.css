@@ -3,11 +3,7 @@
 
     shared.css (site-wide tokens/reset/base)
     is linked separately by the map page's
-    HTML, ahead of this file — every token
-    referenced below without a local
-    definition (--color-*, --space-*,
-    --radius-*, --font-mono, --shadow-popup,
-    etc.) comes from there. This file only
+    HTML, ahead of this file — This file only
     adds the map page's own local tokens.
 ───────────────────────────────────────── */
 
@@ -33,46 +29,38 @@
 ───────────────────────────────────────── */
 
 :root {
-	/* Prevents Android browsers to auto-boost font sizes to improve readability, which nudges everything*/
+	/* Prevents Android browsers from auto-boosting font sizes, which would otherwise nudge every fluid size off its intended value. */
 	-webkit-text-size-adjust: 100%;
 	text-size-adjust: 100%;
 
 	color-scheme: light dark;
 	forced-color-adjust: none; /* Prevents auto dark-mode */
 
-	/* Category colours — orange (warm) to purple (cool), diverging */
-	--color-cat-bible: #d95f5f; /* #d95f02*/
-	--color-cat-letter: #e89e4f; /* #f0a838*/
+	/* Document Type (see markers/shapes.js) */
+	--color-cat-bible: #d95f5f;
+	--color-cat-letter: #e89e4f;
 	--color-cat-notes: #e6d84f;
-	--color-cat-poem: #6dbf6d; /* #8f83c4*/
-	--color-cat-report: #5f8edb; /* #542788*/
+	--color-cat-poem: #6dbf6d;
+	--color-cat-report: #5f8edb;
 	--color-cat-roman: #a47cc8;
 	--color-cat-others: #9e9e9e;
-
-	/* Creole-type colours — magenta/pink to green, diverging */
-	--color-writ-admin: #d95f5f; /*#b5187a*/
-	--color-writ-clergy: #e89e4f; /*#de6fac*/
-	--color-writ-merchant: #e6d84f; /*#377113*/
+	/* Author Type (see markers/shapes.js) */
+	--color-writ-admin: #d95f5f;
+	--color-writ-clergy: #e89e4f;
+	--color-writ-merchant: #e6d84f;
 	--color-writ-military: #6dbf6d;
-	--color-writ-poet: #5f8edb; /*#8fc93a*/
+	--color-writ-poet: #5f8edb;
 	--color-writ-writer: #a47cc8;
-	--color-writ-others: #9e9e9e; /*#f6d392*/
+	--color-writ-others: #9e9e9e;
 
-	--color-unknown: #4f4f4f; /*#f6d392*/
+	--color-unknown: #4f4f4f;
 
-	/* Creole-role icon colours — fixed brand colours for the "about /
-	   using / unknown" marker icons themselves (see markers/shapes.js).
-	   Distinct from --color-writ-* above, which colours the author-type
-	   legend/ring, not the role icon. */
+	/* Creole-role (see markers/shapes.js) */
 	--color-role-about: #4b77bb;
 	--color-role-using: #33af7f;
 	--color-role-unknown: #6b7281;
 
-	/*  
-     *   Fluid sizing: shrinks continuously with viewport instead of
-	 *   jumping at a breakpoint, so narrow screens keep the same
-	 *   proportions as desktop rather than a distinct layout.
-     */
+	/* Fluid sizing */
 	--header-height: 3.25rem;
 	--popup-width: clamp(20rem, 32dvw, 34rem);
 	--popup-height: clamp(16rem, 42dvh, 26rem);
@@ -81,36 +69,17 @@
 	--legend-min-width: 2rem;
 	--analytics-max-width: min(20rem, calc(100dvw - var(--space-4) * 2));
 	--top-left-panels-height: 5rem;
-	/*
-	 *   Width of the zoom control (and so of the whole zoom-panel,
-	 *   which has no width of its own — it shrinks to fit this).
-	 *   basemap-panel and searchbar-panel both offset themselves past
-	 *   it, so this is the single source of truth for that offset math
-	 *   instead of each repeating the literal.
-	 */
 	--zoom-panel-width: 2.5rem;
-
-	/*
-	 *   Floating-panel width shared by legend + results panels.
-	 *   Was a hardcoded var(--space-18) (25rem) — correct at
-	 *   2560x1440, but wider than the entire viewport on phones.
-	 *   Clamped so it never exceeds available width.
-	 */
 	--floating-panel-width: clamp(12rem, 46vw, var(--space-18));
+	--tail-size: 2vw;
+	--tail-height: 2vw;
 
-	/*  
-     *   Shared "glass panel" treatment — one definition, reused by
-	 *   every floating surface (popup, legend, toolbar, results,
-	 *   document viewer) instead of six near-identical copies.
-     */
+	/* Shared "glass panel" treatment */
 	--panel-bg: var(--color-elevated);
 	--panel-border: 0.0625rem solid var(--color-border);
 	--panel-radius: var(--radius-lg);
 	--panel-blur: blur(0.75rem);
 	--panel-shadow: var(--shadow-popup);
-
-	--tail-size: 2vw;
-	--tail-height: 2vw;
 
 	--glass-border-radius: var(--panel-radius);
 	--glass-shadow: var(--panel-shadow);
@@ -119,10 +88,10 @@
 
 [data-theme="dark"] {
 	/* ── Colour Dark: Surfaces ── */
-	--color-bg: #262626; /* page background (kept) */
-	--color-surface: #302f33; /* lighter than bg, mirrors light's surface > bg relationship */
-	--color-elevated: #302f33dd; /* elevated panels, alpha-matched to light */
-	--color-border: #2a2a30; /* default border */
+	--color-bg: #262626;
+	--color-surface: #302f33;
+	--color-elevated: #302f33dd;
+	--color-border: #2a2a30;
 
 	--overlay-tint-subtle: rgba(255, 255, 255, 0.06);
 	--overlay-tint-soft: rgba(255, 255, 255, 0.09);
@@ -135,11 +104,11 @@
 	--glass-border-color: rgba(255, 255, 255, 0.1);
 
 	/* ── Colour Dark: Text ── */
-	--colorText: #e8e8ec; /* primary text */
+	--colorText: #e8e8ec;
 	--colorTextInverted: #1a1a1e;
-	--colorTextSecondary: #a8a8b3; /* mid gray, same distance from bg as light's secondary */
-	--colorTextTertiary: #75757e; /* deeper mid gray step */
-	--colorTextMuted: #47474e; /* gray close to bg, mirrors light's muted */
+	--colorTextSecondary: #a8a8b3;
+	--colorTextTertiary: #75757e;
+	--colorTextMuted: #47474e;
 
 	/* ── Colour Dark: Accent ── */
 	--colorAccent: #3b88d8;
@@ -154,10 +123,10 @@
 
 [data-theme="light"] {
 	/* ── Colour Light: Surfaces ── */
-	--color-bg: #d8d8dc; /* page background */
-	--color-surface: #e6e6ea; /* cards, panels, nav — lighter than bg, like dark mode */
-	--color-elevated: #e6e6eadd; /* elevated panels — same base as surface, w/ alpha */
-	--color-border: #d4d4d8; /* default border */
+	--color-bg: #d8d8dc;
+	--color-surface: #e6e6ea;
+	--color-elevated: #e6e6eadd;
+	--color-border: #d4d4d8;
 
 	--overlay-tint-subtle: rgba(0, 0, 0, 0.06);
 	--overlay-tint-soft: rgba(0, 0, 0, 0.09);
@@ -170,11 +139,11 @@
 	--glass-border-color: rgba(0, 0, 0, 0.1);
 
 	/* ── Colour Light: Text ── */
-	--colorText: #1a1a1e; /* primary text — near-black, mirrors dark's near-white */
-	--colorTextInverted: #e8e8ec; /* primary text */
-	--colorTextSecondary: #75757e; /* mid gray, same distance from bg as dark's secondary */
-	--colorTextTertiary: #95959e; /* softer mid gray, midpoint step between secondary and muted */
-	--colorTextMuted: #b6b6bf; /* light gray close to bg — mirrors dark's dim-near-surface muted */
+	--colorText: #1a1a1e;
+	--colorTextInverted: #e8e8ec;
+	--colorTextSecondary: #75757e;
+	--colorTextTertiary: #95959e;
+	--colorTextMuted: #b6b6bf;
 
 	/* ── Colour Light: Accent ── */
 	--colorAccent: #3b88d8;

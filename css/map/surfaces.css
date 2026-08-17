@@ -87,14 +87,7 @@ a.leaflet-popup-close-button {
 	height: 1px;
 	margin: 0 5%;
 	background: var(--glass-border-color);
-    flex: none
-}
-
-.body__divider {
-	height: 1px;
-	border: none;
-	background: var(--color-border);
-	margin: 0 10%;
+	flex: none;
 }
 
 .panel-close {
@@ -128,4 +121,20 @@ a.leaflet-popup-close-button {
 .legend-panel__collapse[data-collapsed="true"],
 .analytics-panel__collapse[data-collapsed="true"] {
 	grid-template-rows: 0fr;
+}
+
+.collapse-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--colorTextSecondary);
+	border-radius: var(--radius-sm);
+	display: flex;
+	align-items: center;
+	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+}
+
+.collapse-btn:hover,
+.leaflet-popup-close-button:hover {
+	color: var(--colorAccent) !important;
 }

@@ -168,19 +168,13 @@ const Legend = (() => {
 		syncFns = []
 		body.innerHTML = ""
 		const groups = [layersGroup(), creoleRoleGroup(null), categoryGroup(null), authorTypeGroup(null)].filter(Boolean)
-		groups.forEach((els, i) => {
-			els.forEach(el => body.appendChild(el))
-		})
+		groups.forEach(els => els.forEach(el => body.appendChild(el)))
 	}
 	function syncCheckedState() {
 		syncFns.forEach(fn => fn())
 		updateHeaderHidden()
 	}
 
-	// Markup (header, collapse wrapper, actions row, dividers) lives
-	// statically in map.html (#legend-panel); this only wires up behavior
-	// and fills in the data-driven groups content, matching how
-	// SelectionResults and AnalyticsPanel attach to their static shells.
 	// Markup (collapse wrapper, actions row, dividers) lives statically in
 	// map.html (#legend-panel); the header is mounted via the shared
 	// `mountHeader` component, and this otherwise only wires up behavior

@@ -1,5 +1,6 @@
 import Utils from "../utils.js"
 import visualizerPlaceholderContent from "../data/visualizer-content.js"
+import {isolateFromMap} from "../dom-utils.js"
 
 // ─────────────────────────────────────────────────────────────
 // VisualizerModal — the document-viewer overlay, toggled by
@@ -8,11 +9,6 @@ import visualizerPlaceholderContent from "../data/visualizer-content.js"
 const VisualizerModal = (() => {
 	let visualizerEl = null
 	let contentNodes = []
-
-	function isolateFromMap(el) {
-		L.DomEvent.disableScrollPropagation(el)
-		L.DomEvent.disableClickPropagation(el)
-	}
 
 	function handleVisualizerKeydown(event) {
 		if (event.key === "Escape") hide()

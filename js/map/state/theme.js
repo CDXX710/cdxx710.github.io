@@ -23,10 +23,6 @@ const Theme = (() => {
 	const authorTypeIds = ["admin", "clergy", "merchant", "military", "poet", "writer", "others"]
 	const fallbackColor = "#8b949e"
 
-	// NOTE: these CSS custom properties (--color-writ-*) don't exist
-	// in the stylesheet yet — add them alongside --color-cat-* so each
-	// author type gets a distinct colour instead of falling back to
-	// fallbackColor for all of them.
 	const authorTypeColors = {
 		admin: Utils.readCssVar("--color-writ-admin"),
 		clergy: Utils.readCssVar("--color-writ-clergy"),

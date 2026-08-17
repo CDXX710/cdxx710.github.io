@@ -1,4 +1,5 @@
 import Utils from "../utils.js"
+import {isolateFromMap} from "../dom-utils.js"
 
 // ─────────────────────────────────────────────────────────────
 // ExportDialog — the "choose a format and export" dialog.
@@ -105,8 +106,7 @@ const ExportDialog = (() => {
                                                 </div>`
 
 		// Isolate the dialog from the map so clicks/scrolls don't leak through
-		L.DomEvent.disableClickPropagation(dialogEl)
-		L.DomEvent.disableScrollPropagation(dialogEl)
+		isolateFromMap(dialogEl)
 
 		const formatsEl = dialogEl.querySelector(".export-dialog__formats")
 		exportCategories.forEach(category => formatsEl.appendChild(buildCategorySection(category)))

@@ -17,10 +17,12 @@ const FilterState = (() => {
 	}
 	// Tracks which of the four filter groups the user last touched, so
 	// classifyHiddenReason (below) can attribute a record hidden by
-	// several filters at once to whichever one the user is actually
-	// paying attention to, rather than a fixed guess. Higher = more
-	// recently touched. Seeded in this order so the very first hidden
-	// record (before any interaction) still resolves deterministically.
+	// several filters at once to whichever one the user *hasn't* just
+	// been adjusting — the filter currently being dragged/clicked is
+	// already self-explanatory, so this points the blame elsewhere
+	// rather than a fixed guess. Higher = more recently touched. Seeded
+	// in this order so the very first hidden record (before any
+	// interaction) still resolves deterministically.
 	let touchCounter = 0
 	const lastTouched = {creoleRole: touchCounter++, timeline: touchCounter++, authorType: touchCounter++, category: touchCounter++}
 	function touch(group) {
@@ -97,9 +99,11 @@ const FilterState = (() => {
 	// silently undercount it and leave the four notices not summing to
 	// the real hidden total. So this picks exactly one reason per hidden
 	// record: among the filters currently failing it, whichever one the
-	// user most recently touched (see `touch` above) — that's the filter
-	// they're actively working with, so it's the most useful one to
-	// blame. Ties (nothing touched yet) fall back to the seed order.
+	// user has interacted with *least* recently (see `touch` above) —
+	// the filter they're actively adjusting is already the obvious
+	// cause, so the notice instead surfaces whichever other blocking
+	// filter is easiest to overlook. Ties (nothing touched yet) fall
+	// back to the seed order.
 	function classifyHiddenReason(properties) {
 		const {time, category, creole, authorType} = properties
 		const failing = []
@@ -108,7 +112,7 @@ const FilterState = (() => {
 		if (!(isOtherOrMissing(authorType) || state.activeAuthorTypes.has(authorType))) failing.push("authorType")
 		if (!(category === "others" || state.activeCategories.has(category))) failing.push("category")
 		if (!failing.length) return null
-		return failing.reduce((mostRecent, group) => (lastTouched[group] < lastTouched[mostRecent] ? group : mostRecent))
+		return failing.reduce((leastRecent, group) => (lastTouched[group] < lastTouched[leastRecent] ? group : leastRecent))
 	}
 	function isCategoryActive(category) {
 		return state.activeCategories.has(category)

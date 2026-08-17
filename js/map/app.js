@@ -18,6 +18,8 @@ import StateSyncManager from "./state/state-sync-manager.js"
 // ─────────────────────────────────────────────────────────────
 
 function bootstrap() {
+	// mapTheme must subscribe before Basemaps.init() calls setBase() —
+	// that first call is what puts the initial [data-theme] on <html>.
 	mapTheme.init()
 	Basemaps.init()
 	Boundaries.init()

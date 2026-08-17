@@ -218,16 +218,11 @@ const SelectionResults = (() => {
 			if (name === "legend" && !collapsed && !isNarrowViewport()) collapsible.setCollapsed(true)
 		})
 
-		let previousCount = 0
 		EventBus.on("selection:changed", () => {
 			highlightSelectedMarkers()
 			if (ResultsViewState.isShowingAllInBbox()) return
 			render()
-			const count = SelectionState.size()
-			if (!isNarrowViewport()) {
-				if (count === 0) collapsible.setCollapsed(false)
-			}
-			previousCount = count
+			if (SelectionState.size() === 0 && !isNarrowViewport()) collapsible.setCollapsed(false)
 		})
 		let hasArmedOnce = false
 		EventBus.on("selection:toolArmed", ({shape}) => {

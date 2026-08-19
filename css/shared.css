@@ -394,7 +394,69 @@ section h2 {
 }
 
 /* ─────────────────────────────────────────
-   9. RESPONSIVE
+   9. MOBILE NAV TOGGLE
+   Hamburger button + backdrop for the
+   off-canvas nav drawer below 30rem.
+   Hidden entirely above that breakpoint.
+───────────────────────────────────────── */
+
+#nav-toggle {
+	display: none;
+	position: fixed;
+	top: var(--space-6);
+	left: var(--space-6);
+	z-index: calc(var(--z-modal) + 2);
+	width: 2.5rem;
+	height: 2.5rem;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	cursor: pointer;
+}
+
+#nav-toggle span {
+	display: block;
+	width: 1.1rem;
+	height: 2px;
+	background: var(--colorText);
+	border-radius: 1px;
+	transition: transform var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard);
+}
+
+body.nav-open #nav-toggle span:nth-child(1) {
+	transform: translateY(7px) rotate(45deg);
+}
+
+body.nav-open #nav-toggle span:nth-child(2) {
+	opacity: 0;
+}
+
+body.nav-open #nav-toggle span:nth-child(3) {
+	transform: translateY(-7px) rotate(-45deg);
+}
+
+#nav-backdrop {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: var(--color-overlay);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--duration-normal) var(--ease-standard);
+	z-index: var(--z-modal);
+}
+
+body.nav-open #nav-backdrop {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* ─────────────────────────────────────────
+   10. RESPONSIVE
    Reserved for structural changes that
    genuinely can't be fluid — everything else
    (padding, widths, spacing) now scales
@@ -404,6 +466,28 @@ section h2 {
 
 @media (max-width: 30rem) {
 	nav {
-		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: min(80vw, 18rem);
+		height: 100dvh;
+		padding-top: 4rem; /* clears the fixed #nav-toggle button */
+		background: var(--color-surface);
+		box-shadow: var(--shadow-popup);
+		transform: translateX(-100%);
+		transition: transform var(--duration-normal) var(--ease-in-out);
+		z-index: calc(var(--z-modal) + 1);
+	}
+
+	body.nav-open nav {
+		transform: translateX(0);
+	}
+
+	#nav-toggle {
+		display: flex;
+	}
+
+	#nav-backdrop {
+		display: block;
 	}
 }

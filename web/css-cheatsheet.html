@@ -13,6 +13,12 @@
 		<link rel="stylesheet" href="../css/css-cheatsheet.css" />
 	</head>
 	<body>
+		<button id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+			<span></span>
+			<span></span>
+			<span></span>
+		</button>
+		<div id="nav-backdrop"></div>
 		<nav id="sidebar">
 			<a class="site-header__back" href="../index.html">
 				<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -753,7 +759,7 @@
 				</div>
 			</section>
 		</main>
-		<script src="../js/nav-scroll.js"></script>
+		<script src="../js/nav.js"></script>
 		<script>
 			// Copy card label text to clipboard on click
 			function enableCopyOnClick(selector) {

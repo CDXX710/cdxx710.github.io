@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="robots" content="noindex" />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Caribbean Archives — Technical Audit</title>
+		<link rel="icon" type="image/svg+xml" href="https://github.githubassets.com/favicons/favicon-dark.svg" sizes="any" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet" />
+
+		<link rel="stylesheet" href="../css/shared.css" />
+		<link rel="stylesheet" href="../css/tech-docs.css" />
+	</head>
+	<body>
+		<button id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+			<span></span>
+			<span></span>
+			<span></span>
+		</button>
+		<div id="nav-backdrop"></div>
+		<nav id="sidebar">
+			<a class="site-header__back" href="../index.html">
+				<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="9,2 4,7 9,12" />
+				</svg>
+				Index
+			</a>
+
+			<div class="nav-label">Overview</div>
+			<a href="#summary"><span class="dot"></span>Summary</a>
+			<a href="#context"><span class="dot"></span>Context</a>
+
+			<div class="nav-label">System</div>
+			<a href="#stack"><span class="dot"></span>Tech Stack</a>
+			<a href="#architecture"><span class="dot"></span>Architecture</a>
+			<a href="#structure"><span class="dot"></span>Structure</a>
+
+			<div class="nav-label">Deep Dive</div>
+			<a href="#map-deep-dive"><span class="dot"></span>Map System</a>
+			<a href="#state-flow"><span class="dot"></span>State Flow</a>
+			<a href="#components"><span class="dot"></span>Components</a>
+
+			<div class="nav-label">Decisions</div>
+			<a href="#decisions"><span class="dot"></span>Key Decisions</a>
+			<a href="#what-works"><span class="dot"></span>What Works</a>
+			<a href="#limitations"><span class="dot"></span>Limitations</a>
+
+			<div class="nav-label">Future Modes</div>
+			<a href="#story-mode"><span class="dot"></span>Data Story</a>
+			<a href="#comparison-mode"><span class="dot"></span>Comparison</a>
+			<a href="#roadmap"><span class="dot"></span>Roadmap</a>
+
+			<div class="nav-label">Health</div>
+			<a href="#performance"><span class="dot"></span>Performance</a>
+			<a href="#maintainability"><span class="dot"></span>Maintainability</a>
+			<a href="#assessment"><span class="dot"></span>Assessment</a>
+		</nav>
+
+		<div class="content-wrapper">
+			<header class="hero">
+				<div class="tick-row">
+					<span>TECHNICAL AUDIT · CARIBBEAN ARCHIVES</span>
+					<span>COMMIT b8d3724</span>
+				</div>
+				<h1 class="title">A prototype read <em>end to end.</em></h1>
+				<p class="subhead">A full technical audit of <code>CDXX710/cdxx710.github.io</code>, focused on <code>web/map.html</code> and <code>js/map/**</code> — what's real, what's simulated, how the architecture holds together, and what it would take to build the two modes it's already halfway toward.</p>
+				<div class="legend-strip">
+					<span class="item"><b>Repository</b>&nbsp;CDXX710/cdxx710.github.io</span>
+					<span class="item"><b>Commit audited</b>&nbsp;b8d3724 ("cleanup", single squashed commit)</span>
+					<span class="item"><b>Scope</b>&nbsp;whole project, primary focus on the map</span>
+				</div>
+			</header>
+
+			<main>
+				<!-- =============================================
+				     1. EXECUTIVE SUMMARY
+				     ============================================= -->
+				<section class="sheet" id="summary">
+					<div class="sheet-head">
+						<span class="sheet-id">01</span>
+						<h2>Executive Summary</h2>
+						<span class="tagline">The 90-second version</span>
+					</div>
+
+					<div class="card">
+						<p><strong>Caribbean Archives</strong> is a browser-only geospatial research tool for exploring a corpus of historical Caribbean documents — letters, reports, bibles, poems, novels, field notes — classified by date, document type, author type, and their relationship to creole languages ("written in creole" / "about creoles" / unknown). It is published as a GitHub Pages site; <code>index.html</code> is a link index that labels the map as a <em>prototype</em>, and the map's own header reads <strong>"Illustrative data only."</strong></p>
+						<p>The map experience is not a "pins on a map" viewer. It is a <strong>spatial query and analysis surface</strong>. The user draws rectangles, ellipses, lassoes, or polygons over the map — or clicks an island boundary directly — and combines those hits with <strong>boolean set algebra</strong> (new / union / subtract / intersect, with Shift/Alt/Ctrl as temporary modifiers). The resulting selection drives a results list, an analytics panel that recomputes distributions live, and an export dialog. Meanwhile a footer year-range slider, a legend of per-category toggles, and a clickable decade histogram all filter the same dataset from different directions, and every one of those interactions is mirrored into the URL as a shareable, Back/Forward-navigable link.</p>
+						<p>Technically, it is <strong>36 hand-written ES modules (~5,400 LOC) plus ~4,000 LOC of plain CSS, with no build step, no bundler, no <code>package.json</code>, and no dependency manifest of any kind.</strong> Leaflet 1.9.4 is pulled from a CDN; noUiSlider and topojson-client are vendored as local files. Modules are IIFE-closure singletons (<code>const X = (() => { ... })()</code>) exported by default and wired together through a <strong>12-line event bus</strong> that is the only channel modules use to talk to each other. There is no framework, no store library, and — verified by search — <strong>zero <code>fetch</code>, <code>XMLHttpRequest</code>, or <code>localStorage</code> calls anywhere in the application.</strong> State lives in memory and in <code>window.history</code>.</p>
+						<p>This architecture is a good fit for what the project is. The absence of a build step means the deployed artifact is the source; the absence of a framework means Leaflet's DOM is directly addressable (selected markers are styled by toggling a CSS class on Leaflet's own <code>divIcon</code> element); and the event bus keeps 36 modules decoupled without ceremony. The code is unusually well commented — comments explain <em>why</em>, and several record rejected alternatives, which is rare and valuable.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Three structural facts dominate everything downstream</h3>
+						<ol class="detail-list numbered">
+							<li><strong>Records have no identity.</strong> Selection, and the shareable URL, use <em>array indices</em> into <code>ArchiveData.features</code>. The code flags this itself in <code>state-sync-manager.js</code>.</li>
+							<li><strong>The map is a singleton by construction.</strong> <code>MapCore</code> calls <code>L.map("map")</code> at module <em>evaluation</em> time; ~15 modules import and use <code>MapCore.map</code> directly. There is no second map without a refactor.</li>
+							<li><strong><code>StateSyncManager</code> is already two-thirds of a story engine.</strong> It defines a canonical serializable application state, a function to read it from the live app, and a function to apply it back. A story step is that object plus narrative text.</li>
+						</ol>
+					</div>
+
+					<div class="callout">The highest-value near-term work is small, product-neutral, and unblocks both future modes: give records stable IDs, add a batched filter-apply API, and extract the state-application logic that is currently private inside <code>StateSyncManager</code>.</div>
+				</section>
+
+				<!-- =============================================
+				     2. PROJECT CONTEXT AND PURPOSE
+				     ============================================= -->
+				<section class="sheet" id="context">
+					<div class="sheet-head">
+						<span class="sheet-id">02</span>
+						<h2>Project Context and Purpose</h2>
+						<span class="tagline">What's real, what's simulated</span>
+					</div>
+
+					<div class="card">
+						<h3>2.1 What is real</h3>
+						<p>Everything about the <em>interaction model</em> is real and fully implemented. The drawing tools, the boolean selection algebra, the modifier-key overrides, the point-in-polygon hit testing, the dual-resolution boundary simplification, the URL state sync, the light/dark theming, the responsive bottom-sheet layout, the custom popup positioning — all of it is genuine, working code, not a mockup.</p>
+						<p>The geographic data is also real: <code>js/map/data/boundaries-topo.js</code> is a 370 KB TopoJSON file of Caribbean administrative and maritime boundaries carrying GADM-style properties (<code>NAME_0</code>, <code>GID_0</code>, <code>TYPE</code>, <code>FLAG</code>), and <code>img/tiles/</code> contains <strong>4,519 pre-rendered raster tiles (211 MB, zoom levels 4–10)</strong> for two historical map overlays. The repository is 415 MB, and almost all of that is imagery.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>2.2 What is simulated</h3>
+						<p>Three things, and the boundaries are clean:</p>
+						<div class="attr-table-wrap">
+							<table class="attr-table">
+								<thead>
+									<tr>
+										<th>Area</th>
+										<th>Reality</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><strong>The archive dataset</strong></td>
+										<td>25 features hardcoded as a GeoJSON literal in <code>archive-data.js</code>. Every abstract is the same <code>LOREM</code> constant; thumbnails cycle through 12 reused JFIF files.</td>
+									</tr>
+									<tr>
+										<td><strong>Export</strong></td>
+										<td><code>ExportDialog</code> offers 13 formats (PNG, SVG, PDF, GeoJSON, Shapefile, GeoPackage, FlatGeobuf…). The Export button's handler is <code>close()</code>. It is a fidelity mock of a real export UI, with no encoder behind it.</td>
+									</tr>
+									<tr>
+										<td><strong>Source-text viewer</strong></td>
+										<td><code>VisualizerModal</code> renders a static HTML blob from <code>visualizer-content.js</code>, triggered through a global <code>window.toggleWindowPopup</code> referenced by an inline <code>onclick</code> in the popup markup.</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>2.3 Why it reads as finished</h3>
+						<p>The prototype clears the usual "demo" bar because it invested in the parts demos normally skip: keyboard access on markers (<code>role="button"</code>, <code>tabindex</code>, Enter/Space), <code>aria-pressed</code> / <code>aria-expanded</code> maintained on every toggle, focus return on Escape-dismiss, a documented mobile breakpoint, <code>prefers-color-scheme</code> as the default theme source, and shareable deep links. The visual system is a coherent token set (<code>--color-cat-*</code>, <code>--color-writ-*</code>, <code>--color-role-*</code>, fluid <code>clamp()</code> sizing) rather than ad-hoc values.</p>
+					</div>
+
+					<div class="callout">The right way to read this: <strong>the product hypothesis being tested is the interaction design, not the data pipeline.</strong> Mock data is sufficient — arguably necessary — for that test. Hardcoding 25 records is a deliberate scope decision, not an omission.</div>
+				</section>
+
+				<!-- =============================================
+				     3. TECHNOLOGY STACK
+				     ============================================= -->
+				<section class="sheet" id="stack">
+					<div class="sheet-head">
+						<span class="sheet-id">03</span>
+						<h2>Technology Stack</h2>
+						<span class="tagline">What's used, why, and the tradeoffs</span>
+					</div>
+
+					<div class="compare-wrap">
+						<table class="compare">
+							<thead>
+								<tr>
+									<th>Technology</th>
+									<th>Role</th>
+									<th>Where used</th>
+									<th>Why it makes sense</th>
+									<th>Tradeoffs</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>HTML (static shells)</td>
+									<td>Declares every panel's skeleton with stable IDs; JS fills only data-driven content</td>
+									<td><code>web/map.html</code> (~13 KB)</td>
+									<td>Panels exist before JS runs — no layout flash; CSS can be authored against real markup; JS stays behavior-only. <code>basemaps.js</code> and <code>legend-panel.js</code> both comment this contract explicitly</td>
+									<td>~40 <code>getElementById</code> calls bind logic to literal IDs; a second map instance can't reuse them</td>
+								</tr>
+								<tr>
+									<td>Plain CSS, no preprocessor</td>
+									<td>Design tokens, theming, layout, all animation</td>
+									<td><code>css/shared.css</code> + <code>css/map/root.css</code> importing 15 partials</td>
+									<td>Custom properties + <code>@import</code> cover what SCSS was used for; <code>[data-theme]</code> on <code>&lt;html&gt;</code> themes the whole page from one attribute; token names are read back by JS via <code>Theme.readCssVar()</code> so colour has one source of truth</td>
+									<td>15 <code>@import</code>s serialize network requests (no bundler); <code>Theme</code> reads the vars once at module init, so tokens can't be swapped at runtime</td>
+								</tr>
+								<tr>
+									<td>Vanilla ES modules</td>
+									<td>All application logic; 36 modules, ~5,400 LOC</td>
+									<td><code>js/map/**</code></td>
+									<td>Native <code>import</code>/<code>export</code> with explicit <code>.js</code> paths runs directly from GitHub Pages with no toolchain. What's deployed is what's debugged</td>
+									<td>No tree-shaking, minification, or dependency graph tooling; 36 sequential module requests on cold load</td>
+								</tr>
+								<tr>
+									<td>IIFE-singleton module pattern</td>
+									<td>Encapsulation</td>
+									<td>Nearly every module</td>
+									<td>Truly private state with zero boilerplate; a clean public surface per module</td>
+									<td>Singletons are instantiated at import time — the central obstacle to comparison mode (§13)</td>
+								</tr>
+								<tr>
+									<td>EventBus (12 lines, hand-rolled)</td>
+									<td>The only inter-module channel</td>
+									<td><code>js/map/event-bus.js</code></td>
+									<td>36 modules coordinate without a dependency web. A <code>Map&lt;string, Set&lt;handler&gt;&gt;</code> with <code>on</code>/<code>emit</code>; <code>on</code> returns an unsubscribe closure</td>
+									<td>No wildcards, no replay, no dev-tooling; event names are unvalidated strings; ordering is registration order, which the panels quietly depend on</td>
+								</tr>
+								<tr>
+									<td>Leaflet 1.9.4 (CDN)</td>
+									<td>Map engine: tiles, panes, projection, geometry layers, markers</td>
+									<td>Loaded as a classic script → global <code>L</code>; wrapped by <code>MapCore</code></td>
+									<td>Raster-tile-first, which matches CARTO + the local historical pyramids. Critically, <code>L.divIcon</code> markers are <strong>real DOM nodes</strong>, so markers are styled by toggling CSS classes — this is what makes selection highlighting trivial</td>
+									<td>DOM markers don't scale past a few thousand; loaded as a global rather than a module, so <code>L</code> is implicit everywhere</td>
+								</tr>
+								<tr>
+									<td>noUiSlider 15.7.0 (vendored)</td>
+									<td>Footer year-range slider</td>
+									<td><code>js/vendor/nouislider.js</code> → global <code>noUiSlider</code>; wrapped by <code>TimeSlider</code></td>
+									<td>Dual-handle range with touch support is genuinely fiddly to hand-roll; wrapper is 30 lines</td>
+									<td>Fires <code>update</code> continuously during drag — the root cause of the highest-impact performance issue (§15)</td>
+								</tr>
+								<tr>
+									<td>topojson-client (vendored)</td>
+									<td>Decodes the boundary topology to GeoJSON</td>
+									<td><code>js/vendor/topojson.js</code> → global <code>topojson</code>; used by <code>BoundaryData</code></td>
+									<td>TopoJSON's shared-arc encoding is what allows two simplification levels to share arc indices 1:1</td>
+									<td>Adds a decode step; decoded features are cached per level to pay it once</td>
+								</tr>
+								<tr>
+									<td>CARTO raster basemaps</td>
+									<td>Light/dark base tiles, labels on/off</td>
+									<td><code>Config.buildBaseTileUrl(theme, labels)</code></td>
+									<td>One URL template covers all four variants (<code>light_all</code>, <code>dark_nolabels</code>, …). Labels toggle calls <code>setUrl()</code> on cached layers in place rather than recreating them</td>
+									<td>Third-party tile dependency; no vector styling</td>
+								</tr>
+								<tr>
+									<td>Local historical tile pyramids</td>
+									<td>Two georeferenced antique maps as overlays</td>
+									<td><code>img/tiles/{world-atlas,le-piccole}/{z}/{x}/{y}.png</code>, z4–z10</td>
+									<td>Self-contained — the overlays work offline and need no tile server. Each is clipped by an explicit <code>bounds</code> and capped by <code>maxNativeZoom: 10</code></td>
+									<td>211 MB in git; this is the reason the repo is 415 MB</td>
+								</tr>
+								<tr>
+									<td>Pointer Events</td>
+									<td>All drawing input</td>
+									<td><code>selection-toolbar.js</code></td>
+									<td>One code path for mouse, touch, and pen instead of parallel handler pairs; <code>setPointerCapture</code> on the analytics histogram</td>
+									<td>Requires explicit <code>touch-action: none</code> management, which the code handles both by class and inline (with a comment on why belt-and-braces is warranted)</td>
+								</tr>
+								<tr>
+									<td>History API</td>
+									<td>State persistence</td>
+									<td><code>state-sync-manager.js</code> + <code>state-sync-schema.js</code></td>
+									<td>Shareable links and working Back/Forward with no storage layer. <code>pushState</code> for discrete changes, debounced <code>replaceState</code> for continuous ones</td>
+									<td>URL length caps selection at 200 indices (silently); no returning-visitor preferences — an explicit decision, recorded in the file's integration notes</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callout"><strong>Not present, and worth stating:</strong> no bundler, no transpiler, no linter config, no test runner, no CI, no <code>package.json</code>, no marker clustering, no canvas renderer, no service worker.</div>
+				</section>
+
+				<!-- =============================================
+				     4. HIGH-LEVEL ARCHITECTURE
+				     ============================================= -->
+				<section class="sheet" id="architecture">
+					<div class="sheet-head">
+						<span class="sheet-id">04</span>
+						<h2>High-Level Architecture</h2>
+						<span class="tagline">Layered by import direction, not by tooling</span>
+					</div>
+
+					<div class="card">
+						<p>The project has a genuine layered architecture, enforced by import direction rather than by tooling. Lower layers never import upward.</p>
+						<pre class="code-block"><code>web/map.html                    static panel shells + stable IDs
+        │
+        ├── css/map/root.css ──▶ 15 partials; tokens on :root, themes on [data-theme]
+        │
+        └── js/map/app.js ─────▶ bootstrap(), fixed dependency order
+                │
+    ┌───────────┴────────────────────────────────────────────┐
+    │                                                        │
+ DATA (no deps)                                     CONFIG (no deps)
+ archive-data · boundaries-topo                     config.js
+ boundary-data · geo-index                          (every tunable value)
+    │                                                        │
+    └────────────────────┬───────────────────────────────────┘
+                         │
+              PURE LOGIC (no DOM, no map)
+              geo-math · selection-algebra · state-sync-schema · theme
+                         │
+              STATE (owns data, emits events)
+              filter-state · selection-state · results-view-state · viewport-query
+                         │
+                  ◀── EventBus ──▶        (the only cross-module channel)
+                         │
+              MAP LAYER                            UI LAYER
+              map-core (singleton L.map)           legend · analytics · results
+              basemaps · boundaries                searchbar · selection-toolbar
+              markers · draw-overlay               time-slider · dialogs
+                         │                                   │
+                         └───────────┬───────────────────────┘
+                                     │
+                          state-sync-manager  (URL ⇄ state, runs last)</code></pre>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<p>Two properties are worth naming because they shape every future change:</p>
+						<p><strong>State is federated, not centralized.</strong> There is no store. <code>FilterState</code> owns year range + three filter dimensions. <code>SelectionState</code> owns a <code>Set</code> of indices + the combine mode. <code>ResultsViewState</code> owns the "viewport vs. selection" toggle and sort. <code>Basemaps</code> owns the active layer IDs. <code>Boundaries</code> owns layer visibility. Each is authoritative for its slice and broadcasts changes. <code>StateSyncManager</code> is the only module that assembles a whole-application snapshot — and it does so by <em>reading from</em> each owner, not by owning anything itself.</p>
+						<p><strong>Rendering is subscription-driven, not orchestrated.</strong> Nothing calls "render the app." Each panel subscribes to the events it cares about and re-renders its own subtree. <code>AnalyticsPanel</code> listens to <code>filters:changed</code>, <code>selection:changed</code>, and Leaflet's <code>moveend</code>; <code>Markers</code> listens to <code>filters:changed</code>, <code>selection:changed</code>, and <code>search:queryChanged</code>; they never reference each other.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>4.1 The event vocabulary</h3>
+						<p>Fourteen events carry the entire application:</p>
+						<div class="attr-table-wrap">
+							<table class="attr-table">
+								<thead>
+									<tr>
+										<th>Event</th>
+										<th>Emitted by</th>
+										<th>Consumed by</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>filters:changed</code></td>
+										<td><code>FilterState</code> (every setter)</td>
+										<td>Markers, Analytics, Legend, StateSync</td>
+									</tr>
+									<tr>
+										<td><code>selection:changed</code></td>
+										<td><code>SelectionState</code></td>
+										<td>Markers, Results, Analytics, StateSync</td>
+									</tr>
+									<tr>
+										<td><code>selection:toolArmed</code></td>
+										<td><code>SelectionToolbar</code></td>
+										<td>Boundaries (object-click gating), Results</td>
+									</tr>
+									<tr>
+										<td><code>selection:toolUsed</code></td>
+										<td><code>SelectionToolbar</code></td>
+										<td>Results (auto-switch to selection mode)</td>
+									</tr>
+									<tr>
+										<td><code>search:queryChanged</code></td>
+										<td><code>Searchbar</code></td>
+										<td>Markers (hide non-matches), Results</td>
+									</tr>
+									<tr>
+										<td><code>viewport:changed</code></td>
+										<td><code>MapCore</code> on <code>moveend</code></td>
+										<td>StateSync</td>
+									</tr>
+									<tr>
+										<td><code>basemap:baseChanged</code></td>
+										<td><code>Basemaps</code></td>
+										<td>mapTheme (<code>[data-theme]</code>), buttons, StateSync</td>
+									</tr>
+									<tr>
+										<td><code>basemap:overlayChanged</code> / <code>labelsChanged</code></td>
+										<td><code>Basemaps</code></td>
+										<td>buttons, StateSync</td>
+									</tr>
+									<tr>
+										<td><code>sort:changed</code></td>
+										<td><code>CustomDropdown</code> / StateSync</td>
+										<td>Results, dropdown label, StateSync</td>
+									</tr>
+									<tr>
+										<td><code>panel:collapseChanged</code></td>
+										<td><code>createCollapsible</code></td>
+										<td>Legend ⇄ Results mutual collapse (desktop)</td>
+									</tr>
+									<tr>
+										<td><code>boundary:objectClick</code></td>
+										<td><code>Boundaries</code></td>
+										<td>SelectionToolbar</td>
+									</tr>
+									<tr>
+										<td><code>analytics:recordsInViewChanged</code></td>
+										<td><code>AnalyticsPanel</code></td>
+										<td>ResultsViewState</td>
+									</tr>
+									<tr>
+										<td><code>state:hydrated</code></td>
+										<td><code>StateSyncManager</code></td>
+										<td>(no current subscriber)</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="callout">Note <code>boundary:objectClick</code>: <code>Boundaries</code> needs to know whether the object tool is armed, but rather than importing <code>SelectionToolbar</code> (which imports <code>Markers</code>, which would cycle), it mirrors the armed flag locally from <code>selection:toolArmed</code>. That's the bus being used deliberately to break a dependency cycle, and it's commented as such.</div>
+				</section>
+
+				<!-- =============================================
+				     5. PROJECT STRUCTURE
+				     ============================================= -->
+				<section class="sheet" id="structure">
+					<div class="sheet-head">
+						<span class="sheet-id">05</span>
+						<h2>Project Structure</h2>
+						<span class="tagline">Organized by responsibility, not file type</span>
+					</div>
+
+					<div class="card">
+						<p>Four HTML pages sit at the top: <code>index.html</code> (a link index), and under <code>web/</code>, <code>map.html</code> (the subject of this report), <code>data-sources.html</code> (a GIS open-data reference), and <code>css-cheatsheet.html</code> (a design-token reference). The latter two are standalone documentation pages unrelated to the map's runtime.</p>
+						<p>The map's JavaScript is organized by <strong>responsibility, not by file type</strong>, and the directory names are meaningful:</p>
+						<ul class="detail-list">
+							<li><code>js/map/data/</code> — the dataset, the boundary topology, and the decode/lookup layer over them. No behavior beyond caching.</li>
+							<li><code>js/map/state/</code> — pure state owners and pure logic. <code>filter-state.js</code> is explicit that there is no DOM here. <code>state-sync-schema.js</code> opens by declaring itself pure and unit-testable in isolation.</li>
+							<li><code>js/map/map/</code> — everything that touches Leaflet: the map instance, tile layers, boundary rendering, the rubber-band draw overlay, the zoom control.</li>
+							<li><code>js/map/markers/</code> — marker lifecycle, SVG icon generation (<code>shapes.js</code>, 20 KB of hand-authored icon paths for 7 categories × 7 author types × 3 roles), popup positioning, popup content.</li>
+							<li><code>js/map/ui/</code> — the floating panels and dialogs. Each panel module owns one panel and nothing else.</li>
+							<li><code>js/vendor/</code> — noUiSlider and topojson-client.</li>
+						</ul>
+						<p style="margin-top: 0.9rem">CSS mirrors this one-to-one: <code>css/map/legend-panel.css</code> ↔ <code>js/map/ui/legend-panel.js</code> ↔ <code>#legend-panel</code> in <code>map.html</code>. That three-way correspondence holds across every panel and is one of the strongest maintainability properties in the codebase.</p>
+					</div>
+
+					<div class="callout"><strong>Two dead files, both actively misleading.</strong> <code>js/map/state/time-slider-algebra.js</code> is a <strong>byte-identical copy of noUiSlider</strong> (verified by MD5 against <code>js/vendor/nouislider.js</code>) — 35 KB of minified vendor code filed under <code>state/</code> with a name suggesting it contains the project's own time-range logic. <code>js/map/data/topojson.js</code> likewise duplicates <code>js/vendor/topojson.js</code>. Neither is imported or referenced anywhere. An engineer opening <code>state/time-slider-algebra.js</code> expecting domain logic will find a minified third-party bundle. <strong>Delete both.</strong></div>
+				</section>
+
+				<!-- =============================================
+				     6. MAP SYSTEM DEEP DIVE
+				     ============================================= -->
+				<section class="sheet" id="map-deep-dive">
+					<div class="sheet-head">
+						<span class="sheet-id">06</span>
+						<h2>Map System Deep Dive</h2>
+						<span class="tagline">Init order, boundaries, markers, selection</span>
+					</div>
+
+					<div class="card">
+						<h3>6.1 Initialization</h3>
+						<p><code>map.html</code> loads dependencies in a specific and load-bearing order: Leaflet's CSS and the vendored globals (<code>noUiSlider</code>, <code>topojson</code>) in <code>&lt;head&gt;</code>; then at the end of <code>&lt;body&gt;</code>, Leaflet's JS, then <code>boundaries-topo.js</code> (a classic script assigning <code>BoundariesTopoFine</code> / <code>BoundariesTopoCoarse</code> to <code>window</code>), then <code>&lt;script type="module" src="../js/map/app.js"&gt;</code>. Because module scripts are deferred, <code>L</code> and the boundary globals are guaranteed present before any module evaluates.</p>
+						<p><code>app.js</code> is 40 lines and does exactly one thing — <code>bootstrap()</code> — with two ordering constraints spelled out in comments:</p>
+						<pre class="code-block"><code>mapTheme.init()        // must subscribe BEFORE Basemaps.init() calls setBase(),
+Basemaps.init()        // because that first call sets the initial [data-theme]
+Boundaries.init()
+VisualizerModal.init()
+Markers.init(ArchiveData.features)
+Legend.init()
+TimeSlider.init()
+SelectionToolbar.init()
+SelectionResults.init()
+Searchbar.init()
+AnalyticsPanel.init()
+// dropdowns…
+StateSyncManager.initialize()   // must run LAST: reads every module's freshly
+                                // initialized state to compute "defaults",
+                                // then may immediately override it from the URL</code></pre>
+						<p><strong>A subtlety that matters for §13:</strong> the Leaflet map is <em>not</em> created in <code>MapCore.init()</code>. There is no such function. <code>map-core.js</code> calls <code>L.map("map", {...})</code> at module top level, inside the IIFE. Importing <code>MapCore</code> — which <code>basemaps</code>, <code>boundaries</code>, <code>markers</code>, <code>draw-overlay</code>, <code>marker-popup</code>, <code>results-row</code>, <code>results-panel</code>, <code>analytics-panel</code>, <code>viewport-query</code>, <code>selection-toolbar</code>, <code>legend-panel</code>, and <code>state-sync-manager</code> all do — instantiates the map as a side effect. It is a singleton by construction, not by convention.</p>
+						<p style="margin-top: 0.9rem">Initial state resolution runs in three stages:</p>
+						<ol class="detail-list numbered">
+							<li><code>Config</code> supplies center <code>[15.5, -61.2]</code> (Dominica), zoom 8, and — notably — <code>defaultBaseLayerId</code> is computed at config-evaluation time from <code>window.matchMedia("(prefers-color-scheme: light)")</code>, so the map honours OS theme before any user input.</li>
+							<li>Each module initializes to its own defaults: all filters on, no selection, year range = the dataset's full extent (<code>Math.min/max</code> over every feature's <code>time</code>).</li>
+							<li><code>StateSyncManager.initialize()</code> snapshots that as <code>defaults</code>, then calls <code>hydrateFromCurrentLocation()</code>. If a query string is present it is deserialized, sanitized against live bounds, and applied; otherwise defaults are applied unchanged. Either way it finishes with <code>writeHistory("replace")</code> so the very first history entry is well-formed.</li>
+						</ol>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>6.2 The boundary layer</h3>
+						<p><code>BoundaryData</code> decodes TopoJSON to GeoJSON features and caches the result <strong>per simplification level</strong> in a module-level <code>Map</code>. Two levels exist — <code>BoundariesTopoFine</code> (~19% of source points) and <code>BoundariesTopoCoarse</code> (~7%) — and the file header records the crucial property: the arcs were simplified <em>in place</em> via topojson-simplify and never rebuilt, so both levels share arc indices 1:1 and carry identical properties in identical order.</p>
+						<p><code>Boundaries</code> renders them as two <code>L.geoJSON</code> layers (islands and waters, split on <code>Config.boundaries.typeProperty</code>) plus a <code>L.layerGroup</code> of flag markers. Level selection is driven by zoom against <code>Config.boundaries.simplifyZoomThreshold</code> (9), and <code>rebuildForZoom()</code> short-circuits unless the level actually crosses the threshold — so ordinary zooming costs nothing. When it does rebuild, it captures each layer's current on/off state first and restores it, so a user who turned Waters off in the legend doesn't have it reappear on zoom.</p>
+						<p style="margin-top: 0.9rem">Two details here are better than they needed to be:</p>
+						<p><strong>Flag anchoring.</strong> <code>flagLatLng()</code> doesn't use the bbox centre, because for a MultiPolygon archipelago that lands in open water. Instead it picks the largest sub-polygon by ring area (<code>GeoMath.largestPolygon</code>), computes that ring's centroid, and — if the centroid falls outside the ring, as it does for concave shapes — falls back to the nearest ring vertex, then to the bbox centre only as a last resort so hover feedback is never silently lost.</p>
+						<p><strong>Water/island pairing.</strong> A territory's water polygon has a different <code>NAME_0</code> ("Dominican Waters") than its island ("Dominica") but shares <code>GID_0</code>. <code>build()</code> precomputes <code>anchorByGid0</code> <em>before</em> Leaflet invokes <code>onEachFeature</code>, so water tooltips render at exactly the island's flag position. <code>geo-index.js</code> uses the same key and comments on why <code>SOVEREIGN</code> was rejected: Guadeloupe and Martinique both have <code>SOVEREIGN: "France"</code>, which would wrongly merge two distinct islands.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>6.3 Markers</h3>
+						<p>One Leaflet marker is created per feature at init and <strong>never destroyed</strong>. Visibility is <code>addTo</code> / <code>removeLayer</code> against the pre-built instances; icons are <code>L.divIcon</code> with inline SVG from <code>Shapes</code>.</p>
+						<p>The adaptive colour mode is a nice piece of product thinking. <code>highlightByRole</code> starts true — markers are coloured by creole role, the dimension the archive is actually about. <code>computeHighlightByRole()</code> scans for how many distinct roles survive the current filters, bailing early once it finds a second. If filtering collapses to a single role, role has nothing left to distinguish, so <code>refreshIconMode()</code> restyles every marker to its <em>category</em> colour instead. Same icon geometry either way; only the fill changes. It only restyles when the mode actually flips.</p>
+						<p><code>visible()</code> caches the <code>hasLayer</code> filter and invalidates in <code>applyVisibility()</code> — worth noting because the hit-testers call it on every selection.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>6.4 Selection: the most sophisticated subsystem</h3>
+						<p>Arming a tool (<code>arm()</code>) does considerably more than set a flag. It disables Leaflet's <code>dragging</code>, <code>doubleClickZoom</code>, <code>tap</code>, and <code>boxZoom</code> — the last with a comment explaining that Shift+drag is Leaflet's native box-zoom, which would otherwise fight the Shift-as-union modifier. It sets <code>touch-action: none</code> <strong>both</strong> via CSS class and inline, with a comment on why: <code>touch-action</code> is resolved before pointer events dispatch, so if the class rule loses a specificity battle or applies a tick late, the first <code>pointermove</code> arrives as a <code>pointercancel</code> instead.</p>
+						<p style="margin-top: 0.9rem">Hit testing correctly uses two different coordinate spaces:</p>
+						<ul class="detail-list">
+							<li><strong>Screen space</strong> for drawn shapes. <code>containerPoint(marker)</code> projects each visible marker to container pixels and tests against the pixel-space rectangle/ellipse/polygon. This is right: the user drew in pixels, so an ellipse should be an ellipse on screen, not a distorted geodesic region.</li>
+							<li><strong>Geographic space</strong> for object select. <code>GeoMath.pointInGeometry(lng, lat, geometry)</code> ray-casts the marker's lat/lng against the boundary polygon's rings, with holes handled (<code>rings[0]</code> outer, the rest subtractive). An <code>extent</code> mode does a cheap bbox test instead, toggled by a dedicated pair of toolbar buttons.</li>
+						</ul>
+						<p style="margin-top: 0.9rem"><code>GeoMath</code>'s header records that this ray-casting was previously copy-pasted across three modules and has been consolidated — the kind of note that saves the next engineer from re-forking it.</p>
+						<p>Hits flow to <code>SelectionState.applyHits()</code>, which delegates combination to <code>SelectionAlgebra</code> — four one-line set operations in a lookup table, with no state and no DOM. That separation is what makes the modifier-key override cheap: <code>onKeyDown</code> records the current mode, switches to the modifier's mode, and <code>onKeyUp</code> restores it. A single override is tracked at a time (mirroring the single-select mode buttons), <code>evt.repeat</code> is guarded, editable targets are excluded, and a <code>window blur</code> listener restores the mode if focus leaves while a modifier is held — otherwise alt-tabbing would leave the override permanently stuck.</p>
+					</div>
+
+					<div class="callout"><strong>The middle-click pan</strong> deserves specific mention as the most advanced piece of Leaflet integration here. Because arming disables <code>dragging</code> entirely, middle-click panning is hand-rolled: on middle pointerdown it snapshots the map pane's transform and pixel position (via <code>map._getMapPanePos()</code>, with a regex fallback parsing <code>translate3d</code> if that private method disappears), then accumulates deltas and writes <code>translate3d</code> directly to the pane inside a <code>requestAnimationFrame</code>. On release it <strong>restores the original transform first</strong> so Leaflet's internal position is consistent, then commits the real offset with a single <code>panBy({animate: false})</code> — producing exactly one <code>move</code>/<code>moveend</code> pair instead of hundreds. That last point is not incidental: <code>moveend</code> is what drives <code>viewport:changed</code> → URL writes.</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>6.5 The three feedback loops</h3>
+						<div class="attr-table-wrap">
+							<table class="attr-table">
+								<tbody>
+									<tr>
+										<td style="white-space: nowrap"><strong>Filter loop</strong></td>
+										<td>Legend checkbox / analytics bar click / timeline brush / year slider → <code>FilterState</code> setter → <code>touch(group)</code> → <code>filters:changed</code> → <code>Markers.refreshIconMode()</code> + <code>applyVisibility()</code>, <code>AnalyticsPanel.render()</code>, <code>Legend.syncCheckedState()</code>, <code>StateSyncManager</code> (debounced 300 ms).</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><strong>Selection loop</strong></td>
+										<td>Pointer gesture → <code>SelectionToolbar</code> → <code>GeoMath</code> hit test → <code>SelectionState.applyHits()</code> → <code>SelectionAlgebra.combine()</code> → <code>selection:changed</code> → marker highlight classes, results-list reconciliation, analytics rescope, URL push.</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><strong>Viewport loop</strong></td>
+										<td>Leaflet <code>moveend</code> → <code>viewport:changed</code> → <code>ViewportQuery.featuresInView()</code> rescan → results list and analytics update (debounced 150 ms for analytics), URL replace (debounced 300 ms).</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<p style="margin-top: 0.9rem"><code>ViewportQuery</code> is the single implementation behind all three "which features are in view" questions, parameterized by <code>respectFilters: "none" | "active" | "ignoreYear"</code>. Its header records that three modules previously each scanned the dataset independently. The <code>"ignoreYear"</code> mode exists for one specific reason: the decade histogram must show the full distribution for context, because if it respected the year filter every out-of-range decade would read as zero and the user would have nothing to drag back toward.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>6.6 Two pieces of unusually careful product logic</h3>
+						<p><strong>Hidden-record attribution.</strong> The analytics panel shows "N records hidden by the <em>X</em> filter" for each of four filters. A record failing three filters at once must be attributed to exactly one, or the four notices won't sum to the real hidden total. <code>FilterState.classifyHiddenReason()</code> solves this by tracking, via a monotonic <code>touchCounter</code>, which filter group the user touched <em>least</em> recently among those currently blocking the record — the reasoning being that the filter you're actively dragging is already the obvious cause, so the notice should surface the one that's easy to overlook. The comment records that a previous approach (diffing against a scope with one filter lifted) silently undercounted, and that ties fall back to a deterministic seed order. <code>setAllVisible()</code> deliberately does <em>not</em> touch the counter, because a blanket reset isn't the user focusing on one filter.</p>
+						<p><strong>Bidirectional timeline.</strong> The analytics histogram and the footer slider are the same filter viewed twice. Brushing the histogram calls <code>TimeSlider.setRange()</code>, which drives noUiSlider programmatically; noUiSlider's own <code>update</code> handler then notifies <code>FilterState</code>. Control flows one way and the state converges — no two-way binding, no reconciliation.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>6.7 UI synchronization quirks</h3>
+						<p>Panels coordinate through the bus in ways worth knowing before touching them. <code>createCollapsible</code> broadcasts <code>panel:collapseChanged</code> with a name; Legend and Results each listen for the other and mutually collapse on desktop, because their layouts overlap when both are open. Results carries a <code>hasArmedOnce</code> latch so the first time any tool is armed it switches from "Visible in view" to "Selection" mode — once only, so it doesn't fight the user afterward. Search sets <code>searchActive</code> in <code>Markers</code>, which is the <em>only</em> path that hides non-selected markers; every other selection source highlights in place.</p>
+						<p>This is the most implicitly-coupled area of the codebase. <code>results-panel.js</code> alone carries seven bus subscriptions with interlocking collapse rules.</p>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     7. STATE AND INTERACTION FLOW
+				     ============================================= -->
+				<section class="sheet" id="state-flow">
+					<div class="sheet-head">
+						<span class="sheet-id">07</span>
+						<h2>State and Interaction Flow</h2>
+						<span class="tagline">Worked example: Shift+drag a lasso over Martinique</span>
+					</div>
+
+					<div class="card">
+						<pre class="code-block"><code>pointerdown (button 0, Shift held)
+   ├─ keydown "Shift" already fired → KEY_MODE_MAP → modeBeforeOverride = "new"
+   │                                → SelectionState.setMode("add"), button UI updates
+   ├─ isOutsideDrawSurface(evt)? → target isn't inside any panel → proceed
+   └─ isDrawing = true, drawPoints = [pt]
+
+pointermove ×N
+   └─ drawPoints.push(pt) → DrawOverlay.path(pts, false)
+        └─ single &lt;svg class="select-draw-svg"&gt; appended to the map container,
+           its one &lt;path&gt; re-attributed each frame (element is reused, not recreated)
+
+pointerup
+   ├─ hitTesters.lasso(drawPoints)
+   │     └─ Markers.visible()          ← cached list
+   │          .filter(m => GeoMath.inPolygon(containerPoint(m), drawPoints))
+   ├─ SelectionState.applyHits(hits.map(Markers.featureIndex))
+   │     └─ SelectionAlgebra.combine(existing, hits, "add") → union
+   │     └─ emit "selection:changed"
+   │            ├─ Markers.applyVisibility()
+   │            ├─ SelectionResults: highlightSelectedMarkers() + render()
+   │            ├─ AnalyticsPanel.render()   ← scope switches to the selection
+   │            └─ StateSyncManager → sanitize → history.pushState (immediate)
+   ├─ emit "selection:toolUsed" → Results leaves bbox mode, expands
+   └─ cancelDraw() → DrawOverlay.clear()
+
+keyup "Shift" → restoreModeOverride() → SelectionState.setMode("new")</code></pre>
+						<p>Two design notes visible in this trace. First, <code>applyHits</code> receives <em>indices</em>, not markers — the map layer converts to domain identity at the boundary, so <code>SelectionState</code> never touches Leaflet. Second, both <code>ResultsViewState.selectAll()</code> and <code>Searchbar.runSearch()</code> need to <em>replace</em> rather than combine, so both save the mode, force <code>"new"</code>, apply, and restore — a small repeated idiom that would be cleaner as an explicit <code>SelectionState.replaceWith()</code>.</p>
+					</div>
+
+					<div class="callout"><strong>The URL write policy</strong> is a considered piece of design. <code>pushState</code> (immediate, new history entry) for discrete changes — basemap, overlay, selection, sort. Debounced <code>replaceState</code> (300 ms, coalesced) for continuous ones — viewport and filters. <code>filters:changed</code> lands in the debounced bucket even though a checkbox click is discrete, and the code explains the tradeoff: it's the <em>same</em> event as every tick of a slider drag, so treating it as discrete would flood <code>pushState</code>. The cost is ~300 ms of URL staleness after a checkbox click, which is imperceptible. <code>suppressWrites</code> guards the apply path so restoring a state doesn't re-serialize it.</div>
+				</section>
+
+				<!-- =============================================
+				     8. IMPORTANT COMPONENTS
+				     ============================================= -->
+				<section class="sheet" id="components">
+					<div class="sheet-head">
+						<span class="sheet-id">08</span>
+						<h2>Important Components and Responsibilities</h2>
+						<span class="tagline">What an engineer must understand first</span>
+					</div>
+
+					<div class="card">
+						<div class="attr-table-wrap">
+							<table class="attr-table">
+								<tbody>
+									<tr>
+										<td style="white-space: nowrap"><code>config.js</code></td>
+										<td>Genuinely centralized. Tile URL builder, initial view, both overlay definitions with their georeferenced bounds, boundary styling, the simplification threshold, debounce timings, the polygon double-tap window. The boundary block even documents how to discover the right <code>typeProperty</code> for a different data source (<code>console.table(BoundaryData.getFeatures().map(f => f.properties))</code>).</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><code>event-bus.js</code></td>
+										<td>12 lines. Understand it in 30 seconds and you understand how the app is wired.</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><code>filter-state.js</code></td>
+										<td>The most load-bearing state module. Owns four filter dimensions and a single parameterized predicate, <code>isFeatureVisibleIgnoring(props, {ignoreYear})</code>, from which both public predicates derive so they can't drift apart. Encodes a real domain rule: <code>"others"</code> and <code>null</code> collapse into one bucket for both category and author type, and always pass — so "Other / Unknown" records stay visible no matter which specific type is being focused.</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><code>state-sync-schema.js</code></td>
+										<td>The purest module and the most reusable. <code>sanitizeState(partial, fallback, bounds)</code> never throws and always returns a fully valid state, validating every field against live bounds (zoom vs. <code>maxZoom</code>, IDs vs. actual layer IDs, years vs. dataset extent, selection indices vs. <code>featureCount</code>). <code>serializeState</code> omits anything equal to default, so a pristine view has a clean URL. This module is the foundation for both future modes.</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><code>state-sync-manager.js</code></td>
+										<td>The URL bridge, and the file to read first. Its 40-line integration-notes appendix is the best documentation in the repo: it explains why the app's state shape refused to fit a generic model, records the index-identity risk, notes that <code>Basemaps.setOverlay()</code> <em>toggles</em> rather than sets (so clearing means re-toggling the active ID), and states that localStorage was intentionally dropped. It also owns the private <code>applyStateToApp()</code> — the function both future modes need.</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><code>panel-behaviors.js</code></td>
+										<td>Extracts the collapse state machine and header mounting shared by three panels. Its <code>NARROW_VIEWPORT_QUERY = "(max-width: 30rem)"</code> constant carries an honest warning that CSS custom properties can't be read inside a media query condition, so this is hand-synced with <code>responsive.css</code>.</td>
+									</tr>
+									<tr>
+										<td style="white-space: nowrap"><code>geo-math.js</code> / <code>selection-algebra.js</code></td>
+										<td>Pure, dependency-free, and the two modules most obviously ready for unit tests that don't exist.</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     9. KEY ENGINEERING AND DESIGN DECISIONS
+				     ============================================= -->
+				<section class="sheet" id="decisions">
+					<div class="sheet-head">
+						<span class="sheet-id">09</span>
+						<h2>Key Engineering and Design Decisions</h2>
+						<span class="tagline">Marked <span class="tag tag-confirmed">C confirmed</span> <span class="tag tag-inferred">I inferred</span> <span class="tag tag-undeterminable">U undeterminable</span></span>
+					</div>
+
+					<div class="decision card">
+						<h3>9.1 Vanilla ES modules with no build step</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd>No <code>package.json</code>, no lockfile, no config for any tool. <code>&lt;script type="module"&gt;</code> with relative <code>.js</code> imports. Vendored libraries as classic scripts assigning globals. GitHub Pages hosting.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>Push-to-deploy with zero pipeline; the deployed artifact is the source, so devtools show real code with real names; no toolchain to age or break. For a single-developer prototype on Pages, correct.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>No minification or tree-shaking. 36 sequential module requests plus 15 sequential CSS <code>@import</code>s on cold load. No lint or type checking — nothing catches a typo'd event name.</dd></div>
+							<div class="kv-row"><dt>Future</dt><dd>Adding esbuild or Vite later is nearly free (this is standard ESM). Do it when cold-load latency or team size makes it worthwhile, not before.</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.2 Leaflet rather than MapLibre / Mapbox GL</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd>Leaflet 1.9.4 from CDN. All tile sources are raster (CARTO PNGs + local PNG pyramids). Markers are <code>L.divIcon</code> with inline SVG. Marker selection is <code>iconEl.classList.toggle("is-selected-marker", …)</code>.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>Two decisive fits. The data is raster — the historical overlays are pre-rendered PNG pyramids, so a vector-first engine would bring no benefit. And <code>divIcon</code> markers are real DOM nodes, so the entire CSS design system applies to them directly; the same is not true of GL-rendered symbols, where selection styling means shader-level feature-state management.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>DOM markers cap out in the low thousands. No 3D, no vector styling, no smooth fractional zoom.</dd></div>
+							<div class="kv-row"><dt>Future</dt><dd>The ceiling is a real dataset-size limit (§15). Mitigations in order of cost: canvas renderer for boundaries → marker clustering → GL engine. Only the last is a rewrite, and only a very large dataset would justify it.</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.3 Static HTML shells filled by JS</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd><code>map.html</code> declares every panel skeleton with stable IDs; <code>basemaps.js</code> and <code>legend-panel.js</code> both comment that markup lives in HTML and "only the per-layer buttons are data-driven from Config."</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>Panels are present and styled before JS runs — no flash of unstyled or missing chrome. CSS is authored against markup that actually exists. JS stays behavior-only.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>~40 <code>getElementById</code> calls against literal IDs. This is exactly what makes a second, independently-instantiated map hard (§13).</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.4 Array indices as record identity</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd><code>SelectionState</code> holds <code>Set&lt;number&gt;</code>. <code>sanitizeSelection</code> validates against <code>bounds.featureCount</code>. The URL carries <code>sel=3,7,12</code>. <code>ArchiveData</code> features have no <code>id</code> property.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>With a hardcoded 25-record literal, index <em>is</em> identity, and it produces short URLs.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>The code names this itself: indices "are only valid as long as the dataset itself doesn't change shape. If <code>ArchiveData</code> ever becomes dynamic (loaded/paginated/re-ordered), this needs a real id field before it's safe to persist."</dd></div>
+							<div class="kv-row"><dt>Future</dt><dd><strong>This is the single highest-priority change in the repository.</strong> Any shared link, saved story, or comparison scenario silently breaks the moment a record is inserted, removed, or reordered. Adding an <code>id</code> field costs an afternoon now and gets more expensive with every artifact that references indices.</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.5 Federated state singletons over a central store</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd>Five independent state owners, no store module, coordination purely by event.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>Each concern's invariants live with its data; adding a filter dimension touches one file. Avoids the boilerplate of a store for an app whose state is genuinely small.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>No single place to snapshot, diff, or time-travel — which is why <code>StateSyncManager</code> has to reach into five modules to assemble a state object. Cross-cutting operations (like "apply this whole state") are awkward, and the current implementation shows it: <code>applyStateToApp</code> calls 17 individual filter setters, each emitting <code>filters:changed</code>, each triggering a full analytics rebuild.</dd></div>
+							<div class="kv-row"><dt>Future</dt><dd>Don't add a store library. Do add a <strong>batched apply</strong> path per state owner (§14).</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.6 CSS custom properties as the colour source of truth</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd>All category/author/role colours defined in <code>root.css</code>; <code>Theme</code> reads them via <code>getComputedStyle</code> at module init; <code>Shapes</code> receives colours as arguments.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>One definition serves CSS rules, SVG marker fills, legend swatches, and analytics bars — no duplicated hex values.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>Read <em>once</em> at import. Today that's safe, because the semantic colours live on <code>:root</code> and only surface colours vary by <code>[data-theme]</code>. But it silently constrains any future per-theme or user-customizable palette.</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.7 Dual-resolution boundary simplification</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd><code>BoundariesTopoFine</code> (~19% of points) / <code>BoundariesTopoCoarse</code> (~7%), arcs simplified in place so indices match 1:1; <code>levelForZoom()</code> at threshold 9; <code>rebuildForZoom()</code> no-ops unless the level changes.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-confirmed">C</span></dt><dd>The config comments state it: below the threshold more geometry is visible at once, so redraw cost is worst exactly where the extra detail is least perceptible.</dd></div>
+							<div class="kv-row"><dt>Tradeoffs</dt><dd>Two copies of the topology in one 370 KB file, parsed on load. A rebuild at the threshold discards and recreates both <code>L.geoJSON</code> layers plus all flag markers.</dd></div>
+						</dl>
+					</div>
+
+					<div class="decision card">
+						<h3>9.8 Fidelity-mocked export</h3>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Evidence <span class="tag tag-confirmed">C</span></dt><dd>13 formats with per-format hints; the confirm handler is <code>close()</code>.</dd></div>
+							<div class="kv-row"><dt>Reasoning <span class="tag tag-inferred">I</span></dt><dd>The design question being tested is <em>which formats matter and how the chooser should feel</em>, not whether a Shapefile encoder works. Building real encoders for 13 formats would consume the entire prototype budget and answer nothing about the product.</dd></div>
+							<div class="kv-row"><dt>Future</dt><dd>Formats split cleanly. Data formats (CSV/JSON/GeoJSON) are trivial client-side from the selected features. Map formats (PNG/PDF) need canvas rasterization. GIS binaries (SHP/GPKG/FGB) realistically need a server. <strong>The format list is itself a product requirement document</strong> — it should inform the backend scope when one exists.</dd></div>
+						</dl>
+					</div>
+
+					<div class="card">
+						<h3>9.9 Undeterminable <span class="tag tag-undeterminable" style="margin-left: 0.4rem">U</span></h3>
+						<p>Whether the historical overlays are licensed for redistribution (attributed to Old Maps Online, but no LICENSE file exists); the provenance and licence of the boundary topology (properties are GADM-shaped, but nothing states it); whether the single squashed commit hides meaningful history; whether the 25 records are representative of the eventual corpus's shape or scale.</p>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     10. WHAT WORKS PARTICULARLY WELL
+				     ============================================= -->
+				<section class="sheet" id="what-works">
+					<div class="sheet-head">
+						<span class="sheet-id">10</span>
+						<h2>What Works Particularly Well for a Prototype</h2>
+						<span class="tagline">Six strengths worth preserving</span>
+					</div>
+
+					<div class="card">
+						<ul class="detail-list">
+							<li><strong>Configuration discipline.</strong> <code>Config</code> is genuinely the only place tunables live, and it's honoured. Retargeting the prototype to a different archipelago is plausibly a config edit plus new tile pyramids.</li>
+							<li><strong>Comment quality.</strong> Comments explain <em>why</em>, and several record rejected alternatives with the reason for rejection — <code>classifyHiddenReason</code>'s undercounting problem, <code>GID_0</code> vs. <code>SOVEREIGN</code>, why <code>touch-action</code> is set twice, why <code>boxZoom</code> must be disabled. <code>state-sync-manager.js</code>'s integration appendix is close to an ADR. This is the project's most valuable and most fragile asset: it will decay silently unless maintained.</li>
+							<li><strong>Real interaction depth.</strong> Boolean selection algebra with modifier keys, unified pointer input, hand-rolled middle-click panning, geometry-vs-extent object selection, brushable histogram. These are the <em>hard</em> parts of this kind of tool, and they're done rather than sketched.</li>
+							<li><strong>Naming correspondence.</strong> <code>#legend-panel</code> ↔ <code>legend-panel.js</code> ↔ <code>legend-panel.css</code> holds across every panel. Finding the code for a piece of UI takes no search.</li>
+							<li><strong>Accessibility as a default rather than a pass.</strong> Keyboard-operable markers, ARIA state maintained through every toggle, focus return on Escape, deliberate omission of a default <code>aria-expanded</code> in <code>mountHeader</code> so no incorrect value ever flashes in the DOM.</li>
+							<li><strong>Genuinely reused abstractions.</strong> <code>GeoMath</code>, <code>ViewportQuery</code>, and <code>panel-behaviors</code> were each extracted from three duplicated call sites, and each file says so.</li>
+							<li><strong>Correct rendering strategy where it counts.</strong> <code>SelectionResults.render()</code> does keyed reconciliation — it removes rows whose indices vanished, then walks the desired order reusing existing rows and only moving what's out of place. No teardown, no rebuild. This is the right pattern, and it makes the contrast with <code>AnalyticsPanel</code> (§15) instructive rather than accidental.</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     11. CURRENT ARCHITECTURAL LIMITATIONS
+				     ============================================= -->
+				<section class="sheet" id="limitations">
+					<div class="sheet-head">
+						<span class="sheet-id">11</span>
+						<h2>Current Architectural Limitations</h2>
+						<span class="tagline">Ordered by how soon they will actually bite</span>
+					</div>
+
+					<div class="card">
+						<ol class="detail-list numbered">
+							<li><strong>Index-based identity</strong> (§9.4). Blocks real data, saved stories, and shareable comparison states. Fix first.</li>
+							<li><strong><code>MapCore</code> as a construction-time singleton.</strong> ~15 modules import it directly. Blocks comparison mode entirely.</li>
+							<li><strong>No batched state application.</strong> Restoring a state emits <code>filters:changed</code> 17 times; each rebuilds the analytics panel. Invisible at 25 records; disqualifying for story-step transitions.</li>
+							<li><strong>Panel DOM binding by global ID.</strong> Prevents two instances of any panel.</li>
+							<li><strong>Unthrottled <code>filters:changed</code> → full analytics teardown.</strong> The dominant performance risk (§15).</li>
+							<li><strong>No test coverage.</strong> <code>state-sync-schema.js</code>, <code>geo-math.js</code>, and <code>selection-algebra.js</code> are pure and explicitly written to be testable. Nothing tests them.</li>
+							<li><strong>Implicit panel coupling.</strong> Seven interlocking bus subscriptions in <code>results-panel.js</code>; adding a mode means reasoning about all of them.</li>
+							<li><strong>Silent 200-index URL cap.</strong> A lasso over a dense region produces a link that quietly drops the selection. Acknowledged in code, no user-facing warning.</li>
+							<li><strong>DOM markers, no clustering, SVG boundary renderer.</strong> A hard ceiling in the low thousands of records.</li>
+							<li><strong>Dead vendor duplicates under misleading names</strong> (§5).</li>
+						</ol>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     12. FUTURE MODE: DATA STORY
+				     ============================================= -->
+				<section class="sheet" id="story-mode">
+					<div class="sheet-head">
+						<span class="sheet-id">12</span>
+						<h2>Future Mode: Data Story</h2>
+						<span class="tagline">Most of it already exists</span>
+					</div>
+
+					<div class="card">
+						<h3>12.1 The central insight</h3>
+						<p><strong>Most of a story engine already exists.</strong> <code>StateSyncManager</code> defines a canonical, serializable, fully-validated application state (<code>sanitizeState</code>), a function to read it from the live app (<code>readCurrentAppState</code>), and a function to apply it back (<code>applyStateToApp</code>). A story step <em>is</em> one of those state objects plus narrative text.</p>
+						<p>This means Data Story Mode requires <strong>no new state model, no rendering changes, and no changes to any panel.</strong> Every panel already re-renders in response to the same events that <code>applyStateToApp</code> triggers. The work is extraction, sequencing, and a narrative UI.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>12.2 Recommended architecture</h3>
+						<pre class="code-block"><code>StoryDefinition  (declarative data — no code)
+      ↓
+StoryStep  { narrative, statePatch, transition, annotations }
+      ↓
+StoryController  (index, next/prev, merge patch over baseline)
+      ↓
+StateApplier.apply(state, {animate})     ← extracted from StateSyncManager
+      ↓
+existing EventBus events → existing panels, markers, boundaries (UNCHANGED)</code></pre>
+						<p>Steps should carry <strong>partial</strong> states merged over the previous step's resolved state, not full states. A step that only says "now zoom to Martinique" shouldn't have to restate every filter, and authors shouldn't have to keep 10 fields in sync across 12 steps.</p>
+						<pre class="code-block"><code>const story = {
+  id: "creole-emergence",
+  title: "The Emergence of Written Creole",
+  baseline: { /* optional full state; defaults to Config defaults */ },
+  steps: [
+    {
+      id: "overview",
+      narrative: { title: "A Scattered Archive",
+                   body: "Across the Lesser Antilles, 25 surviving documents…" },
+      state: { center: [15.5, -61.2], zoom: 8, yearRange: [1648, 1861] },
+      transition: { map: "flyTo", durationMs: 1200 }
+    },
+    {
+      id: "early-clergy",
+      narrative: { title: "The Missionary Record", body: "…" },
+      state: { yearRange: [1648, 1720], activeAuthorTypes: ["clergy"] },
+      transition: { map: "flyTo", durationMs: 900 },
+      annotations: [{ type: "marker-emphasis", records: ["rec-007", "rec-014"] }]
+    },
+    {
+      id: "martinique-focus",
+      narrative: { title: "Martinique", body: "…" },
+      state: { center: [14.64, -61.02], zoom: 10 },
+      annotations: [{ type: "region-highlight", boundaryGid0: "MTQ" }],
+      transition: { map: "flyTo", durationMs: 1000 }
+    }
+  ]
+}</code></pre>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>12.3 What to build</h3>
+						<ol class="detail-list numbered">
+							<li><strong>Extract <code>StateApplier</code></strong> (~40 lines, mechanical). Lift <code>applyStateToApp</code> out of <code>StateSyncManager</code> into <code>state/state-applier.js</code> and add an options argument:
+								<pre class="code-block"><code>export function applyState(next, {animate = false} = {}) {
+  animate ? MapCore.map.flyTo(next.center, next.zoom, {duration: …})
+          : MapCore.map.setView(next.center, next.zoom, {animate: false})
+  // …everything else applies instantly; only the map animates
+}</code></pre>
+								<code>StateSyncManager</code> then calls it with <code>{animate: false}</code> and behaves identically. <code>StoryController</code> calls it with <code>{animate: true}</code>. Filters and selection apply instantly during the fly-to, which is correct — animating a filter change means animating markers in and out, which reads as noise.</li>
+							<li><strong>Add <code>FilterState.applySnapshot({yearRange, categories, authorTypes, creoleRoles})</code></strong> — one <code>notify()</code> instead of 17. <strong>This is a prerequisite, not a nice-to-have.</strong> Without it every story transition triggers 17 full analytics rebuilds mid-animation.</li>
+							<li><strong><code>StoryController</code></strong> — owns <code>currentStoryId</code> and <code>currentStepIndex</code>, resolves each step by merging its patch over the previous resolved state, calls <code>sanitizeState</code> (free validation), then <code>StateApplier</code>. Emits <code>story:stepChanged</code>.</li>
+							<li><strong>Story URL scheme.</strong> Extend <code>state-sync-schema.js</code> with <code>story</code> and <code>step</code> keys. When a story is active, serialize <code>?story=creole-emergence&amp;step=3</code> <strong>instead of</strong> the full state — the story definition already encodes the state, and Back/Forward then steps through the narrative, which is exactly the desired behaviour.</li>
+							<li><strong>Story panel</strong> — narrative text, progress, prev/next, exit. Reuse <code>panel-behaviors.js</code> for the shell. Suppress or lock the selection toolbar while a story is active.</li>
+							<li><strong>Annotation layer</strong> — the one genuinely new capability. Use a dedicated <code>L.layerGroup</code>, rebuilt per step from declarative step data. <strong>Do not overload <code>SelectionState</code></strong>: story emphasis and user selection are different concepts with different lifetimes, and conflating them will produce bugs where exiting a story leaves a phantom selection. For region highlights, reuse the existing <code>GID_0</code> lookups in <code>geo-index.js</code>.</li>
+						</ol>
+					</div>
+
+					<div class="grid-2" style="margin-top: 1.2rem">
+						<div class="card">
+							<h3>12.4 What stays untouched</h3>
+							<p>Markers, boundaries, basemaps, legend, analytics, results, search, time slider, popups, <code>geo-math</code>, <code>selection-algebra</code>, <code>viewport-query</code>, all CSS. This is the strongest argument for the approach: the entire feature reuses the existing rendering pipeline through the existing event vocabulary.</p>
+						</div>
+						<div class="card">
+							<h3>12.5 Prerequisites and risks</h3>
+							<dl class="kv-list">
+								<div class="kv-row"><dt>Blocking</dt><dd>Stable record IDs. A story step that emphasizes records <em>must not</em> reference <code>[7, 14]</code>.</dd></div>
+								<div class="kv-row"><dt>Blocking</dt><dd><code>applySnapshot</code> batching.</dd></div>
+								<div class="kv-row"><dt>Risk</dt><dd><code>AnalyticsPanel</code>'s full teardown per <code>filters:changed</code> will visibly stutter mid-fly-to. Batching mostly solves it; adding a "quiet" mode that defers analytics rendering until a transition settles is the belt-and-braces version.</dd></div>
+								<div class="kv-row"><dt>Non-risk</dt><dd>Authoring. Stories are plain data and can live as a JS module exactly like <code>ArchiveData</code> does today.</dd></div>
+							</dl>
+						</div>
+					</div>
+
+					<div class="callout"><strong>Estimate: the smallest honest version is a few days of work</strong>, most of it in the narrative UI rather than the architecture. Note that <code>StateSyncManager.getShareableUrl()</code> plus <code>readCurrentAppState()</code> already give you "capture the current view as a step" nearly for free.</div>
+				</section>
+
+				<!-- =============================================
+				     13. FUTURE MODE: SIDE-BY-SIDE COMPARISON
+				     ============================================= -->
+				<section class="sheet" id="comparison-mode">
+					<div class="sheet-head">
+						<span class="sheet-id">13</span>
+						<h2>Future Mode: Side-by-Side Comparison</h2>
+						<span class="tagline">A real refactor — bigger than Data Story</span>
+					</div>
+
+					<div class="card">
+						<h3>13.1 The constraint</h3>
+						<p><code>map-core.js</code> calls <code>L.map("map")</code> at module evaluation time. Roughly fifteen modules import <code>MapCore</code> and use <code>MapCore.map</code> or <code>MapCore.getContainer()</code> directly. <code>FilterState</code>, <code>SelectionState</code>, <code>Markers</code>, <code>Boundaries</code>, and <code>ViewportQuery</code> are all IIFE singletons instantiated on import. Panels bind to global DOM IDs.</p>
+					</div>
+
+					<div class="callout"><strong>There is no shortcut around this.</strong> Comparison mode is a real refactor — meaningfully larger than Data Story Mode — and it should not be attempted first.</div>
+
+					<div class="card">
+						<h3>13.2 Choosing the comparison model</h3>
+						<div class="attr-table-wrap">
+							<table class="attr-table">
+								<thead>
+									<tr>
+										<th>Model</th>
+										<th>Verdict</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Swipe / curtain over one map</td>
+										<td>Cheapest, but can only compare <em>tile layers</em>. Cannot show two different filter states, which is the comparison this dataset actually supports (period × category × author type). <strong>Rejected.</strong></td>
+									</tr>
+									<tr>
+										<td>One map, two marker sets, differential styling</td>
+										<td>No refactor needed, but conflates two states in one viewport; illegible past a handful of records. <strong>Rejected as the primary model</strong> — though it is exactly right for the <em>difference overlay</em> (§13.4).</td>
+									</tr>
+									<tr>
+										<td><strong>Two map instances, synced viewport, independent filter/selection state, shared data</strong></td>
+										<td>Honest, reuses every rendering module wholesale, supports every comparison axis the data offers. <strong>Recommended.</strong></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>13.3 The minimum refactor</h3>
+						<ol class="detail-list numbered">
+							<li><strong><code>MapCore</code> becomes a factory.</strong> <code>createMapContext(containerEl)</code> returns <code>{id, map, bus, filterState, selectionState, markers, boundaries, viewportQuery}</code>. Keep a module-level <code>defaultContext</code> created against <code>#map</code>, and have the current single-map page pass it through — so the existing page changes in one place, not fifteen.</li>
+							<li><strong><code>EventBus</code> becomes instantiable.</strong> It's twelve lines: export <code>createEventBus()</code> alongside the existing default instance. Per-context buses are what prevent left-pane filter changes from leaking into the right pane, and they cost nothing.</li>
+							<li><strong>Convert the state and map modules to factories.</strong> <code>FilterState</code>, <code>SelectionState</code>, <code>ResultsViewState</code>, <code>Markers</code>, <code>Boundaries</code>, <code>ViewportQuery</code> become <code>createFilterState(ctx)</code> etc. This is mechanical: each already closes over private state, none writes to another module's internals, and their dependencies are already explicit imports. <code>Config</code>, <code>Theme</code>, <code>GeoMath</code>, <code>SelectionAlgebra</code>, <code>Shapes</code>, <code>ArchiveData</code>, <code>BoundaryData</code>, and <code>GeoIndex</code> are stateless or read-only and <strong>stay singletons</strong> — which is what keeps this from doubling everything.</li>
+							<li><strong>Panels take <code>(ctx, rootEl)</code>.</strong> Replace <code>document.getElementById("x")</code> with <code>rootEl.querySelector(".x")</code>. Mechanical but touches every panel; this is the bulk of the work.</li>
+							<li><strong><code>ComparisonController</code>:</strong>
+								<pre class="code-block"><code>const ComparisonController = (() => {
+  let left, right
+  let linkViewport = true
+  let linkFilters  = true
+  let isEchoing = false          // same re-entrancy guard as suppressWrites
+
+  function mirrorViewport(from, to) {
+    from.bus.on("viewport:changed", ({center, zoom}) => {
+      if (!linkViewport || isEchoing) return
+      isEchoing = true
+      to.map.setView(center, zoom, {animate: false})
+      isEchoing = false
+    })
+  }
+  // filters mirror the same way, via applySnapshot (§12.3)
+})()</code></pre>
+								The <code>isEchoing</code> guard is the same pattern <code>StateSyncManager</code> already uses for <code>suppressWrites</code> — a known-good idiom in this codebase rather than a new one.</li>
+							<li><strong>Filters default to linked, with an explicit per-group unlink.</strong> The compelling comparisons are "same filters, two places" and "same place, two periods" — both need most dimensions linked and one free. Defaulting to fully independent forces the user to re-specify everything twice to get to the interesting state.</li>
+						</ol>
+					</div>
+
+					<div class="grid-2" style="margin-top: 1.2rem">
+						<div class="card">
+							<h3>13.4 Difference display</h3>
+							<p>Compute the set difference of visible feature indices between contexts and express it as <strong>marker styling, not a new layer</strong> — <code>.is-only-left</code> / <code>.is-only-right</code> / <code>.is-both</code> classes toggled on the existing <code>divIcon</code> elements, exactly as <code>is-selected-marker</code> already works. It reuses the whole marker pipeline and costs one <code>classList.toggle</code> per marker.</p>
+							<p>Numeric differences belong in a <strong>third, shared analytics strip</strong> between the panes ("Left: 12 records · Right: 7 · 4 in both"). <code>AnalyticsPanel</code>'s counting functions can be reused directly if the counting logic is separated from the rendering — which it currently is not, and which is worth doing as part of the analytics cleanup recommended in §15 anyway.</p>
+						</div>
+						<div class="card">
+							<h3>13.5 Responsive behaviour</h3>
+							<p><strong>Do not render two maps below the 30 rem breakpoint.</strong> Two Leaflet instances on a phone means two tile pyramids in flight, two marker DOM trees, and two SVG boundary layers. Instead, render one map with a <strong>tab or toggle between the two states</strong>, reusing the existing bottom-sheet panel layout. The A/B toggle preserves the comparison intent; simultaneity is a desktop affordance.</p>
+						</div>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>13.6 Performance</h3>
+						<p>Two maps roughly double tile requests, marker DOM nodes, and boundary SVG paths. Three mitigations already exist or are cheap:</p>
+						<ul class="detail-list">
+							<li><strong>Boundary geometry decoding is already shared.</strong> <code>BoundaryData</code> caches decoded features per level in a module-level <code>Map</code>, and it stays a singleton — so only <em>rendering</em> doubles, not parsing. This is a real, pre-existing advantage.</li>
+							<li><strong>Tiles are cached by the browser</strong> across both instances, including the 211 MB local pyramids.</li>
+							<li><strong>Boundaries should move to <code>L.canvas()</code></strong> before comparison ships. Two SVG boundary layers is the most likely rendering bottleneck, and this is a one-line renderer option.</li>
+						</ul>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>13.7 Sequence</h3>
+						<ol class="detail-list numbered">
+							<li>Stable record IDs (§9.4) — needed to share a comparison state at all</li>
+							<li><code>FilterState.applySnapshot()</code> — needed for linked filters</li>
+							<li><code>createEventBus()</code> — trivial, unblocks everything else</li>
+							<li><code>createMapContext()</code> with a default context — single-map page unaffected</li>
+							<li>Convert state/map modules to factories</li>
+							<li>Scope panels to <code>(ctx, rootEl)</code> — the bulk</li>
+							<li>Split layout + <code>ComparisonController</code> + viewport sync</li>
+							<li>Difference styling + shared diff strip</li>
+							<li>Mobile A/B fallback</li>
+						</ol>
+						<p style="margin-top: 0.9rem">Steps 1–3 are worth doing regardless of whether comparison mode ever ships.</p>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     14. RECOMMENDED EVOLUTION ROADMAP
+				     ============================================= -->
+				<section class="sheet" id="roadmap">
+					<div class="sheet-head">
+						<span class="sheet-id">14</span>
+						<h2>Recommended Evolution Roadmap</h2>
+						<span class="tagline">In sequence, by unlock</span>
+					</div>
+
+					<div class="card">
+						<h3>Immediate — no product change, high leverage</h3>
+						<ol class="detail-list numbered">
+							<li><strong>Delete <code>js/map/state/time-slider-algebra.js</code> and <code>js/map/data/topojson.js</code>.</strong> Byte-identical vendor duplicates, unreferenced, under actively misleading names. Minutes of work.</li>
+							<li><strong>Add a stable <code>id</code> to every <code>ArchiveData</code> feature</strong>; migrate <code>SelectionState</code> and the URL schema from indices to IDs. Keep index lookups internal to the marker layer. <strong>Highest priority in the repository.</strong></li>
+							<li><strong>Add <code>FilterState.applySnapshot()</code></strong> — one <code>notify()</code> for a whole-filter change. Immediately improves URL restore; prerequisite for both future modes.</li>
+							<li><strong>Extract <code>StateApplier</code></strong> from <code>StateSyncManager</code>. ~40 lines, no behaviour change, unblocks story mode.</li>
+							<li><strong>Debounce or split <code>AnalyticsPanel.render()</code></strong> (§15, finding 1).</li>
+							<li><strong>Add tests for the pure modules</strong> — <code>state-sync-schema</code>, <code>geo-math</code>, <code>selection-algebra</code>. They were written to be tested; <code>sanitizeState</code>'s bounds validation in particular has many branches and no coverage.</li>
+						</ol>
+					</div>
+
+					<div class="grid-2" style="margin-top: 1.2rem">
+						<div class="card">
+							<h3>Before Data Story Mode</h3>
+							<p>Items 2, 3, and 4 above are prerequisites. Then: story schema + <code>StoryController</code> + narrative panel + annotation layer + story URL keys. <strong>No structural refactor required.</strong></p>
+						</div>
+						<div class="card">
+							<h3>Before Comparison Mode</h3>
+							<p>The context-factory refactor (§13.3). Substantially larger. Do items 2 and 3 first regardless; do the rest only when comparison is genuinely committed to.</p>
+						</div>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Before real data</h3>
+						<p>Introduce a <strong>data-access boundary</strong> before anything else:</p>
+						<pre class="code-block"><code>UI / State  →  DataSource interface  →  [ today: static module ]
+                                        [ later: fetch → API ]</code></pre>
+						<p>Define <code>DataSource.getFeatures()</code> / <code>query(filters, bounds)</code> and have <code>ArchiveData</code> implement it synchronously today. Everything downstream then goes through one seam. Then, in order: make it async and give panels loading states; add spatial indexing to <code>ViewportQuery</code> (currently a full linear scan per call); add marker clustering and a canvas renderer; move filtering server-side once the dataset exceeds what's sensible to ship to the client. The mock-data boundary is already clean — <code>ArchiveData</code> has no behavior — so this transition is genuinely additive rather than invasive.</p>
+						<p>The export format list in <code>export-dialog.js</code> should be treated as a requirements document for whatever backend eventually exists.</p>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     15. PERFORMANCE AND SCALABILITY
+				     ============================================= -->
+				<section class="sheet" id="performance">
+					<div class="sheet-head">
+						<span class="sheet-id">15</span>
+						<h2>Performance and Scalability</h2>
+						<span class="tagline">Excellent today; nine findings for tomorrow</span>
+					</div>
+
+					<div class="callout">Current runtime performance is excellent — 25 markers, ~40 boundary polygons, and a well-behaved tile pipeline. Every finding below is about what happens as the dataset grows or the future modes land.</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-high">HIGH · 1</span><h3><code>AnalyticsPanel.render()</code> full teardown, driven by unthrottled <code>filters:changed</code></h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>analytics-panel.js</code> <code>render()</code>; <code>time-slider-footer.js</code> <code>on("update")</code>.</dd></div>
+							<div class="kv-row"><dt>Why it matters</dt><dd><code>render()</code> rebuilds all six sections via <code>innerHTML</code>, re-attaching roughly twenty event listeners, and internally performs <strong>three full dataset scans</strong> (<code>featuresInView</code> twice — once for scope, once for the ignore-year timeline scope — plus <code>hiddenCounts</code>), with a <code>GeoIndex.islandFor()</code> lookup per record. It is subscribed to <code>filters:changed</code> <strong>without debouncing</strong>, and noUiSlider's <code>update</code> event fires <strong>continuously</strong> during a drag. Dragging the year slider therefore triggers a complete teardown-and-rebuild of six DOM sections, plus three dataset scans, per frame.</dd></div>
+							<div class="kv-row"><dt>The tell</dt><dd>Map movement <strong>is</strong> debounced at 150 ms in the same <code>init()</code>. Filter changes are not, despite being the higher-frequency source.</dd></div>
+							<div class="kv-row"><dt>Impact</dt><dd>Negligible at n=25. At n=10,000 a slider drag becomes unusable; during story-mode transitions it will visibly stutter mid-animation.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>(a) debounce the filter-driven path as the map path already is; (b) separate the counting functions from the rendering functions so counts can be computed once and reused — this also makes them reusable for comparison mode's diff strip; (c) adopt <code>SelectionResults</code>' keyed reconciliation for the bar rows instead of <code>innerHTML</code> teardown. The correct pattern already exists in this codebase, twelve files away.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-high">HIGH · 2</span><h3><code>Markers.applyVisibility()</code> on every filter and selection tick</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>markers.js</code>.</dd></div>
+							<div class="kv-row"><dt>Why</dt><dd>Iterates all markers calling <code>addTo</code> / <code>removeLayer</code>, each touching Leaflet's DOM. Runs on every <code>filters:changed</code> and every <code>selection:changed</code> — again, per slider frame.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Track the previously-visible set and diff, so only markers whose visibility actually <em>changed</em> are touched. Most slider ticks change zero or a handful.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-high">HIGH · 3</span><h3>Marker rendering has no scaling strategy</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>markers.js</code> (one DOM <code>divIcon</code> per feature), <code>boundaries.js</code> (default SVG renderer).</dd></div>
+							<div class="kv-row"><dt>Why</dt><dd>DOM markers cap out in the low thousands; two simultaneous SVG boundary layers (comparison mode) is the most likely rendering bottleneck.</dd></div>
+							<div class="kv-row"><dt>Fix, in order of cost</dt><dd><code>L.canvas()</code> renderer for boundaries (one line, do it before comparison mode); marker clustering when the dataset warrants it; viewport-windowed marker creation as a last resort.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-medium">MEDIUM · 4</span><h3>Linear scans in <code>GeoIndex</code>, called per render</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>flagForIsland()</code> does <code>.find()</code> across all boundary features; <code>boundsForIsland()</code> filters all indexed boundaries. Both are called once per island row, on every analytics render.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Build <code>flagByName</code> and <code>boundsByName</code> lookup maps once, alongside the existing <code>gid0ByName</code> / <code>islandNameByGid0</code> maps that already use exactly this pattern.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-medium">MEDIUM · 5</span><h3><code>ViewportQuery</code> is an unindexed full scan</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>featuresInView()</code> iterates every feature testing <code>bounds.contains</code>.</dd></div>
+							<div class="kv-row"><dt>Why</dt><dd>Fine at n=25; O(n) per call, called up to three times per analytics render, plus once per results render, plus on every <code>moveend</code>.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Not yet. When the dataset grows, add a simple grid index or an R-tree. The single-implementation consolidation already done here makes that a one-file change.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-medium">MEDIUM · 6</span><h3>Boundary rebuild at the zoom threshold</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>rebuildForZoom()</code> discards and recreates both <code>L.geoJSON</code> layers plus every flag marker, re-running <code>flagLatLng()</code> (largest-polygon + centroid + point-in-polygon) for each island.</dd></div>
+							<div class="kv-row"><dt>Why</dt><dd>Correctly gated to fire only when the level actually changes, so it's rare. But a user oscillating across zoom 9 pays it repeatedly.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Cache computed anchors by <code>GID_0</code> across rebuilds — they don't depend on simplification level in any way the user can perceive.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-medium">MEDIUM · 7</span><h3>Silent 200-index URL truncation</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd><code>MAX_SELECTION_IN_URL</code> in <code>state-sync-schema.js</code>.</dd></div>
+							<div class="kv-row"><dt>Why</dt><dd>A lasso over a dense region produces a shareable link that quietly drops the selection. Acknowledged in the code's own notes; no user-facing warning.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Surface it in the UI, or move to ID-range compression once records have IDs.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-low">LOW · 8</span><h3>Panel event subscriptions are never released</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd>Every panel's <code>init()</code>. Only <code>StateSyncManager</code> collects unsubscribers.</dd></div>
+							<div class="kv-row"><dt>Why</dt><dd>No leak today, because nothing is ever destroyed. Becomes a genuine leak the moment comparison-mode contexts can be created and torn down.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Address as part of the context-factory refactor, not before.</dd></div>
+						</dl>
+					</div>
+
+					<div class="finding card">
+						<div class="finding-head"><span class="tag tag-low">LOW · 9</span><h3>Repository weight</h3></div>
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Where</dt><dd>211 MB of raster tiles in git, contributing most of the 415 MB clone.</dd></div>
+							<div class="kv-row"><dt>Fix</dt><dd>Fine for a self-contained prototype; consider Git LFS or a CDN if history grows.</dd></div>
+						</dl>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     16. MAINTAINABILITY AND TECHNICAL DEBT
+				     ============================================= -->
+				<section class="sheet" id="maintainability">
+					<div class="sheet-head">
+						<span class="sheet-id">16</span>
+						<h2>Maintainability and Technical Debt</h2>
+						<span class="tagline">What's strong, and what will hurt first</span>
+					</div>
+
+					<div class="card">
+						<h3>Strong today</h3>
+						<p>Configuration centralization; the three-way HTML/CSS/JS naming correspondence; genuinely extracted shared abstractions (<code>GeoMath</code>, <code>ViewportQuery</code>, <code>panel-behaviors</code>), each documenting the duplication it replaced; pure modules cleanly separated from DOM modules; the comment culture.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>The real debt, in the order it will hurt</h3>
+						<ol class="detail-list numbered">
+							<li><strong>Index identity.</strong> Every day this persists, more artifacts (shared links, future stories, future comparison states) accumulate against an unstable key. Fix now.</li>
+							<li><strong>Implicit panel coupling.</strong> <code>results-panel.js</code> carries seven bus subscriptions with interlocking rules — <code>hasArmedOnce</code>, mode auto-switching on tool arm, mutual collapse with the legend, search-driven mode changes. Adding a mode requires reasoning about all of them simultaneously, and there's no test to catch a regression. This is the most likely source of subtle bugs when story mode lands. Consider consolidating the panel's mode transitions into an explicit small state machine before adding a fourth mode to it.</li>
+							<li><strong>Zero test coverage on pure logic.</strong> <code>sanitizeState</code> alone has a dozen validation branches. <code>geo-math</code>'s ray-casting and hole handling is exactly the kind of code where an off-by-one hides for months. These modules were <em>written</em> to be testable — <code>state-sync-schema.js</code> says so in its header. Add the tests before the refactors in §13, not after; they're the safety net for the mechanical conversion.</li>
+							<li><strong>Analytics rendering pattern.</strong> The one place where teardown-and-rebuild was used instead of the reconciliation pattern used elsewhere. It's also the module both future modes will lean on hardest.</li>
+							<li><strong>Dead vendor duplicates.</strong> Trivial to fix, actively misleading until fixed.</li>
+							<li><strong>Documented hand-synced values.</strong> <code>NARROW_VIEWPORT_QUERY</code> must match <code>responsive.css</code>; <code>Theme</code> reads CSS vars once at init. Both are correct today and both are commented, which is the right handling in a no-build project — but both are silent-breakage risks.</li>
+							<li><strong><code>window.toggleWindowPopup</code>.</strong> A global function referenced from an inline <code>onclick</code> inside generated popup HTML — the one place the otherwise-clean module boundaries are bypassed. Fine now; convert to a delegated listener when the popup gains a second action.</li>
+						</ol>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     17. FINAL EXPERT ASSESSMENT
+				     ============================================= -->
+				<section class="sheet" id="assessment">
+					<div class="sheet-head">
+						<span class="sheet-id">17</span>
+						<h2>Final Expert Assessment</h2>
+						<span class="tagline">Where this stands, and what's next</span>
+					</div>
+
+					<div class="card">
+						<dl class="kv-list">
+							<div class="kv-row"><dt>Prototype quality</dt><dd><strong>Excellent.</strong> This is well beyond a proof of concept. The interaction model — boolean spatial selection with modifier keys, dual-space hit testing, live analytics rescoping, shareable deep-linked state — is the genuinely hard part of a tool like this, and it is <em>finished</em>, not sketched. The mocked layers (data, export, source viewer) are exactly the layers a prototype should mock, and the boundaries between real and simulated are clean enough to describe in a paragraph.</dd></div>
+							<div class="kv-row"><dt>Architecture</dt><dd><strong>High, with two specific structural constraints.</strong> The layering is real and enforced by import direction. Pure logic is genuinely pure. The event bus keeps 36 modules decoupled at a cost of twelve lines. Federated state is the right call at this scale. The two constraints — index identity and the construction-time map singleton — are both consequences of reasonable prototype decisions, and the codebase <em>names the first one itself</em>.</dd></div>
+							<div class="kv-row"><dt>Maintainability</dt><dd><strong>Above average for any codebase, unusually high for a prototype.</strong> The comment culture is the standout: comments that explain reasoning and record rejected alternatives are rare in production code, let alone prototypes. Preserve this deliberately — it is the asset most likely to decay silently under time pressure.</dd></div>
+							<div class="kv-row"><dt>Story Mode readiness</dt><dd><strong>High.</strong> The state model, serialization, validation, and application logic already exist. The work is extraction plus a narrative UI. Two small prerequisites (stable IDs, batched filter apply). No panel changes, no rendering changes, no structural refactor. This should be the next feature.</dd></div>
+							<div class="kv-row"><dt>Comparison readiness</dt><dd><strong>Moderate, and gated on a real refactor.</strong> Every module that needs to become multi-instance is already a closure over private state with explicit dependencies, which makes the conversion mechanical rather than architectural — but it touches roughly fifteen files. Do not attempt it before story mode; do the shared prerequisites now.</dd></div>
+						</dl>
+					</div>
+
+					<div class="grid-2" style="margin-top: 1.2rem">
+						<div class="card">
+							<h3>Preserve</h3>
+							<p>The event-bus architecture; <code>Config</code> centralization; pure-module separation; the comment culture; static-shell-plus-JS-behaviour; <code>SelectionResults</code>' reconciliation pattern; the accessibility baseline; vanilla ESM with no build step — <strong>do not add a framework or a state library</strong>; neither is warranted by anything in this codebase.</p>
+						</div>
+						<div class="card">
+							<h3>Evolve</h3>
+							<p>Identity, batched state application, the analytics rendering path, instantiability, and test coverage on the pure modules.</p>
+						</div>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Highest-value next steps</h3>
+						<ol class="detail-list numbered">
+							<li><strong>Add stable record IDs</strong> and migrate <code>SelectionState</code> + the URL schema off array indices. Unblocks everything; gets more expensive every day it waits.</li>
+							<li><strong>Add <code>FilterState.applySnapshot()</code></strong> — one notify per whole-filter change. Prerequisite for both future modes; immediately improves URL restore.</li>
+							<li><strong>Extract <code>StateApplier</code></strong> from <code>StateSyncManager</code> with an <code>{animate}</code> option. Forty mechanical lines; unblocks story mode.</li>
+							<li><strong>Fix the analytics render path</strong> — debounce the filter-driven path, separate counting from rendering, adopt keyed reconciliation. Highest current performance risk and directly reusable by comparison mode's diff strip.</li>
+							<li><strong>Add unit tests for <code>state-sync-schema</code>, <code>geo-math</code>, and <code>selection-algebra</code>.</strong> They were written to be tested; they're the safety net for steps 1–3 and for any later refactor.</li>
+							<li><strong>Delete the two duplicated vendor files.</strong> Minutes, and removes an actively misleading signal.</li>
+							<li><strong>Build Data Story Mode.</strong> After 1–5, this is additive.</li>
+							<li><strong>Switch boundaries to the canvas renderer</strong> — one line, and required before two maps ever coexist.</li>
+							<li><strong>Introduce the <code>DataSource</code> boundary</strong>, implemented synchronously by <code>ArchiveData</code> today. Do this before any real-data work begins, not during.</li>
+							<li><strong>Undertake the context-factory refactor for comparison mode</strong> — only once comparison is genuinely committed to, and only after 1–5 are in place.</li>
+						</ol>
+					</div>
+				</section>
+			</main>
+
+			<footer>
+				<span>TECHNICAL AUDIT · CARIBBEAN ARCHIVES</span>
+				<span>Prepared from a full read of the repository at commit b8d3724 — architectural claims are grounded in the implementation; inferences about intent are marked as such in §9.</span>
+			</footer>
+		</div>
+		<script src="../js/nav.js"></script>
+	</body>
+</html>

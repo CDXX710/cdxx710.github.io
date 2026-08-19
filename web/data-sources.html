@@ -13,9 +13,15 @@
 		<link rel="stylesheet" href="../css/data-sources.css" />
 	</head>
 	<body>
-		<!-- Shared Side Navigation -->
-		<nav>
-			<span class="nav-label">Sources</span>
+		<nav id="sidebar">
+			<a class="site-header__back" href="../index.html">
+				<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="9,2 4,7 9,12" />
+				</svg>
+				Index
+			</a>
+
+			<div class="nav-label">Sources</div>
 			<a href="#geoboundaries"><span class="dot"></span>geoBoundaries</a>
 			<a href="#gadm"><span class="dot"></span>GADM</a>
 			<a href="#osm"><span class="dot"></span>OSM</a>
@@ -23,7 +29,7 @@
 			<a href="#naturalearth"><span class="dot"></span>Natural Earth</a>
 			<a href="#overture"><span class="dot"></span>Overture</a>
 
-			<span class="nav-label">Side by Side</span>
+			<div class="nav-label">Side by Side</div>
 			<a href="#compare"><span class="dot"></span>Comparison</a>
 		</nav>
 
@@ -539,5 +545,25 @@
 				<span>Compiled for reference — verify current license terms before redistribution</span>
 			</footer>
 		</div>
+		<script>
+			// Active nav highlight on scroll
+			const sections = document.querySelectorAll("section[id]")
+			const navLinks = document.querySelectorAll("nav a[href^='#']")
+
+			const observer = new IntersectionObserver(
+				entries => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							navLinks.forEach(a => a.classList.remove("active"))
+							const active = document.querySelector(`nav a[href="#${entry.target.id}"]`)
+							if (active) active.classList.add("active")
+						}
+					})
+				},
+				{rootMargin: "-20% 0px -70% 0px"}
+			)
+
+			sections.forEach(section => observer.observe(section))
+		</script>
 	</body>
 </html>

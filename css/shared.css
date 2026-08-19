@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
    shared.css — Design System for cdxx.github.io
    Single source of truth for tokens, resets, and shared components.
-   Page-specific overrides live in each HTML file's <style> block.
+   Page-specific overrides live in each page's own stylesheet
+   (css/index.css, css/css-cheatsheet.css, css/data-sources.css, css/map/*.css).
 ═══════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────
@@ -117,6 +118,9 @@
 	--ease-standard: ease;
 	--ease-in-out: ease-in-out;
 
+	/* Reused hover-fade transition (nav links, card labels/titles) */
+	--transition-fade: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+
 	/* ── Layout: side-nav ── */
 	/*
 	 *   Fluid sizing: shrinks continuously with viewport instead of
@@ -178,6 +182,7 @@ html {
 ───────────────────────────────────────── */
 
 body {
+	display: flex;
 	background: var(--color-bg);
 	color: var(--colorText);
 	font-family: var(--font-sans);
@@ -205,7 +210,7 @@ body {
 
 /* ─────────────────────────────────────────
    4. SIDE NAVIGATION
-   Shared by index.html and css_cheatsheet.html.
+   Shared by index.html, css-cheatsheet.html, and data-sources.html.
    The map page uses a top header instead.
 ───────────────────────────────────────── */
 
@@ -257,7 +262,7 @@ nav a {
 	display: flex;
 	align-items: center;
 	gap: var(--space-4);
-	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+	transition: var(--transition-fade);
 	justify-content: space-between;
 }
 
@@ -284,7 +289,8 @@ nav a.active .dot {
 
 /* ─────────────────────────────────────────
    5. MAIN CONTENT AREA
-   Used by index.html and css_cheatsheet.html.
+   Base layout used by index.html and css-cheatsheet.html;
+   data-sources.html overrides sizing per its own report layout.
 ───────────────────────────────────────── */
 
 main {
@@ -301,6 +307,10 @@ main {
    6. PAGE HEADER (scroll-page variant)
    The eyebrow + h1 + description block.
 ───────────────────────────────────────── */
+
+header {
+	margin-bottom: var(--space-11);
+}
 
 header .eyebrow {
 	font-family: var(--font-mono);
@@ -366,7 +376,8 @@ section h2 {
 /* ─────────────────────────────────────────
    8. CARD BASE
    Common surface + border + hover lift.
-   Extended by .link-card, .color-card, .font-card.
+   Extended by .link-card, .color-card, .font-card,
+   and used directly by data-sources.html's report cards.
 ───────────────────────────────────────── */
 
 .card {
@@ -391,7 +402,7 @@ section h2 {
    of jumping at this breakpoint.
 ───────────────────────────────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 30rem) {
 	nav {
 		display: none;
 	}

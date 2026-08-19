@@ -10,7 +10,7 @@
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet" />
 		<link rel="stylesheet" href="./css/shared.css" />
 		<link rel="stylesheet" href="./css/index.css" />
 	</head>
@@ -37,7 +37,7 @@
 					<span class="h2-count">1 link</span>
 				</h2>
 				<div class="link-grid">
-					<a class="link-card" href="./web/map.html" title="Carribean Archives">
+					<a class="card link-card" href="./web/map.html" title="Carribean Archives">
 						<div class="link-title">Carribean Archives</div>
 						<div class="link-desc">A Data Visualisation tool prototyped using Leaflet and hosted on GitHub.</div>
 						<div class="link-url">cdxx.github.io</div>
@@ -54,12 +54,12 @@
 					<span class="h2-count">2 links</span>
 				</h2>
 				<div class="link-grid">
-					<a class="link-card" href="./web/data-sources.html" title="CSS Cheatsheet">
+					<a class="card link-card" href="./web/data-sources.html" title="CSS Cheatsheet">
 						<div class="link-title">Open Data Sources</div>
 						<div class="link-desc">An GIS Open Data Cheatsheet with pros, cons and licensing conditions.</div>
 						<div class="link-url">cdxx.github.io</div>
 					</a>
-					<a class="link-card" href="./web/css-cheatsheet.html" title="CSS Cheatsheet">
+					<a class="card link-card" href="./web/css-cheatsheet.html" title="CSS Cheatsheet">
 						<div class="link-title">CSS Cheatsheet</div>
 						<div class="link-desc">A CSS Cheatsheet with named fonts and colors, hosted on GitHub.</div>
 						<div class="link-url">cdxx.github.io</div>
@@ -80,23 +80,6 @@
 				</div>
 			</section>
 		</main>
-		<script>
-			// Active nav highlight on scroll
-			const sections = document.querySelectorAll("section[id]")
-			const navLinks = document.querySelectorAll("nav a")
-			const observer = new IntersectionObserver(
-				entries => {
-					entries.forEach(entry => {
-						if (entry.isIntersecting) {
-							navLinks.forEach(a => a.classList.remove("active"))
-							const active = document.querySelector(`nav a[href="#${entry.target.id}"]`)
-							if (active) active.classList.add("active")
-						}
-					})
-				},
-				{rootMargin: "-20% 0px -70% 0px"}
-			)
-			sections.forEach(s => observer.observe(s))
-		</script>
+		<script src="./js/nav-scroll.js"></script>
 	</body>
 </html>

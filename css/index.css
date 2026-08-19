@@ -4,14 +4,6 @@
 	--color-swatch-reading: #ff7c57;
 }
 
-header {
-	margin-bottom: var(--space-11);
-}
-
-body {
-	display: flex;
-}
-
 /* ─────────────────────────────────────────
     1. LINK CARD
 ───────────────────────────────────────── */
@@ -22,12 +14,7 @@ body {
 }
 
 .link-card {
-	/* extends .card */
-	background: var(--color-surface);
-	border: 1px solid var(--color-border);
-	border-radius: var(--radius-md);
-	overflow: hidden;
-	transition: transform var(--duration-fast), border-color var(--duration-fast);
+	/* extends .card — see shared.css §8 for base surface/border/hover */
 	text-decoration: none;
 	display: flex;
 	flex-direction: column;
@@ -35,17 +22,12 @@ body {
 	gap: var(--space-2);
 }
 
-.link-card:hover {
-	transform: translateY(-2px);
-	border-color: var(--color-border-strong);
-}
-
 .link-title {
 	font-family: var(--font-mono);
 	font-size: var(--font-size-card-title);
 	font-weight: var(--font-weight-bold);
 	color: var(--colorText);
-	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+	transition: var(--transition-fade);
 }
 
 .link-card:hover .link-title {
@@ -67,7 +49,7 @@ body {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	transition: color var(--duration-fast), background var(--duration-normal), opacity var(--duration-slow);
+	transition: var(--transition-fade);
 }
 
 .link-card:hover .link-url {

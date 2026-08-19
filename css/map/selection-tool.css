@@ -172,6 +172,7 @@
 	border-top-right-radius: var(--panel-radius);
 }
 
+/*
 // Boundary/water pointer-events: off by default, on only for Object Select.
 //
 // Boundaries and water polygons live in leaflet-overlay-pane and are
@@ -184,6 +185,7 @@
 // inside them — see selection-toolbar.js's "boundary:objectClick"
 // handling), so the third rule below re-enables pointer-events, but
 // only for that specific tool/pane combination.
+*/
 .leaflet-pane.leaflet-overlay-pane .leaflet-interactive {
 	pointer-events: none !important;
 }

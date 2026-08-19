@@ -7,7 +7,8 @@
 		<title>Field Index — Authoritative GIS Boundary Sources</title>
 		<link rel="icon" type="image/svg+xml" href="https://github.githubassets.com/favicons/favicon-dark.svg" sizes="any" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet" />
 
 		<link rel="stylesheet" href="../css/shared.css" />
 		<link rel="stylesheet" href="../css/data-sources.css" />
@@ -43,7 +44,7 @@
 				<p class="subhead">A field guide to the boundary and basemap sources cartographers, researchers, and analysts return to again and again — what each one is really for, where they disagree, and what it costs you to use them.</p>
 				<div class="legend-strip">
 					<span class="item"><span class="swatch" style="background: var(--good)"></span>Open / permissive license</span>
-					<span class="item"><span class="swatch" style="background: var(--survey)"></span>Mixed / attribution required</span>
+					<span class="item"><span class="swatch" style="background: var(--colorAccent)"></span>Mixed / attribution required</span>
 					<span class="item"><span class="swatch" style="background: var(--bad)"></span>Restricted or fee-based</span>
 				</div>
 			</header>
@@ -131,7 +132,7 @@
 							<h3>Key focus</h3>
 							<p>The deepest, most granular administrative hierarchy available for most countries — often down to level 3–5 (municipalities, wards, villages) — assembled from national statistical and mapping agencies.</p>
 							<h3>Main differences</h3>
-							<p><cite index="4-1">GADM has no restrictions for personal and academic use, but commercial use requires a licensing fee</cite> — the single biggest reason teams end up comparing it against geoBoundaries. In exchange, it typically offers more administrative depth and cleaner topology than most free alternatives.</p>
+							<p><cite>GADM has no restrictions for personal and academic use, but commercial use requires a licensing fee</cite> — the single biggest reason teams end up comparing it against geoBoundaries. In exchange, it typically offers more administrative depth and cleaner topology than most free alternatives.</p>
 							<h3>Licensing</h3>
 							<span class="license-tag lic-restricted">Free for academic/non-commercial · fee for commercial</span>
 						</div>
@@ -201,7 +202,7 @@
 							<h3>Key focus</h3>
 							<p>Not a boundary product per se — a crowd-mapped world database from which administrative relations, roads, buildings, land use, and points of interest are extracted. Tools like Geofabrik, the HOT export tool, and osm-boundaries.com turn raw OSM relations into usable boundary layers.</p>
 							<h3>Main differences</h3>
-							<p><cite index="9-1">OSM-derived boundaries are pulled directly from the live database and can reach much deeper administrative levels — down to neighborhoods and suburbs — in well-mapped regions, whereas GADM offers more consistent coverage but can lag behind fast-changing administrative areas.</cite> Quality is only as good as local mapping community activity.</p>
+							<p><cite>OSM-derived boundaries are pulled directly from the live database and can reach much deeper administrative levels — down to neighborhoods and suburbs — in well-mapped regions, whereas GADM offers more consistent coverage but can lag behind fast-changing administrative areas.</cite> Quality is only as good as local mapping community activity.</p>
 							<h3>Licensing</h3>
 							<span class="license-tag lic-mixed">ODbL 1.0 — share-alike, attribution required</span>
 						</div>
@@ -269,9 +270,9 @@
 					<div class="grid-2">
 						<div class="card">
 							<h3>Key focus</h3>
-							<p><cite index="4-1">cShapes exists to present historical state boundaries and capitals dating back to 1946, tracking the merger, emergence, disappearance, or dissolution of independent states over time</cite> — the tool of choice for political science and conflict research, not current-day mapping.</p>
+							<p><cite>cShapes exists to present historical state boundaries and capitals dating back to 1946, tracking the merger, emergence, disappearance, or dissolution of independent states over time</cite> — the tool of choice for political science and conflict research, not current-day mapping.</p>
 							<h3>Main differences</h3>
-							<p>Where GADM and geoBoundaries answer "what does the world look like today," cShapes answers "what did the world look like in any given year." <cite index="4-1">It is coded to both the Correlates of War and Gleditsch–Ward state lists, making it directly compatible with existing conflict and international-relations datasets</cite>, and ships an R package for computing inter-capital and inter-border distances.</p>
+							<p>Where GADM and geoBoundaries answer "what does the world look like today," cShapes answers "what did the world look like in any given year." <cite>It is coded to both the Correlates of War and Gleditsch–Ward state lists, making it directly compatible with existing conflict and international-relations datasets</cite>, and ships an R package for computing inter-capital and inter-border distances.</p>
 							<h3>Licensing</h3>
 							<span class="license-tag lic-open">Free for research use, citation requested</span>
 						</div>
@@ -477,7 +478,7 @@
 						<span class="tagline">Pick by use case, not by reputation</span>
 					</div>
 
-					<div class="callout"><cite index="3-1">The main deciding factor between GADM and geoBoundaries is licensing: GADM is free for academic and non-commercial use, while geoBoundaries is fully open and the safer choice for commercial projects</cite> — but GADM often wins on administrative depth where that matters more than licensing.</div>
+					<div class="callout"><cite>The main deciding factor between GADM and geoBoundaries is licensing: GADM is free for academic and non-commercial use, while geoBoundaries is fully open and the safer choice for commercial projects</cite> — but GADM often wins on administrative depth where that matters more than licensing.</div>
 
 					<div class="compare-wrap">
 						<table class="compare">
@@ -545,25 +546,6 @@
 				<span>Compiled for reference — verify current license terms before redistribution</span>
 			</footer>
 		</div>
-		<script>
-			// Active nav highlight on scroll
-			const sections = document.querySelectorAll("section[id]")
-			const navLinks = document.querySelectorAll("nav a[href^='#']")
-
-			const observer = new IntersectionObserver(
-				entries => {
-					entries.forEach(entry => {
-						if (entry.isIntersecting) {
-							navLinks.forEach(a => a.classList.remove("active"))
-							const active = document.querySelector(`nav a[href="#${entry.target.id}"]`)
-							if (active) active.classList.add("active")
-						}
-					})
-				},
-				{rootMargin: "-20% 0px -70% 0px"}
-			)
-
-			sections.forEach(section => observer.observe(section))
-		</script>
+		<script src="../js/nav-scroll.js"></script>
 	</body>
 </html>

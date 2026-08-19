@@ -52,7 +52,10 @@ const Config = {
 			tileSubdomains: "",
 			opacity: 0.8,
 			maxNativeZoom: 10,
-			bounds: [[8.101184743046101, -57.510504408646185], [21.015217535045473, -76.6346092899388]]
+			bounds: [
+				[8.101184743046101, -57.510504408646185],
+				[21.015217535045473, -76.6346092899388]
+			]
 		},
 		{
 			id: "piccole",
@@ -62,7 +65,10 @@ const Config = {
 			tileSubdomains: "",
 			opacity: 0.8,
 			maxNativeZoom: 10,
-			bounds: [[7.698238957076736, -56.44554021052002], [20.53069314339214, -66.71402885580099]]
+			bounds: [
+				[7.698238957076736, -56.44554021052002],
+				[20.53069314339214, -66.71402885580099]
+			]
 		}
 	],
 	defaultBaseLayerId: window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark",

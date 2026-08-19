@@ -49,7 +49,8 @@
 }
 
 .searchbar-panel.is-open .searchbar__shell {
-width: 100%;}
+	width: 100%;
+}
 
 .searchbar__shell:focus {
 	outline: none;

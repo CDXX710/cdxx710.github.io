@@ -22,7 +22,7 @@ const Basemaps = (() => {
 				L.tileLayer(Config.buildBaseTileUrl(def.theme, currentLabelsMode), {
 					attribution: def.tileAttribution,
 					subdomains: def.tileSubdomains ?? "abc",
-					maxZoom: Config.map.maxZoom,
+					maxZoom: Config.map.maxZoom
 				})
 			)
 		}

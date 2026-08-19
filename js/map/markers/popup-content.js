@@ -48,9 +48,9 @@ const PopupContent = (() => {
 		                </div>
 	                	<div class="popup__right">
 	                		<div class="popup__resume">${
-							resume
-								? `❝ ${resume} ❞`
-								: `
+								resume
+									? `❝ ${resume} ❞`
+									: `
                                         <div class="popup__resume-empty-title">
                                             We're sorry,
                                         </div>
@@ -58,7 +58,7 @@ const PopupContent = (() => {
                                             No resumés are available at the moment.
                                         </div>
                                     `
-						}</div>
+							}</div>
 	                		${sourceLink(urlText)}
 	                	</div>
 	                </div>`

@@ -63,3 +63,15 @@
 .font-card:hover .label {
 	color: var(--colorText);
 }
+
+@media (max-width: 30rem) {
+	.font-card {
+		width: 60dvw;
+	}
+	.font-card .font .label {
+		font-size: 50%;
+	}
+	#cursive .font-card .font .label:last-of-type {
+		font-size: 40%;
+	}
+}

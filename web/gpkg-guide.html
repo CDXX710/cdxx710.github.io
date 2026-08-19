@@ -4,7 +4,7 @@
 		<meta name="robots" content="noindex" />
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>GeoPackage Bundle Maintenance Manual</title>
+		<title>GeoPackage Maintenance Guide</title>
 		<link rel="icon" type="image/svg+xml" href="https://github.githubassets.com/favicons/favicon-dark.svg" sizes="any" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,6 +12,76 @@
 
 		<link rel="stylesheet" href="../css/shared.css" />
 		<link rel="stylesheet" href="../css/tech-docs.css" />
+		<style>
+			.diagram {
+				display: flex;
+				flex-direction: column;
+				gap: 0.6rem;
+				align-items: center;
+				padding: 1.4rem 1rem;
+			}
+			.diagram svg {
+				max-width: 100%;
+				height: auto;
+			}
+			.shot {
+				border: 1px dashed var(--color-border);
+				border-radius: 10px;
+				padding: 1rem 1.2rem;
+				display: flex;
+				gap: 0.9rem;
+				align-items: flex-start;
+				background: var(--neutral-dim, rgba(154, 154, 168, 0.06));
+			}
+			.shot svg {
+				flex: none;
+				margin-top: 0.15rem;
+				opacity: 0.75;
+			}
+			.shot .shot-label {
+				font-family: var(--font-mono);
+				font-size: 0.68rem;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--colorAccent);
+				margin-bottom: 0.25rem;
+			}
+			.shot p {
+				margin: 0;
+				font-size: 0.92rem;
+				color: var(--colorTextSecondary);
+			}
+			.step-list {
+				counter-reset: step;
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.7rem;
+			}
+			.step-list li {
+				counter-increment: step;
+				display: flex;
+				gap: 0.8rem;
+				align-items: baseline;
+			}
+			.step-list li::before {
+				content: counter(step);
+				flex: none;
+				width: 1.6rem;
+				height: 1.6rem;
+				border-radius: 50%;
+				background: var(--colorAccentDim);
+				color: var(--colorAccent);
+				font-family: var(--font-mono);
+				font-size: 0.78rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin-top: 0.1rem;
+			}
+		</style>
 	</head>
 	<body>
 		<button id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
@@ -28,549 +98,348 @@
 				Index
 			</a>
 
-			<div class="nav-label">Orientation</div>
-			<a href="#summary"><span class="dot"></span>Summary</a>
-			<a href="#anatomy"><span class="dot"></span>Bundle Anatomy</a>
-			<a href="#first-open"><span class="dot"></span>First Open</a>
+			<div class="nav-label">Start Here</div>
+			<a href="#what-is-it"><span class="dot"></span>What's in the file</a>
+			<a href="#opening"><span class="dot"></span>Opening it</a>
 
-			<div class="nav-label">Routine Work</div>
-			<a href="#swap-data"><span class="dot"></span>Swapping Data</a>
-			<a href="#style-link"><span class="dot"></span>How Styling Links</a>
-			<a href="#layouts"><span class="dot"></span>Layouts &amp; Atlases</a>
+			<div class="nav-label">Everyday Work</div>
+			<a href="#updating"><span class="dot"></span>Updating Data</a>
+			<a href="#keeping-styles"><span class="dot"></span>Keeping Styles</a>
+			<a href="#layouts"><span class="dot"></span>Layouts</a>
 
-			<div class="nav-label">When It Breaks</div>
-			<a href="#breakage"><span class="dot"></span>What Breaks Styles</a>
-			<a href="#repair"><span class="dot"></span>Repair Recipes</a>
-			<a href="#geometry"><span class="dot"></span>Geometry &amp; CRS Pitfalls</a>
+			<div class="nav-label">If Something Breaks</div>
+			<a href="#causes"><span class="dot"></span>Common Causes</a>
+			<a href="#fixes"><span class="dot"></span>Quick Fixes</a>
 
-			<div class="nav-label">Discipline</div>
-			<a href="#backups"><span class="dot"></span>Backups &amp; Versioning</a>
-			<a href="#checklist"><span class="dot"></span>Update Checklist</a>
-			<a href="#glossary"><span class="dot"></span>Glossary</a>
+			<div class="nav-label">Good Habits</div>
+			<a href="#backups"><span class="dot"></span>Backups</a>
+			<a href="#checklist"><span class="dot"></span>Checklist</a>
 		</nav>
 
 		<div class="content-wrapper">
 			<header class="hero">
 				<div class="tick-row">
-					<span>MAINTENANCE MANUAL · GEOPACKAGE BUNDLES</span>
-					<span>FOR NOVICE GIS TECHNICIANS</span>
+					<span>QGIS GUIDE · GEOPACKAGE FILES</span>
+					<span>FOR NEW GIS TECHNICIANS</span>
 				</div>
-				<h1 class="title">One file holds<br />the whole <em>project.</em></h1>
-				<p class="subhead">Every <code>.gpkg</code> handed to you here is not just data — it is a self-contained bundle carrying the project, its layers, its styles, and its print layouts in one SQLite file. This manual explains how that bundle is put together, how to feed it new data safely, what quietly breaks the styling when you do, and how to fix it when it happens.</p>
+				<h1 class="title">One file. Data,<br />style, and <em>layout.</em></h1>
+				<p class="subhead">Every project you'll work on comes as a single <code>.gpkg</code> file, opened in QGIS. It already contains the map project, the layers, the way they're styled, and any print layouts. This guide explains how to keep it that way when you swap in new data — plain language, no assumed experience.</p>
 				<div class="legend-strip">
-					<span class="item"><b>Format</b>&nbsp;OGC GeoPackage (SQLite)</span>
-					<span class="item"><b>Contains</b>&nbsp;project · layers · styles · layouts</span>
-					<span class="item"><b>Audience</b>&nbsp;First maintenance pass, no assumed QGIS depth</span>
+					<span class="item"><b>Tool</b>&nbsp;QGIS (Desktop)</span>
+					<span class="item"><b>File type</b>&nbsp;.gpkg</span>
 				</div>
 			</header>
 
 			<main>
 				<!-- =============================================
-				     1. SUMMARY
+				     1. WHAT'S IN THE FILE
 				     ============================================= -->
-				<section class="sheet" id="summary">
+				<section class="sheet" id="what-is-it">
 					<div class="sheet-head">
 						<span class="sheet-id">01</span>
-						<h2>Summary</h2>
-						<span class="tagline">The 90-second version</span>
+						<h2>What's Actually in the File</h2>
+						<span class="tagline">One bundle, four things</span>
 					</div>
 
 					<div class="card">
-						<p>A normal GIS handover gives you a pile of separate files: a <code>.shp</code> here, a <code>.qml</code> style there, a <code>.qgz</code> project pointing at both by file path. Move any one of them and the project opens with red exclamation marks and grey layers. <strong>These bundles are built to avoid exactly that.</strong> Everything — the vector and raster layers, the QGIS project definition, the saved layer styles, and any print layouts — lives inside <em>one</em> <code>.gpkg</code> file, in dedicated internal tables the GeoPackage spec and QGIS both understand natively.</p>
-						<p>That means the bundle is portable: copy the single file to a new machine, open it, and every layer still finds its style and every layout still finds its map frame — <strong>because nothing points outside the file.</strong> It also means the bundle is fragile in a specific, predictable way: because everything is addressed <em>by name</em> inside one file, renaming a table, changing a field, or reprojecting a layer inside that same file is enough to sever a link that used to be automatic.</p>
+						<p>Normally a GIS handover is a mess of separate files — a shapefile here, a style file there, a project file pointing at both. Move one file and the rest breaks. A <code>.gpkg</code> avoids that: it's a single file that already contains everything.</p>
 					</div>
 
 					<div class="card" style="margin-top: 1.2rem">
-						<h3>Three things to internalize before touching anything</h3>
-						<ol class="detail-list numbered">
-							<li><strong>The style lives with the data, not with QGIS.</strong> Styles saved "to the layer" are rows in the GeoPackage's own <code>layer_styles</code> table, keyed to the layer's table name. They travel with the file. They are not a QGIS preference and will not survive on a different machine unless they are actually inside the <code>.gpkg</code>.</li>
-							<li><strong>The project references layers by table name, not by row order or column position.</strong> As long as a replacement table keeps the same name and the same field names, the project usually reopens clean. Rename a table or a key field and the link breaks even though the geometry is perfectly valid.</li>
-							<li><strong>"Updating the data" and "replacing the file" are different operations with different risk.</strong> Loading new rows into an existing table preserves every link. Swapping in a whole new <code>.gpkg</code>, or importing a fresh shapefile over an existing layer, is where things go wrong — covered in full in §5.</li>
+						<div class="diagram">
+							<svg width="560" height="190" viewBox="0 0 560 190" role="img" aria-label="A single .gpkg file containing the project, layers, styles, and layouts">
+								<rect x="4" y="4" width="552" height="182" rx="14" fill="none" stroke="var(--color-border)" stroke-width="1.5" stroke-dasharray="5 5" />
+								<text x="20" y="30" font-family="var(--font-mono)" font-size="12" letter-spacing="0.08em" fill="var(--colorTextSecondary)">ONE FILE — YOURPROJECT.GPKG</text>
+								<g font-family="var(--font-sans, sans-serif)" font-size="14">
+									<rect x="24" y="52" width="120" height="108" rx="10" fill="var(--colorAccentDim)" />
+									<text x="84" y="100" text-anchor="middle" fill="var(--colorAccent)" font-weight="600">Project</text>
+									<text x="84" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">what you open</text>
+
+									<rect x="160" y="52" width="120" height="108" rx="10" fill="var(--good-dim)" />
+									<text x="220" y="100" text-anchor="middle" fill="var(--good)" font-weight="600">Layers</text>
+									<text x="220" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">the actual data</text>
+
+									<rect x="296" y="52" width="120" height="108" rx="10" fill="var(--bad-dim)" />
+									<text x="356" y="100" text-anchor="middle" fill="var(--bad)" font-weight="600">Styles</text>
+									<text x="356" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">how it's drawn</text>
+
+									<rect x="432" y="52" width="104" height="108" rx="10" fill="var(--neutral-dim)" />
+									<text x="484" y="100" text-anchor="middle" fill="var(--neutral)" font-weight="600">Layouts</text>
+									<text x="484" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">print pages</text>
+								</g>
+							</svg>
+						</div>
+						<p>Because everything sits inside one file, copying that single <code>.gpkg</code> to another computer and opening it should give you back the exact same map, colors, and print pages — nothing to relink by hand.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Two things worth remembering</h3>
+						<ul class="detail-list">
+							<li><strong>The style belongs to the layer, not to QGIS.</strong> It's saved inside the file, attached to that layer by name. It isn't a setting on your computer.</li>
+							<li><strong>Everything is matched by name.</strong> QGIS finds a layer's style by looking for a layer with the same name. That's the one rule behind almost everything in §5.</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     2. OPENING IT
+				     ============================================= -->
+				<section class="sheet" id="opening">
+					<div class="sheet-head">
+						<span class="sheet-id">02</span>
+						<h2>Opening the Project Correctly</h2>
+						<span class="tagline">Don't just drag the file in</span>
+					</div>
+
+					<div class="card">
+						<p>If you drag the <code>.gpkg</code> straight onto the QGIS map canvas, you'll only get a flat list of layers — no groups, no saved styling setup, no layouts. Open the <em>project that's saved inside the file</em> instead:</p>
+						<ol class="step-list" style="margin-top: 0.9rem">
+							<li>In QGIS, go to <strong>Project → Open From → GeoPackage…</strong></li>
+							<li>Pick the <code>.gpkg</code> file, then select the project listed inside it.</li>
 						</ol>
 					</div>
 
-					<div class="callout">Read §2 (Bundle Anatomy) and §3 (First Open) once before doing any update, even a routine one. Everything after that is procedure you'll return to as reference.</div>
+					<div class="shot">
+						<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 8h18M8 3v18" /></svg>
+						<div>
+							<div class="shot-label">Screenshot needed</div>
+							<p>The <strong>Project → Open From → GeoPackage…</strong> menu, and the file-picker dialog showing a project selected inside a <code>.gpkg</code>.</p>
+						</div>
+					</div>
+
+					<div class="callout">Before changing anything, take a minute to look at what's already there: the layer names in the Layers panel, and the pages in <strong>Project → Layouts…</strong>. That way, if something looks different later, you'll know exactly what changed.</div>
 				</section>
 
 				<!-- =============================================
-				     2. BUNDLE ANATOMY
+				     3. UPDATING DATA
 				     ============================================= -->
-				<section class="sheet" id="anatomy">
+				<section class="sheet" id="updating">
 					<div class="sheet-head">
-						<span class="sheet-id">02</span>
-						<h2>Bundle Anatomy</h2>
-						<span class="tagline">What's actually inside the file</span>
+						<span class="sheet-id">03</span>
+						<h2>Updating Data</h2>
+						<span class="tagline">The everyday task</span>
 					</div>
 
 					<div class="card">
-						<p>A GeoPackage is a single SQLite database with a <code>.gpkg</code> extension. Everything below is a table or a row inside that one database — there is no separate folder, no sidecar file, and (for the parts covered here) nothing to keep in sync by hand.</p>
-					</div>
-
-					<div class="compare-wrap" style="margin-top: 1.2rem">
-						<table class="compare">
-							<thead>
-								<tr>
-									<th>Part of the bundle</th>
-									<th>Where it actually lives</th>
-									<th>Keyed by</th>
-									<th>What breaks it</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td><strong>Layers</strong> (vector tables, raster tiles)</td>
-									<td>Standard GeoPackage feature/tile tables, one per layer</td>
-									<td>Table name</td>
-									<td>Renaming, deleting, or dropping and recreating the table under a new schema</td>
-								</tr>
-								<tr>
-									<td><strong>Project</strong></td>
-									<td>A <code>QGIS Projects</code> table, holding the saved <code>.qgz</code>/<code>.qgs</code> project XML as a blob inside the same file (when the project was saved <em>into</em> the GeoPackage rather than as a separate file)</td>
-									<td>Project name</td>
-									<td>Saving the project to a separate <code>.qgz</code> instead — which silently forks the project from the bundle</td>
-								</tr>
-								<tr>
-									<td><strong>Styles</strong></td>
-									<td><code>layer_styles</code> table — one row per saved style, storing the QML/SLD definition as text</td>
-									<td><code>f_table_name</code> (must match the layer's table name exactly) + a <code>useAsDefault</code> flag</td>
-									<td>Renaming the layer table without updating <code>f_table_name</code>; deleting and recreating the layer under the same visible name but a different internal table</td>
-								</tr>
-								<tr>
-									<td><strong>Layouts</strong></td>
-									<td>Embedded inside the project blob, as <code>&lt;Layout&gt;</code> elements referencing each map item's layer set by ID</td>
-									<td>Layer ID (an internal QGIS ID, not the table name)</td>
-									<td>Removing a layer and adding a "new" one with the same name — the map item in the layout keeps pointing at the old, now-missing layer ID</td>
-								</tr>
-							</tbody>
-						</table>
+						<p>Most of the time, "update the data" means putting a newer version of the same layer into the same project — new survey points, a refreshed boundary file, this month's readings. There are two ways to do it, and one is much safer than the other.</p>
 					</div>
 
 					<div class="grid-2" style="margin-top: 1.2rem">
 						<div class="card">
-							<h3>Why the project stores styles this way</h3>
-							<p>When a layer is added from a GeoPackage table, QGIS can load its style straight from that layer's row in <code>layer_styles</code> instead of from the project file. Saving a style with <strong>Layer Properties → Symbology → Style → Save Style… → Save in database (GeoPackage)</strong> writes it there. This is what makes the style survive a fresh <code>Add Layer</code> even in a brand-new project — the style isn't remembered by QGIS, it's <em>read off the layer itself</em>.</p>
+							<h3>Adding new records</h3>
+							<p>If you're just adding rows to a layer that already exists — nothing about its columns is changing — copy the new features in and paste them into the existing layer's attribute table. Nothing about the layer's identity changes, so its style and any print page using it keep working automatically.</p>
 						</div>
 						<div class="card">
-							<h3>Why this differs from a folder of shapefiles</h3>
-							<p>A <code>.shp</code> + a hand-saved <code>.qml</code> next to it is two files connected only by the project remembering a file path. Move the shapefile, and the <code>.qml</code> is orphaned even though nothing about the data changed. A GeoPackage collapses that link into rows in one database, so "moving the data" and "moving the style" become the same action by construction.</p>
+							<h3>Replacing the whole layer</h3>
+							<p>If you're swapping in a full new version of a layer (same columns, just newer data), import it and choose to <strong>overwrite the existing layer</strong> — keep the exact same name. Don't delete the old layer and add the new one as if it were fresh; that's the one habit most likely to disconnect the style, explained in §5.</p>
 						</div>
 					</div>
 
-					<div class="callout"><strong>Confirm what a specific bundle actually contains before assuming.</strong> Not every <code>.gpkg</code> handed to you will have an embedded project or layouts — some are data-only. Open it in DB Browser for SQLite (§3.2) and check for a <code>QGIS Projects</code> table before assuming a project is inside.</div>
+					<div class="shot" style="margin-top: 1.2rem">
+						<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z" /><path d="M4 9h16M9 9v11" /></svg>
+						<div>
+							<div class="shot-label">Screenshot needed</div>
+							<p>The import dialog (<strong>Database → DB Manager → Import Layer/File…</strong>) with the <em>Overwrite</em> option and the matching table name visible.</p>
+						</div>
+					</div>
+
+					<div class="callout">After any update, close the project and open it again — don't just refresh the layer. That's the surest way to see whether the style and layouts followed the new data.</div>
 				</section>
 
 				<!-- =============================================
-				     3. FIRST OPEN
+				     4. KEEPING STYLES
 				     ============================================= -->
-				<section class="sheet" id="first-open">
+				<section class="sheet" id="keeping-styles">
 					<div class="sheet-head">
-						<span class="sheet-id">03</span>
-						<h2>First Open — Orientation Pass</h2>
-						<span class="tagline">Before you change anything</span>
+						<span class="sheet-id">04</span>
+						<h2>Keeping the Styling</h2>
+						<span class="tagline">How QGIS finds the right style</span>
 					</div>
 
 					<div class="card">
-						<h3>3.1 Open the project the right way</h3>
-						<p>If the bundle carries an embedded project, open it with <strong>QGIS → Project → Open From → GeoPackage…</strong> and pick the project row, not by dragging the <code>.gpkg</code> onto the canvas — dragging it in only adds the layers as a flat list, without the layer tree groups, layouts, or saved map canvas extent the project defines.</p>
-						<p>Once open, check the <strong>Layers panel</strong> against the <strong>Layout manager</strong> (<em>Project → Layouts…</em>) before touching data: note every layer name, and every layout's map item and its layer set. This is your baseline — if a style or a layout breaks later, you'll know exactly what it looked like before.</p>
+						<div class="diagram">
+							<svg width="520" height="140" viewBox="0 0 520 140" role="img" aria-label="A layer and a style connected because their names match">
+								<rect x="20" y="40" width="180" height="60" rx="10" fill="var(--good-dim)" />
+								<text x="110" y="65" text-anchor="middle" fill="var(--good)" font-weight="600" font-size="14">Layer: "parcels"</text>
+								<text x="110" y="84" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">the data table</text>
+
+								<rect x="320" y="40" width="180" height="60" rx="10" fill="var(--bad-dim)" />
+								<text x="410" y="65" text-anchor="middle" fill="var(--bad)" font-weight="600" font-size="14">Style for "parcels"</text>
+								<text x="410" y="84" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">the colors &amp; symbols</text>
+
+								<line x1="200" y1="70" x2="320" y2="70" stroke="var(--colorAccent)" stroke-width="2" marker-end="url(#arrow)" />
+								<text x="260" y="58" text-anchor="middle" fill="var(--colorAccent)" font-size="11" font-family="var(--font-mono)">same name</text>
+								<defs>
+									<marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+										<path d="M0,0 L8,4 L0,8 z" fill="var(--colorAccent)" />
+									</marker>
+								</defs>
+							</svg>
+						</div>
+						<p>QGIS finds a saved style by matching the layer's name to a style with the same name inside the file. As long as the name stays the same, the style follows automatically — you don't need to reapply it.</p>
 					</div>
 
 					<div class="card" style="margin-top: 1.2rem">
-						<h3>3.2 Inspect the bundle outside QGIS</h3>
-						<p>Use <strong>DB Browser for SQLite</strong> (free, cross-platform) to look inside the <code>.gpkg</code> directly. Two tables matter most for maintenance:</p>
-						<ul class="detail-list">
-							<li><code>gpkg_contents</code> — the authoritative list of every table the GeoPackage considers a layer, with its geometry type and bounding box. This is the ground truth if QGIS shows a layer as broken.</li>
-							<li><code>layer_styles</code> — every saved style, and which layer (<code>f_table_name</code>) each one is attached to. If a layer lost its style, this is the first place to look — either the row is gone, or <code>f_table_name</code> no longer matches any table in <code>gpkg_contents</code>.</li>
-						</ul>
-						<p style="margin-top: 0.9rem"><strong>Read-only by default:</strong> browse and note what you find, but don't edit rows directly in DB Browser unless a repair recipe in §7 says to — QGIS is the safer tool for anything that touches geometry or styling, because it validates as it writes.</p>
+						<h3>Saving a style so it travels with the file</h3>
+						<p>If you build or adjust a style, save it back into the <code>.gpkg</code> so the next person gets it too:</p>
+						<ol class="step-list" style="margin-top: 0.7rem">
+							<li>Right-click the layer → <strong>Properties → Symbology</strong>.</li>
+							<li>Click <strong>Style → Save Style…</strong></li>
+							<li>Choose <strong>"Save in database (GeoPackage)"</strong> — not just "Save to file".</li>
+						</ol>
 					</div>
 
-					<div class="callout">Make a dated copy of the <code>.gpkg</code> before your first edit of any kind (see §8). A file this self-contained is also a file where one bad save touches everything at once.</div>
-				</section>
-
-				<!-- =============================================
-				     4. SWAPPING DATA
-				     ============================================= -->
-				<section class="sheet" id="swap-data">
-					<div class="sheet-head">
-						<span class="sheet-id">04</span>
-						<h2>Using the Same Project with Newer Data</h2>
-						<span class="tagline">The core workflow, ranked safest first</span>
-					</div>
-
-					<div class="card">
-						<p>"New data" usually means one of three things, and they carry very different risk. Pick the narrowest one that actually fits the update you're doing.</p>
-					</div>
-
-					<div class="decision card" style="margin-top: 1.2rem">
-						<h3>4.1 Append or refresh rows in place <span class="tag tag-low">lowest risk</span></h3>
-						<dl class="kv-list">
-							<div class="kv-row">
-								<dt>When to use it</dt>
-								<dd>The schema (field names and types) hasn't changed — you're adding new records, updating attribute values, or replacing the season/month of survey points, but the table structure is the same.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>How</dt>
-								<dd>In QGIS, open the target layer's attribute table and use <strong>field calculator / paste features</strong>, or import the new rows with <strong>Layer → Add Layer → Add Vector Layer</strong> pointed at the source, then <strong>copy features → paste into the existing layer</strong>. The table name and every style reference stay untouched because you never dropped the table.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Why it's safe</dt>
-								<dd>Nothing about the layer's identity (table name, field names) changes, so <code>layer_styles</code> and any layout map item referencing it keep working without any action from you.</dd>
-							</div>
-						</dl>
-					</div>
-
-					<div class="decision card">
-						<h3>4.2 Overwrite a layer's contents, same schema <span class="tag tag-medium">moderate risk</span></h3>
-						<dl class="kv-list">
-							<div class="kv-row">
-								<dt>When to use it</dt>
-								<dd>A full new dataset for the same theme — this quarter's parcel boundaries replacing last quarter's — where the field names and geometry type match the old layer exactly.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>How</dt>
-								<dd>Use <strong>Database → DB Manager → Import Layer/File…</strong> and import into the <em>existing</em> table, with <strong>"Overwrite"</strong> ticked and the table name typed to match the current one exactly — case included. Do not use "Create new table" and then delete the old one; that generates a new internal table even if you give it the old visible name, which is exactly the failure mode in §5.1.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Verify</dt>
-								<dd>After import, reopen the project fresh (close and reopen, don't just refresh) and confirm the layer still carries its style automatically and any layout map item still shows it. If it doesn't, go to §8.1 before doing anything else.</dd>
-							</div>
-						</dl>
-					</div>
-
-					<div class="decision card">
-						<h3>4.3 Swap in a whole new .gpkg bundle <span class="tag tag-high">highest risk</span></h3>
-						<dl class="kv-list">
-							<div class="kv-row">
-								<dt>When to use it</dt>
-								<dd>You've been handed a brand-new bundle — new source, new export — meant to replace the current one wholesale, not just refresh a layer inside it.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>How</dt>
-								<dd>
-									<ol class="detail-list numbered">
-										<li>Open the <em>new</em> file's own embedded project if it has one — don't try to force the old project onto the new file. Check whether the new bundle already carries its own styles and layouts before assuming you need to redo anything.</li>
-										<li>If the new bundle is data-only and needs the <em>old</em> project's styling: open the old project, and for each layer use <strong>Layer Properties → Symbology → Style → Load Style…</strong>, pointed at the corresponding table's saved style — either from the old <code>.gpkg</code>'s <code>layer_styles</code> or from a style export (see §8.2).</li>
-										<li>Re-point each layout's map item at the new layer via the <strong>Layers</strong> panel inside the Layout item properties, then re-check every map frame's extent — a new dataset can have a different bounding box than the old one, leaving a layout that renders but frames the wrong area.</li>
-									</ol>
-								</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Why it's risky</dt>
-								<dd>Everything that made the old bundle self-contained — style bindings, layout layer references — is scoped to the old file. A new file starts that binding over from nothing unless you deliberately carry it across.</dd>
-							</div>
-						</dl>
-					</div>
-
-					<div class="callout">Rule of thumb: if you can get away with §4.1 or §4.2, do that instead of §4.3. Every step in §4.3 is a place styling or layouts can silently fall out of sync, and it is the workflow responsible for most of the breakage in §5.</div>
-				</section>
-
-				<!-- =============================================
-				     5. HOW STYLING ACTUALLY LINKS
-				     ============================================= -->
-				<section class="sheet" id="style-link">
-					<div class="sheet-head">
-						<span class="sheet-id">05</span>
-						<h2>How Styling Actually Links to Data</h2>
-						<span class="tagline">The mechanism, not just the symptom</span>
-					</div>
-
-					<div class="card">
-						<p>QGIS doesn't remember "this layer is red" as a fact about the project. It resolves style at <strong>layer-load time</strong>, by looking for a row in the GeoPackage's <code>layer_styles</code> table where <code>f_table_name</code> matches the layer's actual table name, and where <code>useAsDefault</code> is set to true for that table. If it finds one, it applies it; if it doesn't, the layer loads with QGIS's random default symbology.</p>
-						<p>This is why a style can vanish with the geometry completely intact: <strong>the geometry table and the style row are two separate rows in two separate tables, connected only by a name string.</strong> Nothing enforces that the name string stays correct when either side changes independently.</p>
-					</div>
-
-					<div class="grid-2" style="margin-top: 1.2rem">
-						<div class="card">
-							<h3>Field mappings inside a style</h3>
-							<p>A saved style can reference specific attribute field names directly — a categorized renderer keyed on a <code>land_use</code> column, a data-defined label expression reading <code>site_name</code>, a rule-based renderer testing <code>status = 'active'</code>. These field names are baked into the style definition text itself, not re-derived from the table at load time.</p>
-						</div>
-						<div class="card">
-							<h3>Layout map items</h3>
-							<p>A layout's map frame doesn't store "the parcels layer" as a name — it stores the internal QGIS layer ID assigned when that layer was added to the project. Deleting a layer and re-adding "the same" layer, even under an identical visible name, mints a new ID, and the layout frame is left pointing at nothing.</p>
+					<div class="shot">
+						<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9" /><path d="M12 8v4l3 3" /></svg>
+						<div>
+							<div class="shot-label">Screenshot needed</div>
+							<p>The <strong>Style → Save Style…</strong> dialog with <em>Save in database (GeoPackage)</em> selected.</p>
 						</div>
 					</div>
-
-					<div class="callout">Keep this mental model: <strong>style rides on table name. Field-driven symbology rides on field names. Layout frames ride on layer ID, not name at all.</strong> Each is a different string or ID, matched independently — which is exactly why a change can break one and leave the other two intact.</div>
 				</section>
 
 				<!-- =============================================
-				     6. LAYOUTS & ATLASES
+				     5. LAYOUTS
 				     ============================================= -->
 				<section class="sheet" id="layouts">
 					<div class="sheet-head">
-						<span class="sheet-id">06</span>
-						<h2>Layouts &amp; Atlases</h2>
-						<span class="tagline">Print layouts embedded in the bundle</span>
+						<span class="sheet-id">05</span>
+						<h2>Print Layouts</h2>
+						<span class="tagline">The one thing worth double-checking</span>
 					</div>
 
 					<div class="card">
-						<p>Layouts live inside the same project blob as everything else — there is no separate <code>.qpt</code> file to lose track of as long as the project itself stays inside the GeoPackage. Each map item on a layout holds its own extent, scale (locked or following the canvas), and layer set.</p>
+						<p>Layouts (print pages) are saved inside the project too, so they travel with the file the same way styles do. The one setting worth knowing about is the map frame's <strong>extent</strong> — the area it shows.</p>
+						<p>A layout's map frame can either <strong>follow the current map view</strong>, or be <strong>locked to a fixed area</strong>. A locked extent is great for a page that always needs to show the same region — but if your new data covers a different area than the old data did, a locked frame will just keep showing the old area, cropping out anything new.</p>
 					</div>
 
-					<div class="card" style="margin-top: 1.2rem">
-						<h3>6.1 Locked vs. dynamic extents</h3>
-						<p>Check whether each map item's extent is <strong>locked</strong> (a fixed bounding box, set once) or set to <strong>follow the main canvas</strong>. A locked extent is invisible to a data swap — it will keep framing the old area even after the underlying data has moved or grown, silently cropping the new dataset out of the printed page. This is a common, quiet failure after §4.3: the layout still "works," it's just wrong.</p>
+					<div class="shot">
+						<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="14" rx="1" /><path d="M3 18l5-6 4 4 5-7 4 5" /></svg>
+						<div>
+							<div class="shot-label">Screenshot needed</div>
+							<p>The Layout editor's map item properties panel, showing the <em>lock/extent</em> controls under the "Main properties" section.</p>
+						</div>
 					</div>
 
-					<div class="card" style="margin-top: 1.2rem">
-						<h3>6.2 Atlases</h3>
-						<p>If a layout drives an atlas (one page per feature — one page per parcel, one page per survey site), the atlas's <strong>coverage layer</strong> is itself a layer reference subject to the same layer-ID binding as any map item. Swapping the coverage layer's underlying table (§4.2) is safe as long as the table name is unchanged; deleting and re-adding it (§4.3 without care) breaks the atlas the same way it breaks a static map frame.</p>
-					</div>
-
-					<div class="callout">After any data update, open every layout in the manager, not just the ones you expect to be affected — an atlas coverage layer is easy to forget because it isn't visible on the main canvas.</div>
+					<div class="callout">After updating data, open every layout — not just the one you expect to be affected — and check it still frames the right area.</div>
 				</section>
 
 				<!-- =============================================
-				     7. WHAT BREAKS STYLES
+				     6. COMMON CAUSES
 				     ============================================= -->
-				<section class="sheet" id="breakage">
+				<section class="sheet" id="causes">
 					<div class="sheet-head">
-						<span class="sheet-id">07</span>
-						<h2>What Breaks Styles — Failure Reference</h2>
-						<span class="tagline">Cause, symptom, and why it happens</span>
+						<span class="sheet-id">06</span>
+						<h2>What Usually Breaks a Style</h2>
+						<span class="tagline">A short list, not an exhaustive one</span>
 					</div>
 
 					<div class="attr-table-wrap">
 						<table class="attr-table">
 							<thead>
 								<tr>
-									<th>Cause</th>
-									<th>Symptom you'll see</th>
-									<th>Why</th>
+									<th>What happened</th>
+									<th>What you'll see</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr>
-									<td>Renaming a layer's table during import ("create new table" instead of overwrite)</td>
-									<td>Layer loads with random default symbology; layout frame goes blank or shows "Layer not found"</td>
-									<td><code>f_table_name</code> in <code>layer_styles</code> and the layer ID in the layout no longer match anything</td>
+									<td>The new layer was imported under a different name, or the old one was deleted and a "new" one added</td>
+									<td>The layer shows up with random default colors instead of the saved style</td>
 								</tr>
 								<tr>
-									<td>Renaming or removing a field referenced by a categorized/graduated renderer or a label expression</td>
-									<td>Symbology renders as a single flat color or a fallback ("all others") category; labels disappear or show an expression error</td>
-									<td>The style's renderer definition references the old field name literally; it doesn't fail loudly, it just can't classify anything</td>
+									<td>A column the style relies on (for coloring or labels) was renamed or removed</td>
+									<td>Everything draws in one flat color, or labels disappear</td>
 								</tr>
 								<tr>
-									<td>Changing a layer's geometry type (e.g. Polygon → MultiPolygon, or Point → MultiPoint) during re-import</td>
-									<td>Layer imports but symbol renders differently or not at all; some renderer types are geometry-type specific</td>
-									<td>Simple vs. multi- geometry types are technically distinct in a GeoPackage; a style built for one doesn't always carry cleanly to the other</td>
-								</tr>
-								<tr>
-									<td>Reprojecting a layer to a different CRS on import</td>
-									<td>Layer appears in the wrong place, or not within the map canvas extent at all; layout map item appears empty</td>
-									<td>Geometry stores its own CRS per GeoPackage layer; a mismatched CRS against the project's other layers or the layout's locked extent puts data outside the visible frame</td>
-								</tr>
-								<tr>
-									<td>Saving the project as a separate <code>.qgz</code> "just to be safe," then continuing to edit the <code>.gpkg</code>'s data</td>
-									<td>The <code>.qgz</code> and the <code>.gpkg</code> drift apart; opening one or the other shows different states</td>
-									<td>The project fork is now tracking its own copy, not the bundle's embedded project — the two are no longer the same object</td>
-								</tr>
-								<tr>
-									<td>Deleting and re-adding "the same" layer instead of overwriting in place</td>
-									<td>Style is gone even though the table name looks unchanged; layouts referencing it go blank</td>
-									<td>A new internal layer ID is minted on add, even under an identical display name — layout bindings follow ID, not name</td>
-								</tr>
-								<tr>
-									<td>Editing the <code>.gpkg</code> with two applications open at once (e.g. QGIS and DB Browser both writing)</td>
-									<td>SQLite database lock errors, or a corrupted/partially-written file on next open</td>
-									<td>GeoPackage is a single SQLite file; concurrent writers without WAL-safe handling can corrupt it</td>
+									<td>A layout's map frame is locked to an old area</td>
+									<td>The printed page looks empty or cuts off the new data</td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 
-					<div class="callout"><strong>The common thread:</strong> every failure above changes a name, an ID, or a type while the surrounding link (style row, layout frame, renderer field) keeps pointing at the old value. Nothing here is data corruption — it's a broken pointer, and every one of them is fixable in §8 without redrawing anything from scratch.</div>
+					<div class="callout">Notice the pattern: in every case, the <em>data</em> is fine — it's just that something QGIS was matching by name no longer matches. Nothing here means your data is broken.</div>
 				</section>
 
 				<!-- =============================================
-				     8. REPAIR RECIPES
+				     7. QUICK FIXES
 				     ============================================= -->
-				<section class="sheet" id="repair">
+				<section class="sheet" id="fixes">
 					<div class="sheet-head">
-						<span class="sheet-id">08</span>
-						<h2>Repair Recipes</h2>
-						<span class="tagline">Fixes, in the order to try them</span>
+						<span class="sheet-id">07</span>
+						<h2>Quick Fixes</h2>
+						<span class="tagline">Matched to the causes above</span>
 					</div>
 
 					<div class="card">
-						<h3>8.1 A layer lost its style but the table name is unchanged</h3>
-						<ol class="detail-list numbered">
+						<h3>The style is gone, but the layer name is right</h3>
+						<ol class="step-list" style="margin-top: 0.7rem">
 							<li>Right-click the layer → <strong>Properties → Symbology → Style → Load Style…</strong></li>
-							<li>Choose <strong>"From datasource database (GeoPackage)"</strong> if a saved style still exists in <code>layer_styles</code> for that table — check with DB Browser (§3.2) first if unsure.</li>
-							<li>If no matching row exists, load from a style export instead (see §8.2 on keeping <code>.qml</code> backups) — then re-save it to the database with <strong>Save Style… → Save in database</strong> so it's bundled back into the <code>.gpkg</code> for next time.</li>
+							<li>Choose the style saved in the database.</li>
 						</ol>
 					</div>
 
 					<div class="card" style="margin-top: 1.2rem">
-						<h3>8.2 Categorized/graduated symbology fell back to one flat color</h3>
-						<ol class="detail-list numbered">
-							<li>Open <strong>Symbology</strong> and check the <strong>Value</strong> / <strong>Column</strong> dropdown for the renderer — if it shows a field name struck through or blank, the field it was built on no longer exists under that name.</li>
-							<li>Re-point it at the new field name, then use <strong>Classify</strong> to rebuild the category/graduated breaks — the color ramp and style settings are preserved, only the field binding needs redoing.</li>
-							<li>If labels also broke, open <strong>Layer Properties → Labels</strong> and fix the field reference in the same way, or in the label expression if it's expression-driven.</li>
+						<h3>Colors or labels went flat</h3>
+						<ol class="step-list" style="margin-top: 0.7rem">
+							<li>Open <strong>Symbology</strong> and check the field it's using to color the map — it may show blank or crossed out.</li>
+							<li>Pick the matching field from the new data and re-apply.</li>
 						</ol>
 					</div>
 
 					<div class="card" style="margin-top: 1.2rem">
-						<h3>8.3 A layout map item is blank or missing its layer</h3>
-						<ol class="detail-list numbered">
-							<li>Select the map item → <strong>Item Properties → Layers</strong> → untick "Follow map theme" if needed, then manually re-check the correct current layer in the list.</li>
-							<li>If the extent is locked to the old data's bounding box, click <strong>Set Layer Extent</strong> (or manually zoom-and-set) to reframe it against the new data.</li>
-							<li>For an atlas, reopen <strong>Layout → Atlas settings</strong> and re-select the coverage layer the same way.</li>
+						<h3>A layout page looks wrong</h3>
+						<ol class="step-list" style="margin-top: 0.7rem">
+							<li>Click the map frame → check it's pointed at the right layer.</li>
+							<li>If the extent is locked to an old area, reset it to match the new data.</li>
 						</ol>
 					</div>
 
-					<div class="card" style="margin-top: 1.2rem">
-						<h3>8.4 The project and the GeoPackage have drifted apart</h3>
-						<ol class="detail-list numbered">
-							<li>Confirm which is authoritative — usually the embedded project inside the <code>.gpkg</code>, unless the team has explicitly moved to a standalone <code>.qgz</code>.</li>
-							<li>If the standalone <code>.qgz</code> has newer edits worth keeping, re-save it back into the GeoPackage with <strong>Project → Save As → GeoPackage</strong>, overwriting the embedded copy.</li>
-							<li>Going forward, pick one home for the project and don't "Save As" a second copy out of caution — that caution is what causes the drift. Use §8 (backups) instead.</li>
-						</ol>
-					</div>
-
-					<div class="card" style="margin-top: 1.2rem">
-						<h3>8.5 SQLite lock error or a file that won't open</h3>
-						<ol class="detail-list numbered">
-							<li>Close every application that has the file open — QGIS, DB Browser, a second QGIS instance — and try again.</li>
-							<li>If it still won't open, work from your last dated backup (§8) rather than attempting SQLite repair tools on a file that may be corrupted; on a small municipal-scale bundle, restoring from backup is faster and safer than debugging a database file.</li>
-						</ol>
-					</div>
-
-					<div class="callout">If a recipe above doesn't resolve it, stop and restore from backup before trying a second, more invasive fix — stacking uncertain repairs on top of each other is how a recoverable problem becomes an unrecoverable one.</div>
+					<div class="callout">If none of these fix it, stop and go back to your last backup (§8) rather than trying something bigger — it's faster than untangling a second problem on top of the first.</div>
 				</section>
 
 				<!-- =============================================
-				     9. GEOMETRY & CRS PITFALLS
-				     ============================================= -->
-				<section class="sheet" id="geometry">
-					<div class="sheet-head">
-						<span class="sheet-id">09</span>
-						<h2>Geometry &amp; CRS Pitfalls</h2>
-						<span class="tagline">The failures that look like styling bugs but aren't</span>
-					</div>
-
-					<div class="card">
-						<p>Some of what looks like a broken style is actually a geometry or projection mismatch presenting the same way — nothing draws, or it draws in the wrong place. Rule these out before assuming the style itself is at fault.</p>
-					</div>
-
-					<div class="grid-2" style="margin-top: 1.2rem">
-						<div class="card">
-							<h3>Check the CRS first</h3>
-							<p>Right-click the layer → <strong>Properties → Information</strong> and confirm the CRS matches the rest of the project. A layer imported straight from a source in a different CRS than the project's will still <em>load</em> — QGIS reprojects on the fly — but a layout item with a locked extent defined in the project's CRS can end up framing empty space if the new layer's real-world footprint shifted.</p>
-						</div>
-						<div class="card">
-							<h3>Check for invalid or empty geometry</h3>
-							<p>Use <strong>Vector → Geometry Tools → Check Validity</strong> after any import from an external source. A handful of self-intersecting polygons from a messy source file can render as gaps in an otherwise-correct-looking layer, which is easy to mistake for a symbology problem.</p>
-						</div>
-					</div>
-
-					<div class="callout">Diagnostic order that saves time: <strong>CRS → validity → styling.</strong> Confirming the first two takes under a minute each and rules out the two failure modes most often mistaken for a broken style.</div>
-				</section>
-
-				<!-- =============================================
-				     10. BACKUPS & VERSIONING
+				     8. BACKUPS
 				     ============================================= -->
 				<section class="sheet" id="backups">
 					<div class="sheet-head">
-						<span class="sheet-id">10</span>
-						<h2>Backups &amp; Versioning</h2>
-						<span class="tagline">Cheap insurance against a self-contained file</span>
+						<span class="sheet-id">08</span>
+						<h2>Backups</h2>
+						<span class="tagline">One habit, five seconds</span>
 					</div>
 
 					<div class="card">
-						<h3>8.1 Before every update</h3>
-						<p>Copy the whole <code>.gpkg</code> to a dated filename before touching it — e.g. <code>parcels_2026-08-19.gpkg</code> — even for a routine data refresh. Because everything lives in one file, there is no "just the data" or "just the layout" to revert independently; the backup is the only undo you'll have once a save has gone through.</p>
+						<p>Before updating anything, copy the <code>.gpkg</code> file and give the copy today's date — for example <code>parcels_2026-08-19.gpkg</code>. Because everything lives in one file, that copy is your only way back if an update goes wrong. It costs a few seconds and it's the single most useful habit in this guide.</p>
 					</div>
-
-					<div class="card" style="margin-top: 1.2rem">
-						<h3>8.2 Export styles as a safety net, separately from the bundle</h3>
-						<p>For any layer with a style worth protecting, also export it as a standalone <code>.qml</code> via <strong>Save Style… → Save to file</strong>, kept alongside your backups. This costs a minute and means a style can always be reloaded (§8.1) even in the worst case where the bundle's <code>layer_styles</code> table itself is damaged.</p>
-					</div>
-
-					<div class="card" style="margin-top: 1.2rem">
-						<h3>8.3 Version-control the file the way it deserves</h3>
-						<p>A <code>.gpkg</code> is a binary SQLite file — regular version control tools will store a full new copy on every change rather than a meaningful diff. Dated copies in a clearly named folder, or a dedicated large-file tool if your team already uses one, both beat relying on a generic <code>git</code> history to tell you what changed inside the file.</p>
-					</div>
-
-					<div class="callout">Backups are the difference between "an afternoon's rework" and "redo the styling from scratch." Every recipe in §8 assumes one exists.</div>
 				</section>
 
 				<!-- =============================================
-				     11. UPDATE CHECKLIST
+				     9. CHECKLIST
 				     ============================================= -->
 				<section class="sheet" id="checklist">
 					<div class="sheet-head">
-						<span class="sheet-id">11</span>
-						<h2>Update Checklist</h2>
-						<span class="tagline">Run this every time, top to bottom</span>
+						<span class="sheet-id">09</span>
+						<h2>Checklist</h2>
+						<span class="tagline">Run through this every time</span>
 					</div>
 
 					<div class="card">
-						<ol class="detail-list numbered">
-							<li><strong>Back up.</strong> Dated copy of the <code>.gpkg</code>, per §8.1.</li>
-							<li><strong>Note the baseline.</strong> Layer names, field names, geometry types, and every layout's map items — per §3.1.</li>
-							<li><strong>Pick the narrowest workflow that fits.</strong> Append (§4.1) before overwrite (§4.2) before full bundle swap (§4.3).</li>
-							<li><strong>Preserve names on the way in.</strong> Same table name, same field names, same geometry type unless you have a specific reason to change them — and if you do change one, expect to redo the matching link in §7.</li>
-							<li><strong>Reopen the project fresh</strong> (not just refresh) and check every layer's symbology against the baseline from step 2.</li>
-							<li><strong>Open every layout</strong>, not just the ones you expect to be affected, and check extents against the new data's real footprint.</li>
-							<li><strong>Check the CRS and geometry validity</strong> of anything newly imported, per §9, before blaming styling for a blank layer.</li>
-							<li><strong>Re-save the style to the database</strong> if you had to reload it from a <code>.qml</code> backup, so the bundle stays self-contained for the next person.</li>
-							<li><strong>Keep the project's home singular.</strong> Don't leave a stray <code>.qgz</code> fork sitting next to the bundle — per §8.4.</li>
+						<ol class="step-list">
+							<li>Make a dated backup copy of the file.</li>
+							<li>Open the project from the GeoPackage, not by dragging the file in.</li>
+							<li>Update the data — add rows, or overwrite the layer keeping the same name.</li>
+							<li>Close and reopen the project to check styles carried over.</li>
+							<li>Open every layout and check it still frames the right area.</li>
+							<li>If a style needed reloading, save it back into the file for next time.</li>
 						</ol>
-					</div>
-
-					<div class="callout">A clean update run touches steps 1–6 and nothing else. If you find yourself in §7 (Repair Recipes), that's a sign one of steps 3–4 was skipped or a rename slipped through — worth a mental note for next time, not a cause for alarm.</div>
-				</section>
-
-				<!-- =============================================
-				     12. GLOSSARY
-				     ============================================= -->
-				<section class="sheet" id="glossary">
-					<div class="sheet-head">
-						<span class="sheet-id">12</span>
-						<h2>Glossary</h2>
-						<span class="tagline">Terms used throughout this manual</span>
-					</div>
-
-					<div class="card">
-						<dl class="kv-list">
-							<div class="kv-row">
-								<dt>GeoPackage (<code>.gpkg</code>)</dt>
-								<dd>An OGC open standard storing vector layers, raster tiles, and optionally a QGIS project, all as tables inside one SQLite database file.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Bundle</dt>
-								<dd>This manual's term for a <code>.gpkg</code> that carries not just data but an embedded project, styles, and layouts together — the pattern every file here follows.</dd>
-							</div>
-							<div class="kv-row">
-								<dt><code>layer_styles</code></dt>
-								<dd>The internal GeoPackage table QGIS reads from and writes to when a style is saved "to the database" — one row per style, matched to a layer by table name.</dd>
-							</div>
-							<div class="kv-row">
-								<dt><code>gpkg_contents</code></dt>
-								<dd>The internal table listing every layer the GeoPackage format recognizes, with its geometry type and extent — the ground-truth list to check when QGIS's own display looks wrong.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Layer ID</dt>
-								<dd>An internal identifier QGIS assigns when a layer is added to a project — not the same as the layer's display name or its table name. Layout map items bind to this ID.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Locked extent</dt>
-								<dd>A layout map item's bounding box set to a fixed value rather than following the live canvas — stable for print, but blind to a dataset's footprint changing underneath it.</dd>
-							</div>
-							<div class="kv-row">
-								<dt>Coverage layer</dt>
-								<dd>The layer an atlas iterates over, generating one output page per feature — subject to the same layer-ID binding as a static map item.</dd>
-							</div>
-						</dl>
 					</div>
 				</section>
 			</main>
 
 			<footer>
-				<span>GEOPACKAGE BUNDLE MAINTENANCE MANUAL</span>
-				<span>Written for a first maintenance pass — verify against your team's own conventions</span>
+				<span>GEOPACKAGE MAINTENANCE GUIDE</span>
+				<span>Written for a first pass in QGIS</span>
 			</footer>
 		</div>
 		<script src="../js/nav.js"></script>

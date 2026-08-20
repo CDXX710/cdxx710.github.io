@@ -2,7 +2,7 @@
     PAGE LAYOUT
     
     Full-viewport column: header → map → slider footer.
-    Overrides the scroll-page layout from shared.css.
+    Overrides the scroll-page layout from commons.css.
 ───────────────────────────────────────── */
 
 body {

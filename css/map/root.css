@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────
     IMPORTS
 
-    shared.css (site-wide tokens/reset/base)
+    commons.css (site-wide tokens/reset/base)
     is linked separately by the map page's
     HTML, ahead of this file — This file only
     adds the map page's own local tokens.

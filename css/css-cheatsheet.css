@@ -9,7 +9,7 @@
 }
 
 .color-card {
-	/* extends .card — see shared.css §8 for base surface/border/hover */
+	/* extends .card — see commons.css §8 for base surface/border/hover */
 	cursor: pointer;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .font-card {
-	/* extends .card — see shared.css §8 for base surface/border/hover */
+	/* extends .card — see commons.css §8 for base surface/border/hover */
 	cursor: pointer;
 	padding: var(--space-9);
 }

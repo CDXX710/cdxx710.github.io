@@ -1,8 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
-   shared.css — Design System for cdxx.github.io
+   commons.css — Design System for cdxx.github.io
    Single source of truth for tokens, resets, and shared components.
    Page-specific overrides live in each page's own stylesheet
-   (css/index.css, css/css-cheatsheet.css, css/data-sources.css, css/map/*.css).
+   (css/index.css, css/css-cheatsheet.css, css/map/*.css, css/map-audit.css).
+   The hero/sheet-card report layout (§10) is shared directly by
+   data-sources.html, map-audit.html, and gpkg-guide.html.
 ═══════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────
@@ -35,6 +37,17 @@
 	--colorAccentDim: #3e462d;
 
 	--colorSelection: #2563eb;
+
+	/* ── Colour: Report status (data-sources / map-audit / gpkg-guide) ── */
+	--good: #8fe0a8;
+	--good-dim: #8fe0a81a;
+	--good-border: #8fe0a84d;
+	--bad: #ff8a8a;
+	--bad-dim: #ff8a8a1a;
+	--bad-border: #ff8a8a4d;
+	--neutral: #9a9aa8;
+	--neutral-dim: #9a9aa81a;
+	--neutral-border: #9a9aa84d;
 
 	/* ── Typography ── */
 	--font-mono: "Space Mono", monospace;
@@ -377,7 +390,7 @@ section h2 {
    8. CARD BASE
    Common surface + border + hover lift.
    Extended by .link-card, .color-card, .font-card,
-   and used directly by data-sources.html's report cards.
+   and used directly by the report layout's cards (§10.2).
 ───────────────────────────────────────── */
 
 .card {
@@ -456,7 +469,422 @@ body.nav-open #nav-backdrop {
 }
 
 /* ─────────────────────────────────────────
-   10. RESPONSIVE
+   10. REPORT / DOCUMENT PAGE LAYOUT
+   The hero + sheet-card document format, shared
+   by data-sources.html, map-audit.html, and
+   gpkg-guide.html. Each page still brings its
+   own stylesheet (data-sources.css, map-audit.css,
+   gpkg-guide.css) for content that isn't common
+   to all three.
+
+   Scoped to `.content-wrapper` wherever it would
+   otherwise collide with the scroll-page rules in
+   §5–§8 (main, section, header, .card). index.html
+   and css-cheatsheet.html have no .content-wrapper,
+   so they're unaffected by this section.
+───────────────────────────────────────── */
+
+::selection {
+	background: var(--colorAccentDim);
+	color: var(--colorAccent);
+}
+
+/* Blueprint grid, only on the report pages. */
+body:has(> .content-wrapper) {
+	min-height: 100vh;
+	background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 40px), var(--color-bg);
+}
+
+.content-wrapper {
+	flex: 1;
+	min-width: 0;
+}
+
+/* ── 10.1 Hero ── */
+
+.content-wrapper header.hero {
+	position: relative;
+	padding: 5.5rem 2rem 1.4rem;
+	max-width: 1100px;
+	margin: 0 auto;
+	border-bottom: 1px solid var(--color-border);
+}
+
+.tick-row {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 2.2rem;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.tick-row span {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	color: var(--colorTextSecondary);
+	letter-spacing: 0.05em;
+}
+
+h1.title {
+	font-family: var(--font-mono);
+	font-weight: 700;
+	font-size: clamp(2.4rem, 5.6vw, 4rem);
+	line-height: 1.05;
+	margin: 0 0 1.1rem;
+	color: var(--colorText);
+	max-width: 20ch;
+}
+
+h1.title em {
+	font-style: italic;
+	font-weight: 400;
+	color: var(--colorAccent);
+}
+
+.subhead {
+	max-width: 62ch;
+	font-size: 1.05rem;
+	color: var(--colorTextSecondary);
+	margin: 0 0 2.2rem;
+	line-height: 1.6;
+}
+
+.legend-strip {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.6rem;
+	padding-top: 1.6rem;
+	border-top: 1px dashed var(--color-border);
+}
+
+.legend-strip .item {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--colorTextSecondary);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.legend-strip .item b {
+	color: var(--colorText);
+	font-weight: 700;
+}
+
+/* Scoped to .legend-strip: css-cheatsheet.html has its own
+   full-size .swatch color chips at a completely different size. */
+.legend-strip .swatch {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	display: inline-block;
+	flex-shrink: 0;
+}
+
+/* ── 10.2 Sheet cards ── */
+
+.content-wrapper main {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 3rem 2rem 6rem;
+}
+
+.content-wrapper section.sheet {
+	margin-top: 4.5rem;
+	scroll-margin-top: 2rem;
+}
+
+.sheet-head {
+	display: flex;
+	align-items: baseline;
+	gap: 1rem;
+	border-bottom: 1px solid var(--color-border);
+	padding-bottom: 0.9rem;
+	margin-bottom: 1.6rem;
+	flex-wrap: wrap;
+}
+
+.sheet-id {
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--colorAccent);
+	border: 1px solid var(--colorAccent);
+	background: var(--colorAccentDim);
+	padding: 0.15rem 0.5rem;
+	border-radius: var(--radius-sm);
+	flex-shrink: 0;
+}
+
+.sheet-head h2 {
+	font-family: var(--font-mono);
+	font-weight: 700;
+	font-size: 1.7rem;
+	margin: 0;
+	color: var(--colorText);
+}
+
+.sheet-head .tagline {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--colorTextSecondary);
+	margin-left: auto;
+}
+
+.grid-2 {
+	display: grid;
+	grid-template-columns: 1.3fr 1fr;
+	gap: 1.8rem;
+}
+
+@media (max-width: 30rem) {
+	.grid-2 {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Extends the .card base in §8 with report padding/spacing. */
+.content-wrapper .card {
+	padding: 1.1rem 1.2rem;
+}
+
+.content-wrapper .card + .card {
+	margin-top: 1.2rem;
+}
+
+.content-wrapper .card h3 {
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--colorTextSecondary);
+	margin: 0 0 0.8rem;
+}
+
+.content-wrapper .card h3:not(:first-child) {
+	margin-top: 1.2rem;
+}
+
+.content-wrapper .card p {
+	margin: 0 0 0.7rem;
+	font-size: 0.95rem;
+	color: var(--colorText);
+	line-height: 1.65;
+}
+
+.content-wrapper .card p:last-child {
+	margin-bottom: 0;
+}
+
+.pros-cons {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+}
+
+@media (max-width: 30rem) {
+	.pros-cons {
+		grid-template-columns: 1fr;
+	}
+}
+
+.pros-cons ul {
+	margin: 0;
+	padding-left: 1.1rem;
+	color: var(--colorTextSecondary);
+}
+
+.pros-cons li {
+	margin-bottom: 0.4rem;
+	font-size: 0.92rem;
+	line-height: 1.5;
+}
+
+.pros-cons .pros h3 {
+	color: var(--good);
+}
+
+.pros-cons .cons h3 {
+	color: var(--bad);
+}
+
+/* ── 10.3 Attribute tables + inline code ── */
+
+.attr-table-wrap {
+	overflow-x: auto;
+}
+
+.attr-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 0.3rem;
+}
+
+.attr-table th,
+.attr-table td {
+	text-align: left;
+	padding: 0.6rem 0.7rem;
+	font-size: 0.85rem;
+	border-bottom: 1px solid var(--color-border);
+	color: var(--colorText);
+	line-height: 1.5;
+}
+
+.attr-table th {
+	font-family: var(--font-mono);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	color: var(--colorTextSecondary);
+	letter-spacing: 0.04em;
+	white-space: nowrap;
+}
+
+.attr-table code,
+.content-wrapper main code {
+	font-family: var(--font-mono);
+	background: var(--color-bg);
+	border: 1px solid var(--color-border-subtle);
+	padding: 0.08rem 0.35rem;
+	border-radius: 2px;
+	font-size: 0.85em;
+	color: var(--colorAccent);
+	white-space: nowrap;
+}
+
+.license-tag {
+	display: inline-block;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	padding: 0.2rem 0.55rem;
+	border-radius: var(--radius-sm);
+	margin-top: 0.2rem;
+}
+
+.lic-open {
+	background: var(--good-dim);
+	color: var(--good);
+	border: 1px solid var(--good-border);
+}
+
+.lic-mixed {
+	background: var(--colorAccentDim);
+	color: var(--colorAccent);
+	border: 1px solid rgba(200, 255, 87, 0.28);
+}
+
+.lic-restricted {
+	background: var(--bad-dim);
+	color: var(--bad);
+	border: 1px solid var(--bad-border);
+}
+
+/* ── 10.4 Callout ── */
+
+.callout {
+	border-left: 3px solid var(--colorAccent);
+	padding: 0.9rem 1.2rem;
+	background: var(--colorAccentDim);
+	border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+	font-size: 0.92rem;
+	color: var(--colorText);
+	line-height: 1.6;
+	margin: 1.6rem 0;
+}
+
+.callout:first-child {
+	margin-top: 0;
+}
+
+.callout:last-child {
+	margin-bottom: 0;
+}
+
+/* ── 10.5 Detail lists ── */
+
+.detail-list {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+}
+
+.detail-list li {
+	font-size: 0.93rem;
+	line-height: 1.6;
+	color: var(--colorText);
+	padding-left: 1rem;
+	border-left: 2px solid var(--color-border);
+}
+
+.detail-list li strong {
+	color: var(--colorAccent);
+}
+
+.detail-list.numbered {
+	counter-reset: item;
+}
+
+.detail-list.numbered li {
+	counter-increment: item;
+	position: relative;
+	padding-left: 2.1rem;
+	border-left: none;
+}
+
+.detail-list.numbered li::before {
+	content: counter(item);
+	position: absolute;
+	left: 0;
+	top: 0.05rem;
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	color: var(--colorAccent);
+	border: 1px solid var(--color-border-strong);
+	border-radius: var(--radius-sm);
+	width: 1.3rem;
+	height: 1.3rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+/* ── 10.6 Footer ── */
+
+.content-wrapper footer {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 2.5rem 2rem 4rem;
+	border-top: 1px solid var(--color-border);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.04em;
+	color: var(--colorTextSecondary);
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+/* ── 10.7 Responsive ── */
+
+@media (max-width: 600px) {
+	.content-wrapper header.hero {
+		padding: 3.5rem 1.2rem 2.5rem;
+	}
+
+	.content-wrapper main {
+		padding: 2rem 1.2rem 4rem;
+	}
+
+	.sheet-head .tagline {
+		margin-left: 0;
+	}
+}
+
+/* ─────────────────────────────────────────
+   11. RESPONSIVE
    Reserved for structural changes that
    genuinely can't be fluid — everything else
    (padding, widths, spacing) now scales

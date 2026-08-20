@@ -14,7 +14,7 @@
 }
 
 .link-card {
-	/* extends .card — see shared.css §8 for base surface/border/hover */
+	/* extends .card — see commons.css §8 for base surface/border/hover */
 	text-decoration: none;
 	display: flex;
 	flex-direction: column;

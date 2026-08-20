@@ -10,7 +10,7 @@
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet" />
 
-		<link rel="stylesheet" href="../css/shared.css" />
+		<link rel="stylesheet" href="../css/commons.css" />
 		<link rel="stylesheet" href="../css/map-audit.css" />
 	</head>
 	<body>
@@ -190,7 +190,7 @@
 								<tr>
 									<td>Plain CSS, no preprocessor</td>
 									<td>Design tokens, theming, layout, all animation</td>
-									<td><code>css/shared.css</code> + <code>css/map/root.css</code> importing 15 partials</td>
+									<td><code>css/commons.css</code> + <code>css/map/root.css</code> importing 15 partials</td>
 									<td>Custom properties + <code>@import</code> cover what SCSS was used for; <code>[data-theme]</code> on <code>&lt;html&gt;</code> themes the whole page from one attribute; token names are read back by JS via <code>Theme.readCssVar()</code> so colour has one source of truth</td>
 									<td>15 <code>@import</code>s serialize network requests (no bundler); <code>Theme</code> reads the vars once at module init, so tokens can't be swapped at runtime</td>
 								</tr>

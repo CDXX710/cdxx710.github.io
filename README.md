@@ -11,6 +11,7 @@ Personal GitHub Pages site: a small link index plus a data-visualisation prototy
 - `web/map-audit.html` — a full technical/architecture audit of the map prototype: stack, design decisions, current limitations, and a roadmap.
 - `web/css-cheatsheet.html` — a reference sheet of named fonts and colours.
 - `web/data-sources.html` — a GIS open-data cheatsheet (pros, cons, licensing).
+- `web/gpkg-guide.html` — a complete guide to use and maintain the maps and projects I created.
 - `css/` — stylesheets, with `css/map/` holding the map UI's per-panel styles.
 - `js/` — vanilla ES modules, with `js/map/` holding the map app's logic (state, map core, markers, UI panels) and `js/vendor/` holding third-party libraries (noUiSlider, TopoJSON).
 - `img/` — flags, marker icons, thumbnails, and pre-rendered map tiles used by the prototype.

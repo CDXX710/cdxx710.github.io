@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="robots" content="noindex" />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>GeoPackage Maintenance Guide</title>
+		<link rel="icon" type="image/svg+xml" href="https://github.githubassets.com/favicons/favicon-dark.svg" sizes="any" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet" />
+
+		<link rel="stylesheet" href="../css/shared.css" />
+		<link rel="stylesheet" href="../css/map-audit.css" />
+		<link rel="stylesheet" href="../css/gpkg-guide.css" />
+	</head>
+
+	<body>
+		<button id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar"></button>
+		<div id="nav-backdrop"></div>
+		<nav id="sidebar">
+			<a class="site-header__back" href="../index.html">
+				<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="9,2 4,7 9,12" />
+				</svg>
+				Index
+			</a>
+
+			<div class="nav-label">Start Here</div>
+			<a href="#what-is-it"><span class="dot"></span>What's in the file</a>
+			<a href="#opening"><span class="dot"></span>Opening it</a>
+
+			<div class="nav-label">Everyday Work</div>
+			<a href="#updating"><span class="dot"></span>Updating Data</a>
+			<a href="#keeping-styles"><span class="dot"></span>Keeping Styles</a>
+			<a href="#layouts"><span class="dot"></span>Layouts</a>
+
+			<div class="nav-label">If Something Breaks</div>
+			<a href="#causes"><span class="dot"></span>Common Causes</a>
+			<a href="#fixes"><span class="dot"></span>Quick Fixes</a>
+
+			<div class="nav-label">Good Habits</div>
+			<a href="#backups"><span class="dot"></span>Backups</a>
+			<a href="#checklist"><span class="dot"></span>Checklist</a>
+		</nav>
+
+		<div class="content-wrapper">
+			<header class="hero">
+				<div class="tick-row">
+					<span>QGIS GUIDE · GEOPACKAGE FILES</span>
+					<span>FOR NEW GIS TECHNICIANS</span>
+				</div>
+				<h1 class="title">One file. Data,<br />style, and <em>layout.</em></h1>
+				<p class="subhead">Every project you'll work on comes as a single <code>.gpkg</code> file, opened in QGIS. It already contains the map project, the layers, the way they're styled, and any print layouts. This guide explains how to keep it that way when you swap in new data — plain language, no assumed experience.</p>
+				<div class="legend-strip">
+					<span class="item"><b>Tool</b>&nbsp;QGIS (Desktop)</span>
+					<span class="item"><b>File type</b>&nbsp;.gpkg</span>
+				</div>
+			</header>
+
+			<main>
+				<!-- =============================================
+				     1. WHAT'S IN THE FILE
+				     ============================================= -->
+				<section class="sheet" id="what-is-it">
+					<div class="sheet-head">
+						<span class="sheet-id">01</span>
+						<h2>What's Actually in the File</h2>
+						<span class="tagline">One bundle, four things</span>
+					</div>
+
+					<div class="card">
+						<p>Normally a GIS handover is a mess of separate files — a shapefile here, a style file there, a project file pointing at both. Move one file and the rest breaks. A <code>.gpkg</code> avoids that: it's a single file that already contains everything.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<div class="diagram">
+							<svg width="560" height="190" viewBox="0 0 560 190" role="img" aria-label="A single .gpkg file containing the project, layers, styles, and layouts">
+								<rect x="4" y="4" width="552" height="182" rx="14" fill="none" stroke="var(--color-border)" stroke-width="1.5" stroke-dasharray="5 5" />
+								<text x="20" y="30" font-family="var(--font-mono)" font-size="12" letter-spacing="0.08em" fill="var(--colorTextSecondary)">ONE FILE — YOURPROJECT.GPKG</text>
+								<g font-family="var(--font-sans, sans-serif)" font-size="14">
+									<rect x="24" y="52" width="120" height="108" rx="10" fill="var(--colorAccentDim)" />
+									<text x="84" y="100" text-anchor="middle" fill="var(--colorAccent)" font-weight="600">Project</text>
+									<text x="84" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">what you open</text>
+
+									<rect x="160" y="52" width="120" height="108" rx="10" fill="var(--good-dim)" />
+									<text x="220" y="100" text-anchor="middle" fill="var(--good)" font-weight="600">Layers</text>
+									<text x="220" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">the actual data</text>
+
+									<rect x="296" y="52" width="120" height="108" rx="10" fill="var(--bad-dim)" />
+									<text x="356" y="100" text-anchor="middle" fill="var(--bad)" font-weight="600">Styles</text>
+									<text x="356" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">how it's drawn</text>
+
+									<rect x="432" y="52" width="104" height="108" rx="10" fill="var(--neutral-dim)" />
+									<text x="484" y="100" text-anchor="middle" fill="var(--neutral)" font-weight="600">Layouts</text>
+									<text x="484" y="120" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">print pages</text>
+								</g>
+							</svg>
+						</div>
+						<p>Because everything sits inside one file, copying that single <code>.gpkg</code> to another computer and opening it should give you back the exact same map, colors, and print pages — nothing to relink by hand.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Worth remembering</h3>
+						<ul class="detail-list">
+							<li><strong>The style belongs to the database, not to QGIS.</strong> It's saved inside the file, attached to the layer by name.</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     2. OPENING IT
+				     ============================================= -->
+				<section class="sheet" id="opening">
+					<div class="sheet-head">
+						<span class="sheet-id">02</span>
+						<h2>Opening the Project Correctly</h2>
+						<span class="tagline">Don't just drag the file in</span>
+					</div>
+
+					<div class="card">
+						<p>If you drag the <code>.gpkg</code> straight onto the QGIS map canvas, you'll only get a flat list of layers — no groups, no saved styling setup, no layouts. Open the <em>project that's saved inside the file</em> instead:</p>
+						<ol class="step-list" style="margin-top: 0.9rem">
+							<li>In QGIS, go to <code>Project &gt; Open From &gt; GeoPackage…</code></li>
+							<li>Pick the <code>.gpkg</code> file, then select the project listed inside it.</li>
+						</ol>
+					</div>
+
+					<div class="shot">
+						<img src="../img/guide/gpkg/Project-Open_From-GeoPackage.png" />
+					</div>
+
+					<div class="callout">Before changing anything, take a minute to look at what's already there: the layer names in the Layers panel, and the pages in <strong>Project &gt; Layouts…</strong>. That way, if something looks different later, you'll know exactly what changed.</div>
+				</section>
+
+				<!-- =============================================
+				     3. UPDATING DATA
+				     ============================================= -->
+				<section class="sheet" id="updating">
+					<div class="sheet-head">
+						<span class="sheet-id">03</span>
+						<h2>Updating Data</h2>
+						<span class="tagline">The everyday task</span>
+					</div>
+
+					<div class="card">
+						<p>Most of the time, "to update the data" means switching a different layer/version of the same dataset into the same project — new survey points, a refreshed boundary file, this month's readings. There are two ways to do it, and one is much safer than the other.</p>
+					</div>
+
+					<div class="grid-2" style="margin-top: 1.2rem">
+						<div class="card">
+							<h3>Adding new records</h3>
+							<p>If you're just adding rows to a layer that already exists — nothing about its columns/attribute fields is changing — copy the new features in and paste them into the existing layer's attribute table, or digititalize them by hand before filling in their form. Nothing about the layer's identity changes, so its style and any print page using it keep working automatically.</p>
+						</div>
+						<div class="card">
+							<h3>Replacing the whole layer</h3>
+							<p>If you're replacing a layer with a new version, import the new layer but don’t delete the old one yet.</p>
+							<p>
+								Right-click the old layer and select
+								<code>Styles &gt; Copy Style &gt; All Style Categories</code>
+							</p>
+							<p>
+								Then, right-click the new layer and select
+								<code>Styles &gt; Paste Style &gt; All Style Categories</code>
+							</p>
+							<p>You can also access all saved styles via <code>Layer Properties &gt; Style &gt; Load Style &gt;</code><br /><code>From Database (GeoPackage)</code></p>
+							<p>If the style doesn’t apply correctly, check that the field names used for styling have not changed between versions.</p>
+						</div>
+					</div>
+
+					<div class="shot">
+						<img src="../img/guide/gpkg/Layer_Properties-Style-Load_Style.png" />
+					</div>
+					<div class="callout">After any update, close the project and open it again — don't just refresh the layer. That's the surest way to see whether the style and layouts followed the new data.</div>
+				</section>
+
+				<!-- =============================================
+                    4. KEEPING STYLES
+                    ============================================= -->
+				<section class="sheet" id="keeping-styles">
+					<div class="sheet-head">
+						<span class="sheet-id">04</span>
+						<h2>Keeping the Styling</h2>
+						<span class="tagline">How QGIS finds the right style</span>
+					</div>
+
+					<div class="card">
+						<div class="diagram">
+							<svg width="520" height="140" viewBox="0 0 520 140" role="img" aria-label="A layer and a style connected because their names match">
+								<rect x="20" y="40" width="180" height="60" rx="10" fill="var(--good-dim)" />
+								<text x="110" y="65" text-anchor="middle" fill="var(--good)" font-weight="600" font-size="14">Layer: "parcels"</text>
+								<text x="110" y="84" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">data &amp; table</text>
+
+								<rect x="320" y="40" width="180" height="60" rx="10" fill="var(--bad-dim)" />
+								<text x="410" y="65" text-anchor="middle" fill="var(--bad)" font-weight="600" font-size="14">Style for "parcels"</text>
+								<text x="410" y="84" text-anchor="middle" fill="var(--colorTextSecondary)" font-size="11">colors &amp; symbols</text>
+
+								<line x1="200" y1="70" x2="320" y2="70" stroke="var(--colorAccent)" stroke-width="2" marker-end="url(#arrow)" />
+								<text x="260" y="58" text-anchor="middle" fill="var(--colorAccent)" font-size="11" font-family="var(--font-mono)">same name</text>
+								<defs>
+									<marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+										<path D="M0,0 L8,4 L0,8 z" fill="var(--colorAccent)" />
+									</marker>
+								</defs>
+							</svg>
+						</div>
+						<p>When saving a style as default to the databsase, QGIS will save the layer name it has been assigned to, QGIS then finds a saved style by matching the layer's name to its style inside the file. As long as the layer name stays the same, the style follows automatically — you don't need to reapply it.</p>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Saving a style so it travels with the file</h3>
+						<p>If you build or adjust a style, save it back into the <code>.gpkg</code> so the next person gets it too:</p>
+						<ol class="step-list" style="margin-top: 0.7rem">
+							<li>Right-click the layer<code>&gt; Export &gt; Save as QGIS Layer Style File</code>.</li>
+							<li>Choose<code>"Save style: Save in database (GeoPackage)"</code> — not "As QGIS QML Style File".</li>
+							<li>Optionally give it a name(if empty, defaults to layer name) and<strong>don't forget to check</strong><code>"Use as default style for this layer"</code></li>
+						</ol>
+					</div>
+
+					<div class="shot">
+						<img src="../img/guide/gpkg/Save_style-Save_in_database(GeoPackage).png" />
+					</div>
+				</section>
+
+				<!-- =============================================
+                        5. LAYOUTS
+                        ============================================= -->
+				<section class="sheet" id="layouts">
+					<div class="sheet-head">
+						<span class="sheet-id">05</span>
+						<h2>Print Layouts</h2>
+						<span class="tagline">The one thing worth double-checking</span>
+					</div>
+
+					<div class="card">
+						<p>Layouts (print pages) are saved inside the project too, so they travel with the file the same way styles do. The one setting worth knowing about is the map <strong>theme</strong> — I use it to drive the map style on unique layer within my projects.</p>
+						<p>In QGIS layouts, a map element can either <strong>follow the current map theme</strong>, or be <strong>locked to a fixed one</strong>. A locked theme is great for a layout that always features multiples maps, without this following fix it may not render on export the way it does in QGIS..</p>
+						<p>For single map layouts. Go to: <code>Item Properties &gt; Layers &gt; Follow map theme</code></p>
+						<p>For multi-maps layouts. Go to: <code>Item Properties &gt; Variables &gt; +</code> and add the variable <code>current_theme</code> — give it for value the name of the theme you want to target</p>
+					</div>
+
+					<div class="shot">
+						<img src="../img/guide/gpkg/Item_Properties-Layers-Follow_map_theme.png" />
+						<img src="../img/guide/gpkg/Item_Properties-Variables-+.png" />
+					</div>
+
+					<div class="callout">To work this requires the plugin I developed, you can find it: <a href="https://github.com/CDXX710/GIS-Toolbox/tree/main/QGIS/Plugins/advanced_theme_switcher">here</a></div>
+				</section>
+
+				<!-- =============================================
+				     6. COMMON CAUSES
+				     ============================================= -->
+				<section class="sheet" id="causes">
+					<div class="sheet-head">
+						<span class="sheet-id">06</span>
+						<h2>What Usually Breaks a Style</h2>
+						<span class="tagline">A short list, not an exhaustive one</span>
+					</div>
+
+					<div class="attr-table-wrap">
+						<table class="attr-table">
+							<thead>
+								<tr>
+									<th>What happened</th>
+									<th>What you'll see</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>The new layer was imported under a different name, or the old one was deleted and a "new" one added</td>
+									<td>The layer doesn't show up with the saved style</td>
+								</tr>
+								<tr>
+									<td>A column the style relies on (for coloring or labels) was renamed or removed</td>
+									<td>Everything draws in one flat color, or not at all</td>
+								</tr>
+								<tr>
+									<td>A layout's map frame is locked to an old area</td>
+									<td>The printed page looks empty or cuts off the new data</td>
+								</tr>
+								<tr>
+									<td>The logo folder is missing or has been renamed.</td>
+									<td>The DDAs logos are missing</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callout">Notice the pattern: in every case, the <em>data</em> is fine — it's just that something QGIS was matching by name no longer matches. Nothing here means your data is broken.</div>
+				</section>
+
+				<!-- =============================================
+				     7. QUICK FIXES
+				     ============================================= -->
+				<section class="sheet" id="fixes">
+					<div class="sheet-head">
+						<span class="sheet-id">07</span>
+						<h2>Quick Fixes</h2>
+						<span class="tagline">Matched to the causes above</span>
+					</div>
+
+					<div class="card">
+						<h3>The style is gone, but the layer name is right</h3>
+						<ol class="step-list" style="margin-top: 0.7rem">
+							<li>Right-click the layer &gt; <strong>Properties &gt; Symbology &gt; Style &gt; Load Style…</strong></li>
+							<li>Choose the style saved in the database.</li>
+						</ol>
+					</div>
+
+					<div class="card" style="margin-top: 1.2rem">
+						<h3>Colors went flat/transparent</h3>
+						<ol class="step-list" style="margin-top: 0.7rem">
+							<li>Open <code>Symbology</code> and check the field it's using — <code>"field_name"</code>the new data might lack this field or its name has changed.</li>
+							<li>Simply modify the double-quoted text to its new matching value.</li>
+						</ol>
+					</div>
+				</section>
+
+				<!-- =============================================
+				     8. BACKUPS
+				     ============================================= -->
+				<section class="sheet" id="backups">
+					<div class="sheet-head">
+						<span class="sheet-id">08</span>
+						<h2>Backups</h2>
+						<span class="tagline">One habit, five seconds</span>
+					</div>
+
+					<div class="card">
+						<p>Before updating anything, copy the <code>.gpkg</code> file and give the copy today's date — for example <code>parcels_2026-08-19.gpkg</code>. Because everything lives in one file, that copy is your only way back if an update goes wrong. It costs a few seconds and it's the single most useful habit in this guide.</p>
+					</div>
+				</section>
+			</main>
+
+			<footer>
+				<span>GEOPACKAGE MAINTENANCE GUIDE</span>
+				<span>Written for a first pass in QGIS</span>
+			</footer>
+		</div>
+		<script src="../js/nav.js"></script>
+	</body>
+</html>
